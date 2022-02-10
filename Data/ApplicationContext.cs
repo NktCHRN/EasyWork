@@ -62,6 +62,9 @@ namespace Data
             .HasOne(u => u.Project)
             .WithMany(p => p.TeamMembers)
             .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<User>()
+                .HasIndex(u => u.PhoneNumber).IsUnique();
         }
     }
 }

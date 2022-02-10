@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Entities
+namespace Business.Models
 {
-    public class Project
+    public class ProjectModel
     {
         public int Id { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(150)")]
+        [StringLength(150)]
         public string Name { get; set; } = null!;
 
         public string? Description { get; set; }
@@ -16,7 +15,7 @@ namespace Data.Entities
         [Required]
         public DateTime StartDate { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
+        [StringLength(4, MinimumLength = 3)]
         public string? MainPictureFormat { get; set; }
 
         public int? MaxToDo { get; set; }
@@ -28,12 +27,8 @@ namespace Data.Entities
         [Required]
         public int OwnerId { get; set; }
 
-        [ForeignKey("OwnerId")]
-        public User? Owner { get; set; }
-
-
-        public ICollection<Release>? Releases { get; set; }
-        public ICollection<UserOnProject>? TeamMembers { get; set; }
-        public ICollection<Task>? Tasks { get; set; }
+        public ICollection<int>? ReleasesIds { get; set; }
+        public ICollection<int>? TeamMembersIds { get; set; }
+        public ICollection<int>? TasksIds { get; set; }
     }
 }

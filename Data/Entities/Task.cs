@@ -17,7 +17,7 @@ namespace Data.Entities
         public int Id { get; set; }
 
         [Required]
-        [Column(TypeName = "nvarchar(100)")]
+        [Column(TypeName = "nvarchar(150)")]
         public string Name { get; set; } = null!;
 
         public string? Description { get; set; }
