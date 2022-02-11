@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Entities
+namespace Business.Models
 {
-    public class Message
+    public class MessageModel
     {
         public int Id { get; set; }
 
         [Required]
+        [StringLength(2000)]
         public string Text { get; set; } = null!;
 
         [Required]
@@ -18,14 +18,11 @@ namespace Data.Entities
 
         [Required]
         public int TaskId { get; set; }
-        public Task? Task { get; set; }
 
         [Required]
         public int SenderId { get; set; }
-        [ForeignKey("SenderId")]
-        public User? Sender { get; set; }
 
 
-        public ICollection<File> Files { get; set; } = null!;
+        public ICollection<int> FilesIds { get; set; } = null!;
     }
 }

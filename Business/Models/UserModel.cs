@@ -20,15 +20,15 @@ namespace Business.Models
 
         public DateTime LastSeen { get; set; }
 
-        public ICollection<int>? BansIds { get; set; }
-        public ICollection<int>? GivenBansIds { get; set; }
+        public ICollection<int> BansIds { get; set; } = null!;
+        public ICollection<int> GivenBansIds { get; set; } = null!;
 
-        public ICollection<int>? OwnedProjectsIds { get; set; }
+        public ICollection<int> OwnedProjectsIds { get; set; } = null!;
 
-        public ICollection<int>? ProjectsIds { get; set; }
+        public ICollection<(int ProjectId, int UserId)> ProjectsIds { get; set; } = null!;
 
-        public ICollection<int>? TasksIds { get; set; }
+        public ICollection<int> TasksIds { get; set; } = null!;
 
-        public ICollection<int>? MessagesIds { get; set; }
+        public ICollection<int> MessagesIds { get; set; } = null!;
     }
 }

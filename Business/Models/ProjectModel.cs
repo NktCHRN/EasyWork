@@ -27,8 +27,8 @@ namespace Business.Models
         [Required]
         public int OwnerId { get; set; }
 
-        public ICollection<int>? ReleasesIds { get; set; }
-        public ICollection<int>? TeamMembersIds { get; set; }
-        public ICollection<int>? TasksIds { get; set; }
+        public ICollection<int> ReleasesIds { get; set; } = null!;
+        public ICollection<(int ProjectId, int UserId)> TeamMembersIds { get; set; } = null!;
+        public ICollection<int> TasksIds { get; set; } = null!;
     }
 }

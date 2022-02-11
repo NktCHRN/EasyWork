@@ -42,8 +42,8 @@ namespace Data.Entities
         public User? Executor { get; set; }
 
 
-        public ICollection<Message>? Messages { get; set; }
+        public ICollection<Message> Messages { get; set; } = null!;
 
-        public ICollection<File>? Files { get; set; }
+        public ICollection<File> Files { get; set; } = null!;
     }
 }
