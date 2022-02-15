@@ -11,9 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
     <Folder Include="Services\" />
-    <Folder Include="Identity\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 
