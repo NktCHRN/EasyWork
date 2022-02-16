@@ -16,13 +16,14 @@ namespace Business.Models
         [Required]
         public DateTime StartDate { get; set; }
 
-        [Required]
-        public DateTime Deadline { get; set; }
+        public DateTime? Deadline { get; set; }
 
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         [Required]
         public TaskStatuses Status { get; set; }
+
+        public TaskPriorities? Priority { get; set; }
 
         [Required]
         public int ProjectId { get; set; }
@@ -33,5 +34,7 @@ namespace Business.Models
         public ICollection<int> Messages { get; set; } = null!;
 
         public ICollection<int> Files { get; set; } = null!;
+
+        public ICollection<int> TagsIds { get; set; } = null!;
     }
 }

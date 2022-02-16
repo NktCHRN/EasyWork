@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data
 {
-    public class ApplicationContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public DbSet<Ban> Bans => Set<Ban>();
 
@@ -21,7 +21,9 @@ namespace Data
 
         public DbSet<UserOnProject> UsersOnProjects => Set<UserOnProject>();
 
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
+        public DbSet<Tag> Tags => Set<Tag>();
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
             Database.EnsureCreated();
         }

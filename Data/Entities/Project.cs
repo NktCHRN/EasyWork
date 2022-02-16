@@ -35,5 +35,6 @@ namespace Data.Entities
         public ICollection<Release> Releases { get; set; } = null!;
         public ICollection<UserOnProject> TeamMembers { get; set; } = null!;
         public ICollection<Task> Tasks { get; set; } = null!;
+        public ICollection<Tag> Tags { get; set; } = null!;
     }
 }

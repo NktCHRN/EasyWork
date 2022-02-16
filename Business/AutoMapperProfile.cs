@@ -21,6 +21,8 @@ namespace Business
                 m => m.MapFrom(pm => pm.Releases.Select(r => r.Id)))
                 .ForMember(e => e.TasksIds,
                 m => m.MapFrom(pm => pm.Tasks.Select(t => t.Id)))
+                .ForMember(e => e.TagsIds,
+                m => m.MapFrom(pm => pm.Tags.Select(t => t.Id)))
                 .ReverseMap();
             CreateMap<Release, ReleaseModel>().ReverseMap();
             CreateMap<Data.Entities.Task, TaskModel>()
@@ -28,20 +30,12 @@ namespace Business
                 m => m.MapFrom(tm => tm.Files.Select(f => f.Id)))
                 .ForMember(e => e.Messages,
                 m => m.MapFrom(tm => tm.Messages.Select(msg => msg.Id)))
+                .ForMember(e => e.TagsIds,
+                m => m.MapFrom(taskm => taskm.Tags.Select(t => t.Id)))
                 .ReverseMap();
-            CreateMap<User, UserModel>()
-                .ForMember(e => e.BansIds,
-                m => m.MapFrom(um => um.Bans.Select(b => b.Id)))
-                .ForMember(e => e.GivenBansIds,
-                m => m.MapFrom(um => um.GivenBans.Select(gb => gb.Id)))
-                .ForMember(e => e.OwnedProjectsIds,
-                m => m.MapFrom(um => um.OwnedProjects.Select(op => op.Id)))
-                .ForMember(e => e.ProjectsIds,
-                m => m.MapFrom(um => um.Projects.Select(p => new Tuple<int, int>(p.ProjectId, p.UserId))))
+            CreateMap<Tag, TagModel>()
                 .ForMember(e => e.TasksIds,
-                m => m.MapFrom(um => um.Tasks.Select(t => t.Id)))
-                .ForMember(e => e.MessagesIds,
-                m => m.MapFrom(um => um.Messages.Select(m => m.Id)))
+                m => m.MapFrom(tagm => tagm.Tasks.Select(t => t.Id)))
                 .ReverseMap();
             CreateMap<UserOnProject, UserOnProjectModel>().ReverseMap();
         }

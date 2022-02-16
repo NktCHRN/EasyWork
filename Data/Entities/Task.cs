@@ -12,6 +12,14 @@ namespace Data.Entities
         Complete = 4,
         Archived = 5
     }
+    public enum TaskPriorities : short
+    {
+        Lowest = -2,
+        Low = -1,
+        Middle = 0,
+        High = 1,
+        Highest = 2
+    }
     public class Task
     {
         public int Id { get; set; }
@@ -25,13 +33,14 @@ namespace Data.Entities
         [Required]
         public DateTime StartDate { get; set; }
 
-        [Required]
-        public DateTime Deadline { get; set; }
+        public DateTime? Deadline { get; set; }
 
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         [Required]
         public TaskStatuses Status { get; set; }
+
+        public TaskPriorities? Priority { get; set; }
 
         [Required]
         public int ProjectId { get; set; }
@@ -45,5 +54,7 @@ namespace Data.Entities
         public ICollection<Message> Messages { get; set; } = null!;
 
         public ICollection<File> Files { get; set; } = null!;
+
+        public ICollection<Tag> Tags { get; set; } = null!;
     }
 }
