@@ -2,7 +2,7 @@
 
 namespace Business.Interfaces
 {
-    public interface IFileService
+    public interface IFileService : IModelValidator<FileModel>
     {
         Task<FileModel> GetByIdAsync(int id);
 

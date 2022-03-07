@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Business.Interfaces
 {
-    public interface IReleaseService : ICRUD<ReleaseModel>
+    public interface IReleaseService : ICRUD<ReleaseModel>, IModelValidator<ReleaseModel>
     {
         Task<IAsyncEnumerable<ReleaseModel>> GetProjectReleasesAsync(int projectId);
     }

@@ -2,9 +2,11 @@
 
 namespace Business.Interfaces
 {
-    public interface IBanService : ICRUD<BanModel>
+    public interface IBanService : ICRUD<BanModel>, IModelValidator<BanModel>
     {
-        Task<IAsyncEnumerable<BanModel>> GetUserBansAsync(int userId);
+        IEnumerable<BanModel> GetUserBans(int userId);
+
+        IEnumerable<BanModel> GetAdminBans(int adminId);
 
         Task DeleteUserBansAsync(int userId);
     }

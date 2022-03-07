@@ -2,7 +2,7 @@
 
 namespace Business.Interfaces
 {
-    public interface IProjectService : ICRUD<ProjectModel>
+    public interface IProjectService : ICRUD<ProjectModel>, IModelValidator<ProjectModel>
     {
         Task<IAsyncEnumerable<ProjectModel>> GetAllAsync();
 

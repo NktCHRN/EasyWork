@@ -26,26 +26,38 @@ namespace Tests
         {
             var users = new User[]
             {
-                new User()
+                new User()  // id 1
                 {
                     FirstName = "Michael",
                     LastName = "Gordon",
                     PhoneNumber = "380677123238",
                     Email = "mg23112@fakemail.com"
                 },
-                new User()
+                new User()  // id 2
                 {
                     FirstName = "Nick",
                     LastName = "Flame",
                     PhoneNumber = "380777333298",
                     Email = "777@nomail.com"
                 },
-                new User()
+                new User()  // id 3
                 {
                     FirstName = "Rick",
                     LastName = "Michaelson",
                     PhoneNumber = "380991233238",
                     Email = "rm@notamail.com",
+                },
+                new User()  // id 4
+                {
+                    FirstName = "Martin",
+                    LastName = "Wright",
+                    Email = "mwright@mail.com"
+                },
+                new User()  // id 5
+                {
+                    FirstName = "Peter",
+                    LastName = "Radd",
+                    Email = "prd@pmail.net"
                 }
             };
             foreach (var user in users)

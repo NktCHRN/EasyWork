@@ -1,6 +1,5 @@
 ﻿using Business.Identity;
 using Data.Entities;
-using Microsoft.AspNetCore.Identity;
 using NUnit.Framework;
 
 namespace Tests.BLLTests
