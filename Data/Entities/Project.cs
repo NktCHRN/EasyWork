@@ -25,6 +25,10 @@ namespace Data.Entities
 
         public int? MaxValidate { get; set; }
 
+        public Guid? InviteCode { get; set; }
+
+        public bool IsInviteCodeActive { get; set; }
+
         [Required]
         public int OwnerId { get; set; }
 

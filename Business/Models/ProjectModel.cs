@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Business.Models
 {
@@ -23,6 +24,10 @@ namespace Business.Models
         public int? MaxInProgress { get; set; }
 
         public int? MaxValidate { get; set; }
+
+        public Guid? InviteCode { get; set; }
+
+        public bool IsInviteCodeActive { get; set; }
 
         [Required]
         public int OwnerId { get; set; }
