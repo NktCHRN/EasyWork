@@ -28,9 +28,10 @@ namespace Business.Services
             return model;
         }
 
-        private IEnumerable<Ban> GetNotMappedUserBans(int userId)
+        private IEnumerable<Ban> GetNotMappedActiveUserBans(int userId)
         {
-            return _context.Bans.Where(b => b.UserId == userId);
+            return _context.Bans
+                .Where(b => b.UserId == userId && b.DateTo >= DateTime.Now && b.DateFrom <= DateTime.Now);
         }
         private async Task DeleteNotMappedAsync(Ban model)
         {
@@ -38,6 +39,11 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Adds new ban to DB
+        /// </summary>
+        /// <param name="model">Model to add</param>
+        /// <exception cref="ArgumentException">Thrown if model was not valid</exception>
         public async Task AddAsync(BanModel model)
         {
             model.DateFrom = DateTime.Now;
@@ -48,29 +54,55 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Deletes ban by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <exception cref="InvalidOperationException">Thrown if model with such an id was not found</exception>
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
             await DeleteNotMappedAsync(model);
         }
 
-        public async Task DeleteUserBansAsync(int userId)
+        /// <summary>
+        /// Deletes all active bans for user by user id
+        /// </summary>
+        /// <param name="userId"></param>
+        public async Task DeleteActiveUserBansAsync(int userId)
         {
-            var bans = GetNotMappedUserBans(userId);
+            var bans = GetNotMappedActiveUserBans(userId);
             foreach (var ban in bans)
                 await DeleteNotMappedAsync(ban);
         }
 
+        /// <summary>
+        /// Get a ban model by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <exception cref="InvalidOperationException">Thrown if model with such an id was not found</exception>
+        /// <returns>A ban model with this id</returns>
         public async Task<BanModel> GetByIdAsync(int id)
         {
             return _mapper.Map<BanModel>(await GetNotMappedByIdAsync(id));
         }
 
-        public IEnumerable<BanModel> GetUserBans(int userId)
+        /// <summary>
+        /// Get all active bans by user id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns>IEnumerable of all ban models with given user id</returns>
+        public IEnumerable<BanModel> GetActiveUserBans(int userId)
         {
-            return _mapper.Map<IEnumerable<BanModel>>(GetNotMappedUserBans(userId));
+            return _mapper.Map<IEnumerable<BanModel>>(GetNotMappedActiveUserBans(userId));
         }
 
+        /// <summary>
+        /// Updates ban model
+        /// </summary>
+        /// <param name="model">Model to update</param>
+        /// <exception cref="ArgumentException">Thrown if model was not valid</exception>
+        /// <exception cref="InvalidOperationException">Thrown if model with such an id was not found</exception>
         public async Task UpdateAsync(BanModel model)
         {
             bool isValid = IsValid(model, out string? error);
@@ -82,6 +114,19 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Validates model
+        /// </summary>
+        /// <param name="model">Model to validate</param>
+        /// <param name="firstErrorMessage">String for error message (if model is not valid)</param>
+        /// <returns>
+        /// False if:
+        /// - The expire date is earlier than current date
+        /// - Too long hammer
+        /// - Not existing user
+        /// - Not existing admin
+        /// True, otherwise
+        /// </returns>
         public bool IsValid(BanModel model, out string? firstErrorMessage)
         {
             firstErrorMessage = null;
@@ -113,6 +158,11 @@ namespace Business.Services
             return true;
         }
 
+        /// <summary>
+        /// Get all bans by admin id
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <returns>IEnumerable of all ban models with given admin id</returns>
         public IEnumerable<BanModel> GetAdminBans(int adminId)
         {
             return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.AdminId == adminId));

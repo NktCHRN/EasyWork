@@ -88,8 +88,8 @@ namespace Tests.BLLTests
                     AdminId = 1,
                     UserId = 2,
                     Hammer = "Lorem ipsum",
-                    DateFrom = new DateTime(2021, 12, 1),
-                    DateTo = new DateTime(2022, 12, 1)
+                    DateFrom = DateTime.Now.AddMonths(-1),
+                    DateTo = DateTime.Now.AddMonths(2)
                 },
                 new Ban()   // id 2
                 {
@@ -115,8 +115,16 @@ namespace Tests.BLLTests
                     AdminId = 5,
                     UserId = 2,
                     Hammer = "Lorem ipsum 2",
-                    DateFrom = new DateTime(2022, 10, 1),
-                    DateTo = new DateTime(2023, 12, 1)
+                    DateFrom = DateTime.Now.AddMonths(-1),
+                    DateTo = DateTime.Now.AddMonths(3)
+                },
+                new Ban()   // id 4
+                {
+                    AdminId = 5,
+                    UserId = 2,
+                    Hammer = "Lorem ipsum 3",
+                    DateFrom = DateTime.Now.AddMonths(-3),
+                    DateTo = DateTime.Now.AddMonths(-2)
                 }
             };
             foreach (var ban in bans)
@@ -159,7 +167,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(5)]
+        [TestCase(6)]
         public void DeleteByIdAsync_InvalidId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
@@ -190,7 +198,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task DeleteUserBansAsync_DeletesAllBans()
+        public async Task DeleteActiveUserBansAsync_DeletesAllBans()
         {
             // Arrange
             SeedData();
@@ -198,18 +206,18 @@ namespace Tests.BLLTests
             var expectedCount = _context.Bans.Count() - 2;
 
             // Act
-            await _service.DeleteUserBansAsync(userId);
+            await _service.DeleteActiveUserBansAsync(userId);
             var actualCount = _context.Bans.Count();
 
             // Assert
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete all user bans");
-            Assert.IsFalse(_context.Bans.Any(b => b.UserId == userId), "Method deletes wrong bans");
+            Assert.IsFalse(_context.Bans.Any(b => b.UserId == userId && b.DateTo >= DateTime.Now && b.DateFrom <= DateTime.Now), "Method deletes wrong bans");
         }
 
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(5)]
+        [TestCase(6)]
         public void GetByIdAsync_InvalidId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
@@ -238,7 +246,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetUserBans_ReturnsAllBans()
+        public void GetUserActiveBans_ReturnsAllBans()
         {
             // Arrange
             SeedData();
@@ -246,11 +254,11 @@ namespace Tests.BLLTests
             var expectedCount = 2;
 
             // Act
-            var actual = _service.GetUserBans(userId);
+            var actual = _service.GetActiveUserBans(userId);
 
             // Assert
             Assert.AreEqual(expectedCount, actual.Count(), "Method does not return right quantity");
-            Assert.IsTrue(actual.All(b => b.UserId == userId), "Method returns wrong bans");
+            Assert.IsTrue(actual.All(b => b.UserId == userId && b.DateTo >= DateTime.Now && b.DateFrom <= DateTime.Now), "Method returns wrong bans");
         }
 
         [Test]
@@ -278,7 +286,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(5)]
+        [TestCase(6)]
         public void UpdateAsyncTest_NotExistingModel_ThrowsInvalidOperationException(int id)
         {
             // Arrange
