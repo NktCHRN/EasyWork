@@ -76,7 +76,9 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
-            _context.Bans.Update(_mapper.Map<Ban>(model));
+            var existingModel = await GetNotMappedByIdAsync(model.Id);
+            existingModel = _mapper.Map(model, existingModel);
+            _context.Bans.Update(existingModel);
             await _context.SaveChangesAsync();
         }
 
