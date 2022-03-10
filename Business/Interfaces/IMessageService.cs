@@ -4,6 +4,6 @@ namespace Business.Interfaces
 {
     public interface IMessageService : ICRUD<MessageModel>, IModelValidator<MessageModel>
     {
-        Task<IAsyncEnumerable<MessageModel>> GetTaskMessagesAsync(int taskId);
+        Task<IEnumerable<MessageModel>> GetTaskMessagesAsync(int taskId);
     }
 }

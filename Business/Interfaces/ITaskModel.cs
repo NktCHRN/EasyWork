@@ -4,11 +4,11 @@ namespace Business.Interfaces
 {
     public interface ITaskModel : ICRUD<TaskModel>, IModelValidator<TaskModel>
     {
-        Task<IAsyncEnumerable<TaskModel>> GetProjectTasksAsync(int projectId);
+        Task<IEnumerable<TaskModel>> GetProjectTasksAsync(int projectId);
 
-        Task<IAsyncEnumerable<TaskModel>> GetUserTasksAsync(int userId);
+        Task<IEnumerable<TaskModel>> GetUserTasksAsync(int userId);
 
-        Task<IAsyncEnumerable<TaskModel>> GetUserOnProjectTasksAsync(int userOnProjectId);
+        Task<IEnumerable<TaskModel>> GetUserOnProjectTasksAsync(int userOnProjectId);
 
         Task AddTagToTaskAsync(int taskId, TagModel tag);
 

@@ -4,8 +4,8 @@ namespace Business.Interfaces
 {
     public interface IProjectService : ICRUD<ProjectModel>, IModelValidator<ProjectModel>
     {
-        Task<IAsyncEnumerable<ProjectModel>> GetAllAsync();
+        Task<IEnumerable<ProjectModel>> GetAllAsync();
 
-        Task<IAsyncEnumerable<ProjectModel>> GetUserProjectsAsync(int userId);
+        Task<IEnumerable<ProjectModel>> GetUserProjectsAsync(int userId); // (as participant)
     }
 }
