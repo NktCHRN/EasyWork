@@ -77,7 +77,7 @@ namespace Business.Services
         }
 
         /// <summary>
-        /// Get a ban model by id
+        /// Returns a ban model with given id
         /// </summary>
         /// <param name="id"></param>
         /// <exception cref="InvalidOperationException">Thrown if model with such an id was not found</exception>
@@ -88,10 +88,10 @@ namespace Business.Services
         }
 
         /// <summary>
-        /// Get all active bans by user id
+        /// Returns all active bans by user id
         /// </summary>
         /// <param name="userId"></param>
-        /// <returns>IEnumerable of all ban models with given user id</returns>
+        /// <returns>IEnumerable of all active ban models with given user id</returns>
         public IEnumerable<BanModel> GetActiveUserBans(int userId)
         {
             return _mapper.Map<IEnumerable<BanModel>>(GetNotMappedActiveUserBans(userId));
@@ -159,13 +159,23 @@ namespace Business.Services
         }
 
         /// <summary>
-        /// Get all bans by admin id
+        /// Returns all bans by admin id
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns>IEnumerable of all ban models with given admin id</returns>
         public IEnumerable<BanModel> GetAdminBans(int adminId)
         {
             return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.AdminId == adminId));
+        }
+
+        /// <summary>
+        /// Returns all bans by user id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns>IEnumerable of all ban models with given user id</returns>
+        public IEnumerable<BanModel> GetUserBans(int userId)
+        {
+            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.UserId == userId));
         }
     }
 }

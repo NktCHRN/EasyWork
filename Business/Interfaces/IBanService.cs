@@ -6,6 +6,8 @@ namespace Business.Interfaces
     {
         IEnumerable<BanModel> GetActiveUserBans(int userId);
 
+        IEnumerable<BanModel> GetUserBans(int userId);
+
         IEnumerable<BanModel> GetAdminBans(int adminId);
 
         Task DeleteActiveUserBansAsync(int userId);

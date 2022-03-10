@@ -379,5 +379,21 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedCount, actual.Count(), "Method does not return right quantity");
             Assert.IsTrue(actual.All(b => b.AdminId == adminId), "Method returns wrong bans");
         }
+
+        [Test]
+        public void GetUserBans_ReturnsAllBans()
+        {
+            // Arrange
+            SeedData();
+            var userId = 2;
+            var expectedCount = 3;
+
+            // Act
+            var actual = _service.GetUserBans(userId);
+
+            // Assert
+            Assert.AreEqual(expectedCount, actual.Count(), "Method does not return right quantity");
+            Assert.IsTrue(actual.All(b => b.UserId == userId), "Method returns wrong bans");
+        }
     }
 }
