@@ -1,4 +1,5 @@
 ﻿using Business.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Business.Interfaces
 {
@@ -6,7 +7,7 @@ namespace Business.Interfaces
     {
         Task<FileModel> GetByIdAsync(int id);
 
-        Task AddAsync(FileModel model);
+        Task AddAsync(FileModel model, IFormFile file);
 
         Task DeleteByIdAsync(int id);
 

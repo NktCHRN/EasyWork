@@ -1,4 +1,5 @@
 ﻿using Business.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Business.Interfaces
 {
@@ -7,5 +8,9 @@ namespace Business.Interfaces
         Task<IEnumerable<ProjectModel>> GetAllAsync();
 
         Task<IEnumerable<ProjectModel>> GetUserProjectsAsync(int userId); // (as participant)
+
+        Task UpdateProjectMainPictureAsync(ProjectModel model, IFormFile image);
+
+        Task DeleteProjectMainPictureAsync(ProjectModel model);
     }
 }
