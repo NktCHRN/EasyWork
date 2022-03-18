@@ -130,6 +130,11 @@ namespace Business.Services
         public bool IsValid(BanModel model, out string? firstErrorMessage)
         {
             firstErrorMessage = null;
+            if (model is null)
+            {
+                firstErrorMessage = "Model cannot be null";
+                return false;
+            }
             if (model.DateTo < model.DateFrom)
             {
                 firstErrorMessage = "The expire date of ban cannot be earlier than current date";

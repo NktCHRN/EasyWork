@@ -11,8 +11,8 @@ namespace Business.Interfaces
 
         Task DeleteByIdAsync(int id);
 
-        Task<IEnumerable<FileModel>> GetMessageFilesAsync(int messageId);
+        IEnumerable<FileModel> GetMessageFiles(int messageId);
 
-        Task<IEnumerable<FileModel>> GetTaskFilesAsync(int taskId);
+        IEnumerable<FileModel> GetTaskFiles(int taskId);
     }
 }

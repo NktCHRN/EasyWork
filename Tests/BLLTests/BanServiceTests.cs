@@ -351,7 +351,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void IsValidTest_InvalidModel_ReturnsTrue()
+        public void IsValidTest_ValidModel_ReturnsTrue()
         {
             // Arrange
             var model = _validBan;
