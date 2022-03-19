@@ -3,7 +3,6 @@ using Business.Interfaces;
 using Business.Models;
 using Data;
 using Data.Entities;
-using System.ComponentModel.DataAnnotations;
 using Task = System.Threading.Tasks.Task;
 
 namespace Business.Services
@@ -129,23 +128,12 @@ namespace Business.Services
         /// </returns>
         public bool IsValid(BanModel model, out string? firstErrorMessage)
         {
-            firstErrorMessage = null;
-            if (model is null)
-            {
-                firstErrorMessage = "Model cannot be null";
+            var result = IModelValidator<BanModel>.IsValidByDefault(model, out firstErrorMessage);
+            if (!result)
                 return false;
-            }
             if (model.DateTo < model.DateFrom)
             {
                 firstErrorMessage = "The expire date of ban cannot be earlier than current date";
-                return false;
-            }
-            var validationContext = new ValidationContext(model);
-            var validationResults = new List<ValidationResult>();
-            bool isValid = Validator.TryValidateObject(model, validationContext, validationResults, true);
-            if (!isValid)
-            {
-                firstErrorMessage = validationResults.First().ErrorMessage;
                 return false;
             }
             var user = _context.Users.Find(model.UserId);

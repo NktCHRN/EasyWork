@@ -8,6 +8,6 @@ namespace Business.Interfaces
     {
         Task UpdateAvatarAsync(User model, IFormFile image);
 
-        Task DeleteAvatarAsync(User model);
+        Task DeleteAvatarByUserIdAsync(int userId);
     }
 }

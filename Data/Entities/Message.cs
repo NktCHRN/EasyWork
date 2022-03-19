@@ -14,6 +14,9 @@ namespace Data.Entities
         public bool IsReturnMessage { get; set; }
 
         [Required]
+        public bool IsEdited { get; set; }
+
+        [Required]
         public DateTime Date { get; set; }
 
         [Required]

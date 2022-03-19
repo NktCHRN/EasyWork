@@ -18,7 +18,7 @@ namespace Business.Models
 
         public DateTime? Deadline { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTime? EndDate { get; set; }      // should be null on creation
 
         [Required]
         public TaskStatuses Status { get; set; }
@@ -28,7 +28,7 @@ namespace Business.Models
         [Required]
         public int ProjectId { get; set; }
 
-        public int? ExecutorId { get; set; }
+        public int? ExecutorId { get; set; }        // may be or not be null on creation
 
 
         public ICollection<int> Messages { get; set; } = null!;

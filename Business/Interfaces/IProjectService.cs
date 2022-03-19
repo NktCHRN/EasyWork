@@ -7,10 +7,10 @@ namespace Business.Interfaces
     {
         Task<IEnumerable<ProjectModel>> GetAllAsync();
 
-        Task<IEnumerable<ProjectModel>> GetUserProjectsAsync(int userId); // (as participant)
+        Task<IEnumerable<ProjectModel>> GetUserProjectsAsync(int userId); // (as a participant)
 
-        Task UpdateProjectMainPictureAsync(ProjectModel model, IFormFile image);
+        Task UpdateMainPictureAsync(ProjectModel model, IFormFile image);
 
-        Task DeleteProjectMainPictureAsync(ProjectModel model);
+        Task DeleteMainPictureByProjectIdAsync(int projectId);
     }
 }

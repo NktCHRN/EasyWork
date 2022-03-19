@@ -3,12 +3,6 @@ using Business.Interfaces;
 using Business.Models;
 using Data;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using File = Data.Entities.File;
 
 namespace Business.Services
@@ -77,20 +71,9 @@ namespace Business.Services
 
         public bool IsValid(FileModel model, out string? firstErrorMessage)
         {
-            firstErrorMessage = null;
-            if (model is null)
-            {
-                firstErrorMessage = "Model cannot be null";
+            var result = IModelValidator<FileModel>.IsValidByDefault(model, out firstErrorMessage);
+            if (!result)
                 return false;
-            }
-            var validationContext = new ValidationContext(model);
-            var validationResults = new List<ValidationResult>();
-            bool isValid = Validator.TryValidateObject(model, validationContext, validationResults, true);
-            if (!isValid)
-            {
-                firstErrorMessage = validationResults.First().ErrorMessage;
-                return false;
-            }
             if (!(model.TaskId is null ^ model.MessageId is null))
             {
                 firstErrorMessage = "Only TaskId or MessageId should not be null";
