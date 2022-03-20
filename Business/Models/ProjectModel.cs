@@ -19,10 +19,13 @@ namespace Business.Models
         [StringLength(4, MinimumLength = 3)]
         public string? MainPictureFormat { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
         public int? MaxToDo { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
         public int? MaxInProgress { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
         public int? MaxValidate { get; set; }
 
         public Guid? InviteCode { get; set; }

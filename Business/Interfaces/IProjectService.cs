@@ -5,11 +5,13 @@ namespace Business.Interfaces
 {
     public interface IProjectService : ICRUD<ProjectModel>, IModelValidator<ProjectModel>
     {
-        Task<IEnumerable<ProjectModel>> GetAllAsync();
+        IEnumerable<ProjectModel> GetAll();
 
-        Task<IEnumerable<ProjectModel>> GetUserProjectsAsync(int userId); // (as a participant)
+        IEnumerable<ProjectModel> GetUserProjects(int userId); // (as a participant or owner); sorted by project Id
 
-        Task UpdateMainPictureAsync(ProjectModel model, IFormFile image);
+        Task ChangeOwnerAsync(ProjectModel model, int newOwnerId);        // new owner should already be a manager on the project
+
+        Task UpdateMainPictureAsync(int projectId, IFormFile image);
 
         Task DeleteMainPictureByProjectIdAsync(int projectId);
     }

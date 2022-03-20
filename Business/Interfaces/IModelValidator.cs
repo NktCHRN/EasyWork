@@ -4,7 +4,7 @@ namespace Business.Interfaces
 {
     public interface IModelValidator<TModel> where TModel : class
     {
-        bool IsValid(TModel model, out string? firstErrorMessage) => IsValidByDefault(model, out firstErrorMessage);
+        bool IsValid(TModel model, out string? firstErrorMessage);
 
         protected static bool IsValidByDefault(TModel model, out string? firstErrorMessage)
         {
