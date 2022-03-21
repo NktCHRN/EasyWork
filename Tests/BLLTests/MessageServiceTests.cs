@@ -8,8 +8,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tests.BLLTests
@@ -353,19 +351,22 @@ namespace Tests.BLLTests
         [TestCase(1)]
         [TestCase(4)]
         [TestCase(5)]
-        public async Task DeleteByIdAsync_ValidId_DeletesElement(int id)
+        public async Task DeleteByIdAsync_ValidId_DeletesElementCascade(int id)
         {
             // Arrange
             SeedData();
             var expectedCount = _context.Messages.Count() - 1;
+            var expectedFilesCount = _context.Files.Count() - _context.Files.Where(f => f.MessageId == id).Count();
 
             // Act
             await _service.DeleteByIdAsync(id);
-            var actualCount = _context.Messages.Count();
 
             // Assert
+            var actualCount = _context.Messages.Count();
+            var actualFilesCount = _context.Files.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Messages.Any(m => m.Id == id), "Method deletes wrong element");
+            Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
         }
 
         [Test]
@@ -420,6 +421,8 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var model = _invalidForUpdateMessages.ElementAt(index);
+            if (model.Date != DateTime.MaxValue)
+                model.Date = (_context.Messages.Find(model.Id))!.Date;       // Fix for unchangeable date
 
             // Act & Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateAsync(model));

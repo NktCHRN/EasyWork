@@ -45,18 +45,19 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task ChangeOwnerAsync(ProjectModel model, int newOwnerId)
+        public async Task ChangeOwnerByProjectIdAsync(int projectId, int newOwnerId)
         {
+            var existingModel = await GetNotMappedByIdAsync(projectId);
             var newOwner = await _context.UsersOnProjects
-                .Where(uop => uop.UserId == model.OwnerId && uop.ProjectId == model.Id && uop.IsManager)
+                .Where(uop => uop.UserId == newOwnerId && uop.ProjectId == existingModel.Id && uop.IsManager)
                 .SingleOrDefaultAsync();
             if (newOwner is null)
                 throw new InvalidOperationException("User with such an id (new owner) is not a manager on a project right now");
-            var existingModel = await GetNotMappedByIdAsync(model.Id);
 
+            var oldOwnerId = existingModel.OwnerId;
             // in case if old owner was also registered as user on project
             var oldOwnerOnProject = await _context.UsersOnProjects
-                .Where(uop => uop.UserId == model.OwnerId && uop.ProjectId == model.Id)
+                .Where(uop => uop.UserId == existingModel.OwnerId && uop.ProjectId == existingModel.Id)
                 .SingleOrDefaultAsync(); 
             if (oldOwnerOnProject is not null)
             {
@@ -74,8 +75,8 @@ namespace Business.Services
 
             var oldOwnerAsManager = new UserOnProject()
             {
-                ProjectId = model.Id,
-                UserId = model.OwnerId,
+                ProjectId = existingModel.Id,
+                UserId = oldOwnerId,
                 IsManager = true
             };
             await _context.UsersOnProjects.AddAsync(oldOwnerAsManager);
@@ -85,6 +86,8 @@ namespace Business.Services
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
+            if (!string.IsNullOrEmpty(model.MainPictureFormat))
+                await DeleteMainPictureByProjectIdAsync(id);
             _context.Projects.Remove(model);
             await _context.SaveChangesAsync();
         }
@@ -167,12 +170,12 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateMainPictureAsync(int projectId, IFormFile image)
+        public async Task UpdateMainPictureByProjectIdAsync(int projectId, IFormFile image)
         {
             var model = await GetNotMappedByIdAsync(projectId);
             string? oldFileName = null;
             if (!string.IsNullOrEmpty(model.MainPictureFormat))
-                oldFileName = model.Id + '.' + model.MainPictureFormat;
+                oldFileName = model.Id + "." + model.MainPictureFormat;
             var extension = Path.GetExtension(image.FileName);
             if (!_manager.IsValidImageType(extension))
                 throw new ArgumentException("Not appropriate file type", image.FileName);
