@@ -60,6 +60,11 @@ namespace Data
             .WithMany(p => p.Releases)
             .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<Tag>()
+            .HasOne(r => r.Project)
+            .WithMany(p => p.Tags)
+            .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<UserOnProject>()
             .HasOne(u => u.Project)
             .WithMany(p => p.TeamMembers)

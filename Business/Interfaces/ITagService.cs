@@ -4,8 +4,8 @@ namespace Business.Interfaces
 {
     public interface ITagService : ICRUD<TagModel>, IModelValidator<TagModel>
     {
-        Task<IEnumerable<TagModel>> GetProjectTagsAsync(int projectId);
+        IEnumerable<TagModel> GetProjectTags(int projectId);
 
-        Task<IEnumerable<TagModel>> GetTaskTagsAsync(int projectId);
+        Task<IEnumerable<TagModel>> GetTaskTagsAsync(int taskId);
     }
 }

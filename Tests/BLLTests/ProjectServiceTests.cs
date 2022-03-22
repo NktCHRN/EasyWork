@@ -260,6 +260,25 @@ namespace Tests.BLLTests
                 _context.SaveChanges();
             }
 
+            var tags = new Tag[]
+            {
+                new Tag()
+                {
+                    Name = "Automatisation",
+                    ProjectId = 1
+                },
+                new Tag()
+                {
+                    Name = "Testing",
+                    ProjectId = 2
+                }
+            };
+            foreach(var tag in tags)
+            {
+                _context.Tags.Add(tag);
+                _context.SaveChanges();
+            }
+
             SetDateFixes();
         }
 
@@ -355,6 +374,7 @@ namespace Tests.BLLTests
             var expectedCount = _context.Projects.Count() - 1;
             var expectedTasksCount = 1;
             var expectedMessagesCount = 0;
+            var expectedTagsCount = 1;
 
             // Act
             await _service.DeleteByIdAsync(id);
@@ -363,10 +383,12 @@ namespace Tests.BLLTests
             var actualCount = _context.Projects.Count();
             var actualTasksCount = _context.Tasks.Count();
             var actualMessagesCount = _context.Messages.Count();
+            var actualTagsCount = _context.Tags.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Projects.Any(t => t.Id == id), "Method deletes wrong element");
             Assert.AreEqual(expectedTasksCount, actualTasksCount, "Method does not delete all tasks cascadely");
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
+            Assert.AreEqual(expectedTagsCount, actualTagsCount, "Method does not delete all tags cascadely");
         }
 
         [Test]

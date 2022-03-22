@@ -14,47 +14,37 @@ using Task = System.Threading.Tasks.Task;
 namespace Tests.BLLTests
 {
     [TestFixture]
-    public class ReleaseServiceTests
+    public class TagServiceTests
     {
         private readonly IMapper _mapper = UnitTestHelper.CreateMapperProfile();
 
         private ApplicationDbContext _context = null!;
 
-        private IReleaseService _service = null!;
+        private ITagService _service = null!;
 
-        private readonly IEnumerable<ReleaseModel> _invalidReleases = new ReleaseModel[]
+        private readonly IEnumerable<TagModel> _invalidTags = new TagModel[]
         {
-            new ReleaseModel()      // 0
+            new TagModel()      // 0
             {
-                Description = "This is the invalid release 1.0.0, the first release of our project.",
                 ProjectId = 1
             },
-            new ReleaseModel()      // 1
+            new TagModel()      // 1
             {
-                Name = "v1.0.0",
-                Description = "This is the invalid release 1.0.0, the first release of our project.",
+                Name = "TooLongNameMoreThan20characters",
+                ProjectId = 1
+            },
+            new TagModel()      // 2
+            {
+                Name = "Development",
                 ProjectId = -1
-            },
-            new ReleaseModel()      // 2
-            {
-                Name = "v1.0.0TooLong Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
-                "Sed nec arcu ac purus bibendum sodales sed. ",
-                Description = "This is the invalid release 1.0.0, the first release of our project.",
-                ProjectId = 1
-            },
+            }
         };
 
-        private readonly IEnumerable<ReleaseModel> _validReleases = new ReleaseModel[]
+        private readonly IEnumerable<TagModel> _validTags = new TagModel[]
         {
-            new ReleaseModel()  // 0
+            new TagModel()      // 0
             {
-                Name = "v1.0.0",
-                Description = "This is the release 1.0.0, the first release of our project.",
-                ProjectId = 1
-            },
-            new ReleaseModel()  // 1
-            {
-                Name = "v1.0.1",
+                Name = "Development",
                 ProjectId = 1
             }
         };
@@ -64,7 +54,7 @@ namespace Tests.BLLTests
         {
             _context = new ApplicationDbContext(UnitTestHelper.GetUnitTestDbOptions());
             SeedRequiredData();
-            _service = new ReleaseService(_context, _mapper);
+            _service = new TagService(_context, _mapper);
         }
 
         private void SeedRequiredData()
@@ -84,10 +74,6 @@ namespace Tests.BLLTests
                 new Project()       // id 2
                 {
                     Name = "Project 2"
-                },
-                new Project()       // id 3
-                {
-                    Name = "Project 3"
                 }
             };
             foreach (var project in projects)
@@ -96,90 +82,88 @@ namespace Tests.BLLTests
                 _context.SaveChanges();
             }
 
-            var releases = new Release[]
+            var tags = new Tag[]
             {
-                new Release()       // id 1
+                new Tag()       // id 1
                 {
-                    Name = "v1.0.0",
-                    Description = "The first version of the project 1",
+                    Name = "Automatisation",
                     ProjectId = 1
                 },
-                new Release()       // id 2
+                new Tag()       // id 2
                 {
-                    Name = "v1.1.0",
-                    Description = "The 1.1.0 version of the project 1",
-                    ProjectId = 1
-                },
-                new Release()       // id 3
-                {
-                    Name = "v1.0.0",
-                    Description = "The first version of the project 2",
+                    Name = "Testing",
                     ProjectId = 2
                 },
-                new Release()       // id 4
+                new Tag()       // id 3
                 {
-                    Name = "v1.2.0",
-                    Description = "The 1.2.0 version of the project 1",
+                    Name = "Programming",
                     ProjectId = 1
                 },
-                new Release()       // id 5
+                new Tag()       // id 4
                 {
-                    Name = "v1.0",
-                    Description = "The initial version of the project 3",
-                    ProjectId = 3
-                },
-                new Release()       // id 6
-                {
-                    Name = "v1.1",
-                    Description = "The 1.1 version of the project 1",
-                    ProjectId = 3
-                },
+                    Name = "Hotfix",
+                    ProjectId = 1
+                }
             };
-            foreach (var release in releases)
+            foreach(var tag in tags)
             {
-                release.Date = DateTime.Now;
-                _context.Releases.Add(release);
+                _context.Tags.Add(tag);
                 _context.SaveChanges();
             }
 
-            SetDateFixes();
-        }
-
-        private void SetDateFixes()
-        {
-            foreach (var release in _invalidForUpdateReleases)
+            var tasks = new Data.Entities.Task[]
             {
-                if (release.Date != DateTime.MaxValue)
-                    release.Date = (_context.Releases.Find(release.Id))!.Date;
+                new Data.Entities.Task()
+                {
+                    Name = "Task 1",
+                    ProjectId = 1,
+                    Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 1),
+                        _context.Tags.Single(t => t.Id == 3)
+                    }
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 1",
+                    ProjectId = 2,
+                    Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 2)
+                    }
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 2",
+                    ProjectId = 1,
+                    Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 1)
+                    }
+                }
+            };
+            foreach(var task in tasks)
+            {
+                _context.Tasks.Add(task);
+                _context.SaveChanges();
             }
-            _validForUpdateRelease.Date = (_context.Releases.Find(_validForUpdateRelease.Id))!.Date;
         }
 
-        private readonly IEnumerable<ReleaseModel> _invalidForUpdateReleases = new ReleaseModel[]
+        private readonly IEnumerable<TagModel> _invalidForUpdateTags = new TagModel[]
         {
-            new ReleaseModel()       // id 1, ind 0
+            new TagModel()       // id 1, ind 0
                 {
                 Id = 1,
-                    Name = "v1.0.0",
-                    Description = "The first version of the project 1",
+                    Name = "Automatisation",
                     ProjectId = 2       // changed
-                },
-            new ReleaseModel()       // id 1, ind 1
-                {
-                Id = 1,
-                    Name = "v1.0.0",
-                    Description = "The first version of the project 1",
-                    ProjectId = 1,
-                    Date = DateTime.MaxValue    // changed
-                },
+                }
         };
 
-        private readonly ReleaseModel _validForUpdateRelease = new()        // id 5
+        private readonly TagModel _validForUpdateTag = new()        // id 1
         {
-            Id = 5,
-            Name = "v1.0.0",                                        // changed
-            Description = "The first version of the project 3",     // changed
-            ProjectId = 3
+            Id = 1,
+            Name = "Engineering",       // changed
+            ProjectId = 1
         };
 
         [Test]
@@ -189,7 +173,7 @@ namespace Tests.BLLTests
         public void IsValidTest_InvalidModel_ReturnsFalseWithError(int modelNumber)
         {
             // Arrange
-            var model = _invalidReleases.ElementAt(modelNumber);
+            var model = _invalidTags.ElementAt(modelNumber);
 
             // Act
             var actual = _service.IsValid(model, out string? error);
@@ -201,11 +185,10 @@ namespace Tests.BLLTests
 
         [Test]
         [TestCase(0)]
-        [TestCase(1)]
         public void IsValidTest_ValidModel_ReturnsTrue(int modelNumber)
         {
             // Arrange
-            var model = _validReleases.ElementAt(modelNumber);
+            var model = _validTags.ElementAt(modelNumber);
 
             // Act
             var actual = _service.IsValid(model, out string? error);
@@ -232,7 +215,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(1)]
         [TestCase(3)]
-        [TestCase(6)]
+        [TestCase(4)]
         public async Task GetByIdAsync_ValidId_ReturnesElement(int id)
         {
             // Arrange
@@ -261,21 +244,21 @@ namespace Tests.BLLTests
 
         [Test]
         [TestCase(1)]
+        [TestCase(2)]
         [TestCase(4)]
-        [TestCase(6)]
         public async Task DeleteByIdAsync_ValidId_DeletesElement(int id)
         {
             // Arrange
             SeedData();
-            var expectedCount = _context.Releases.Count() - 1;
+            var expectedCount = _context.Tags.Count() - 1;
 
             // Act
             await _service.DeleteByIdAsync(id);
 
             // Assert
-            var actualCount = _context.Releases.Count();
+            var actualCount = _context.Tags.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
-            Assert.IsFalse(_context.Releases.Any(m => m.Id == id), "Method deletes wrong element");
+            Assert.IsFalse(_context.Tags.Any(m => m.Id == id), "Method deletes wrong element");
         }
 
         [Test]
@@ -283,16 +266,16 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            var model = _validReleases.First();
+            var model = _validTags.First();
             var expectedName = model.Name;
-            var expectedCount = _context.Releases.Count() + 1;
+            var expectedCount = _context.Tags.Count() + 1;
 
             // Act
             await _service.AddAsync(model);
 
             // Assert
-            var actualCount = _context.Releases.Count();
-            var actual = _context.Releases.Last();
+            var actualCount = _context.Tags.Count();
+            var actual = _context.Tags.Last();
             Assert.AreEqual(expectedCount, actualCount, "Method does not add a model to DB");
             Assert.AreEqual(expectedName, actual.Name, "Method does not add model with needed information");
         }
@@ -302,7 +285,7 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            var model = _invalidReleases.First();
+            var model = _invalidTags.First();
 
             // Act & Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await _service.AddAsync(model));
@@ -313,7 +296,7 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            var model = _invalidReleases.First();
+            var model = _invalidTags.First();
 
             // Act & Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateAsync(model));
@@ -321,12 +304,11 @@ namespace Tests.BLLTests
 
         [Test]
         [TestCase(0)]
-        [TestCase(1)]
         public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
         {
             // Arrange
             SeedData();
-            var model = _invalidForUpdateReleases.ElementAt(index);
+            var model = _invalidForUpdateTags.ElementAt(index);
 
             // Act & Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateAsync(model));
@@ -337,32 +319,50 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            var model = _validForUpdateRelease;
+            var model = _validForUpdateTag;
             var expectedName = model.Name;
 
             // Act
             await _service.UpdateAsync(model);
 
             // Assert
-            var actual = await _context.Releases.SingleAsync(r => r.Id == model.Id);
+            var actual = await _context.Tags.SingleAsync(r => r.Id == model.Id);
             Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
         }
 
         [Test]
-        public void GetProjectReleasesTest_ReturnsRealProjectReleases()
+        public void GetProjectTagsTest_ReturnsRealProjectTags()
         {
             // Arrange
             SeedData();
             var projectId = 1;
-            IEnumerable<int> expectedReleasesIds = new[] { 1, 2, 4 };
+            IEnumerable<int> expectedTagsIds = new[] { 1, 3, 4 };
 
             // Act
-            var actualReleases = _service.GetProjectReleases(projectId);
+            var actualTags = _service.GetProjectTags(projectId);
 
             // Assert
-            Assert.AreEqual(expectedReleasesIds.Count(), actualReleases.Count(), "Method returnes wrong elements");
-            var actualReleasesIds = actualReleases.Select(r => r.Id);
-            Assert.IsTrue(expectedReleasesIds.SequenceEqual(actualReleasesIds), 
+            Assert.AreEqual(expectedTagsIds.Count(), actualTags.Count(), "Method returnes wrong elements");
+            var actualTagsIds = actualTags.Select(r => r.Id);
+            Assert.IsTrue(expectedTagsIds.SequenceEqual(actualTagsIds),
+                "Method returnes wrong elements or the order is wrong");
+        }
+
+        [Test]
+        public async Task GetTaskTagsAsyncTest_ReturnsRealTaskTags()
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;
+            IEnumerable<int> expectedTagsIds = new[] { 1, 3 };
+
+            // Act
+            var actualTags = await _service.GetTaskTagsAsync(taskId);
+
+            // Assert
+            Assert.AreEqual(expectedTagsIds.Count(), actualTags.Count(), "Method returnes wrong elements");
+            var actualTagsIds = actualTags.Select(r => r.Id);
+            Assert.IsTrue(expectedTagsIds.SequenceEqual(actualTagsIds),
                 "Method returnes wrong elements or the order is wrong");
         }
     }

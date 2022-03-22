@@ -8,9 +8,9 @@ namespace Business.Interfaces
 
         Task<IEnumerable<TaskModel>> GetUserTasksAsync(int userId);
 
-        Task<IEnumerable<TaskModel>> GetUserOnProjectTasksAsync(int userOnProjectId);
+        Task<IEnumerable<TaskModel>> GetProjectUserTasksAsync(int projectId, int userId);
 
-        Task AddTagToTaskAsync(int taskId, TagModel tag);
+        Task AddTagToTaskAsync(int taskId, int tagId);
 
         Task DeleteTagFromTaskAsync(int taskId, int tagId);
     }
