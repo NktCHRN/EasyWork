@@ -26,6 +26,6 @@ namespace Business.Models
         public int SenderId { get; set; }
 
 
-        public ICollection<int> FilesIds { get; set; } = null!;
+        public ICollection<int> FilesIds { get; set; } = new List<int>();
     }
 }

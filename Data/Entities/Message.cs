@@ -29,6 +29,6 @@ namespace Data.Entities
         public User? Sender { get; set; }
 
 
-        public ICollection<File> Files { get; set; } = null!;
+        public ICollection<File> Files { get; set; } = new List<File>();
     }
 }

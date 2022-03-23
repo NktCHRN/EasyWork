@@ -13,6 +13,6 @@ namespace Business.Models
         [Required]
         public int ProjectId { get; set; }
 
-        public ICollection<int> TasksIds { get; set; } = null!;
+        public ICollection<int> TasksIds { get; set; } = new List<int>();
     }
 }

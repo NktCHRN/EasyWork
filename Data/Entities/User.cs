@@ -27,15 +27,15 @@ namespace Data.Entities
 
         public DateTime LastSeen { get; set; }
 
-        public ICollection<Ban> Bans { get; set; } = null!;
-        public ICollection<Ban> GivenBans { get; set; } = null!;
+        public ICollection<Ban> Bans { get; set; } = new List<Ban>();
+        public ICollection<Ban> GivenBans { get; set; } = new List<Ban>();
 
-        public ICollection<Project> OwnedProjects { get; set; } = null!;
+        public ICollection<Project> OwnedProjects { get; set; } = new List<Project>();
 
-        public ICollection<UserOnProject> Projects { get; set; } = null!;
+        public ICollection<UserOnProject> Projects { get; set; } = new List<UserOnProject>();
 
-        public ICollection<Task> Tasks { get; set; } = null!;
+        public ICollection<Task> Tasks { get; set; } = new List<Task>();
 
-        public ICollection<Message> Messages { get; set; } = null!;
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
     }
 }

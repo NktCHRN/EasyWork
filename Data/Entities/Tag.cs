@@ -15,6 +15,6 @@ namespace Data.Entities
         public int ProjectId { get; set; }
         public Project? Project { get; set; }
 
-        public ICollection<Task> Tasks { get; set; } = null!;
+        public ICollection<Task> Tasks { get; set; } = new List<Task>();
     }
 }

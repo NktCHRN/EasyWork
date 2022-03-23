@@ -36,9 +36,9 @@ namespace Data.Entities
         public User? Owner { get; set; }
 
 
-        public ICollection<Release> Releases { get; set; } = null!;
-        public ICollection<UserOnProject> TeamMembers { get; set; } = null!;
-        public ICollection<Task> Tasks { get; set; } = null!;
-        public ICollection<Tag> Tags { get; set; } = null!;
+        public ICollection<Release> Releases { get; set; } = new List<Release>();
+        public ICollection<UserOnProject> TeamMembers { get; set; } = new List<UserOnProject>();
+        public ICollection<Task> Tasks { get; set; } = new List<Task>();
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     }
 }

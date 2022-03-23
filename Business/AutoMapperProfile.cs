@@ -26,9 +26,9 @@ namespace Business
                 .ReverseMap();
             CreateMap<Release, ReleaseModel>().ReverseMap();
             CreateMap<Data.Entities.Task, TaskModel>()
-                .ForMember(e => e.Files,
+                .ForMember(e => e.FilesIds,
                 m => m.MapFrom(tm => tm.Files.Select(f => f.Id)))
-                .ForMember(e => e.Messages,
+                .ForMember(e => e.MessagesIds,
                 m => m.MapFrom(tm => tm.Messages.Select(msg => msg.Id)))
                 .ForMember(e => e.TagsIds,
                 m => m.MapFrom(taskm => taskm.Tags.Select(t => t.Id)))

@@ -31,10 +31,10 @@ namespace Business.Models
         public int? ExecutorId { get; set; }        // may be or not be null on creation
 
 
-        public ICollection<int> Messages { get; set; } = null!;
+        public ICollection<int> MessagesIds { get; set; } = new List<int>();
 
-        public ICollection<int> Files { get; set; } = null!;
+        public ICollection<int> FilesIds { get; set; } = new List<int>();
 
-        public ICollection<int> TagsIds { get; set; } = null!;
+        public ICollection<int> TagsIds { get; set; } = new List<int>();
     }
 }

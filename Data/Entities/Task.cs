@@ -51,10 +51,10 @@ namespace Data.Entities
         public User? Executor { get; set; }
 
 
-        public ICollection<Message> Messages { get; set; } = null!;
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
 
-        public ICollection<File> Files { get; set; } = null!;
+        public ICollection<File> Files { get; set; } = new List<File>();
 
-        public ICollection<Tag> Tags { get; set; } = null!;
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     }
 }
