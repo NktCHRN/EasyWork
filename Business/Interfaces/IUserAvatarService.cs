@@ -1,6 +1,4 @@
-﻿using Data.Entities;
-using Microsoft.AspNetCore.Http;
-using Task = System.Threading.Tasks.Task;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Business.Interfaces
 {

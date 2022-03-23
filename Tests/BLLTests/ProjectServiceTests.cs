@@ -702,11 +702,6 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            var fileMock = new Mock<IFormFile>();
-            var expectedformat = "bmp";
-            fileMock.Setup(m => m.FileName).Returns($"avtr.{expectedformat}");
-            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "bmp" || s == ".bmp"))).Returns(true);
-            var file = fileMock.Object;
 
             // Act & Assert
             Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteMainPictureByProjectIdAsync(projectId),
