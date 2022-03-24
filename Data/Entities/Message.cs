@@ -17,6 +17,9 @@ namespace Data.Entities
         public bool IsEdited { get; set; }
 
         [Required]
+        public bool IsRead { get; set; }
+
+        [Required]
         public DateTime Date { get; set; }
 
         [Required]

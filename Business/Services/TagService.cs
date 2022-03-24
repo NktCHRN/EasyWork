@@ -34,7 +34,7 @@ namespace Business.Services
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
             await _context.Tags.AddAsync(_mapper.Map<Tag>(model));
-            await _context.SaveChangesAsync(); ;
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteByIdAsync(int id)

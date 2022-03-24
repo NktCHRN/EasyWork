@@ -163,7 +163,8 @@ namespace Tests.BLLTests
                 {
                     SenderId = 1,
                     Text = "This is message 5",
-                    TaskId = 2
+                    TaskId = 2,
+                    IsRead = true
                 }
             };
             foreach (var message in messages)
@@ -242,6 +243,14 @@ namespace Tests.BLLTests
                     TaskId = 1,
                     IsReturnMessage = false     // changed
                 },
+            new MessageModel()     // id 5, ind 5
+                {
+                Id = 5,
+                                        SenderId = 1,
+                    Text = "This is message 5",
+                    TaskId = 2,
+                    IsRead = false      // changed
+                },
         };
 
         private readonly MessageModel _validForUpdateMessage = new()
@@ -250,7 +259,8 @@ namespace Tests.BLLTests
             SenderId = 2,
             Text = "This is message 1 edited (valid)",
             TaskId = 1,
-            IsEdited = true
+            IsEdited = true,
+            IsRead = true
         };
 
         [Test]
@@ -416,6 +426,7 @@ namespace Tests.BLLTests
         [TestCase(2)]
         [TestCase(3)]
         [TestCase(4)]
+        [TestCase(5)]
         public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
         {
             // Arrange

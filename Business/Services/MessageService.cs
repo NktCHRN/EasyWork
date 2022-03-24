@@ -92,6 +92,8 @@ namespace Business.Services
                 throw new ArgumentException("Message status cannot be changed", nameof(model));
             if (model.Date != existingModel.Date)
                 throw new ArgumentException("Date cannot be changed", nameof(model));
+            if (model.IsRead == false && existingModel.IsRead)
+                throw new ArgumentException("The \"read\" status cannot be returned to false", nameof(model));
             existingModel = _mapper.Map(model, existingModel);
             _context.Messages.Update(existingModel);
             await _context.SaveChangesAsync();

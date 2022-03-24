@@ -14,6 +14,9 @@ namespace Business.Models
         public bool IsReturnMessage { get; set; }
 
         [Required]
+        public bool IsRead { get; set; }
+
+        [Required]
         public bool IsEdited { get; set; }
 
         [Required]
