@@ -74,31 +74,22 @@ namespace Business.Services
             var result = IModelValidator<FileModel>.IsValidByDefault(model, out firstErrorMessage);
             if (!result)
                 return false;
-            if (!(model.TaskId is null ^ model.MessageId is null))
+            if (model.TaskId is not null && model.MessageId is not null)
             {
                 firstErrorMessage = "Only TaskId or MessageId should not be null";
                 return false;
             }
-            if (model.TaskId is null)
+            if (model.MessageId is not null && !_context.Messages.Any(m => m.Id == model.MessageId))
             {
-                var foundMessage = _context.Messages.Any(m => m.Id == model.MessageId);
-                if (!foundMessage)
-                {
                     firstErrorMessage = "Message with such an id was not found";
                     return false;
-                }
-                return true;
             }
-            else
+            if (model.TaskId is not null && !_context.Tasks.Any(t => t.Id == model.TaskId))
             {
-                var foundTask = _context.Tasks.Any(t => t.Id == model.TaskId);
-                if (!foundTask)
-                {
                     firstErrorMessage = "Task with such an id was not found";
                     return false;
-                }
-                return true;
             }
+            return true;
         }
     }
 }

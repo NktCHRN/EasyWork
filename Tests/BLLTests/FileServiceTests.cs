@@ -36,20 +36,16 @@ namespace Tests.BLLTests
                 Name = "TestFile.cs"
             },
             new FileModel()  // 1
-                {
-                Name = "TestFile.cs"
-                },
-            new FileModel()  // 2
             {
                 TaskId = -1,
                 Name = "TestFile.cs"
             },
-            new FileModel()  // 3
+            new FileModel()  // 2
             {
                 MessageId = -1,
                 Name = "TestFile.cs"
             },
-            new FileModel() // 4
+            new FileModel() // 3
             {
                 TaskId = 1,
                 Name = "Too long name! dolor sit amet, consectetur adipiscing elit. " +
@@ -61,16 +57,20 @@ namespace Tests.BLLTests
 
         private readonly IEnumerable<FileModel> _validFiles = new FileModel[]
         {
-            new FileModel()
+            new FileModel()     // 0
             {
                 TaskId = 1,
                 Name = "TestFile.cs"
             },
-            new FileModel()
+            new FileModel()     // 1
             {
                 MessageId = 1,
                 Name = "TestFile.cs"
             },
+            new FileModel()     // 2
+                {
+                Name = "TestFile.cs"
+                }
         };
 
         [SetUp]
@@ -223,6 +223,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(0)]
         [TestCase(1)]
+        [TestCase(2)]
         public void IsValidTest_ValidFile_ReturnsTrue(int modelNumber)
         {
             // Arrange
@@ -241,7 +242,6 @@ namespace Tests.BLLTests
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
-        [TestCase(4)]
         public void IsValidTest_InvalidFile_ReturnsFalse(int modelNumber)
         {
             // Arrange
