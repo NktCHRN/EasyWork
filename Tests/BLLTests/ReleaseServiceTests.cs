@@ -77,7 +77,7 @@ namespace Tests.BLLTests
             _context.SaveChanges();
         }
 
-        private void SeedData()
+        private void SeedData(bool setDateTimeNow = true)
         {
             var projects = new Project[]
             {
@@ -102,25 +102,29 @@ namespace Tests.BLLTests
                 {
                     Name = "v1.0.0",
                     Description = "The first version of the project 1",
-                    ProjectId = 1
+                    ProjectId = 1,
+                    Date = new DateTime(2022, 1, 2)
                 },
                 new Release()       // id 2
                 {
                     Name = "v1.1.0",
                     Description = "The 1.1.0 version of the project 1",
-                    ProjectId = 1
+                    ProjectId = 1,
+                    Date= new DateTime(2022, 3, 1)
                 },
                 new Release()       // id 3
                 {
                     Name = "v1.0.0",
                     Description = "The first version of the project 2",
-                    ProjectId = 2
+                    ProjectId = 2,
+                    Date= new DateTime(2022, 1, 3)
                 },
                 new Release()       // id 4
                 {
                     Name = "v1.2.0",
                     Description = "The 1.2.0 version of the project 1",
-                    ProjectId = 1
+                    ProjectId = 1,
+                    Date= new DateTime(2022, 1, 3)
                 },
                 new Release()       // id 5
                 {
@@ -137,7 +141,8 @@ namespace Tests.BLLTests
             };
             foreach (var release in releases)
             {
-                release.Date = DateTime.Now;
+                if (setDateTimeNow)
+                    release.Date = DateTime.Now;
                 _context.Releases.Add(release);
                 _context.SaveChanges();
             }
@@ -363,6 +368,26 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedReleasesIds.Count(), actualReleases.Count(), "Method returnes wrong elements");
             var actualReleasesIds = actualReleases.Select(r => r.Id);
             Assert.IsTrue(expectedReleasesIds.SequenceEqual(actualReleasesIds), 
+                "Method returnes wrong elements or the order is wrong");
+        }
+
+        [Test]
+        public void GetProjectReleasesByDateTest_ReturnsRealProjectReleases()
+        {
+            // Arrange
+            SeedData(false);
+            var projectId = 1;
+            var from = new DateTime(2022, 1, 1);
+            var to = new DateTime(2022, 1, 20);
+            IEnumerable<int> expectedReleasesIds = new[] { 4, 1 };
+
+            // Act
+            var actualReleases = _service.GetProjectReleasesByDate(projectId, from, to);
+
+            // Assert
+            Assert.AreEqual(expectedReleasesIds.Count(), actualReleases.Count(), "Method returnes wrong elements");
+            var actualReleasesIds = actualReleases.Select(r => r.Id);
+            Assert.IsTrue(expectedReleasesIds.SequenceEqual(actualReleasesIds),
                 "Method returnes wrong elements or the order is wrong");
         }
     }
