@@ -573,7 +573,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var userId = 1;
-            IEnumerable<int> expectedProjectNumbers = new[] {1, 2, 3};
+            IEnumerable<int> expectedProjectNumbers = new[] {3, 2, 1};
 
             // Act
             var actual = _service.GetUserProjects(userId);

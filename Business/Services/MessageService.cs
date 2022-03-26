@@ -56,7 +56,7 @@ namespace Business.Services
 
         public IEnumerable<MessageModel> GetTaskMessages(int taskId)
         {
-            return _mapper.Map<IEnumerable<MessageModel>>(_context.Messages.Where(m => m.TaskId == taskId));
+            return _mapper.Map<IEnumerable<MessageModel>>(_context.Messages.Where(m => m.TaskId == taskId)).Reverse();
         }
 
         public bool IsValid(MessageModel model, out string? firstErrorMessage)
@@ -88,8 +88,6 @@ namespace Business.Services
                 throw new ArgumentException("Task cannot be changed", nameof(model));
             if (model.SenderId != existingModel.SenderId)
                 throw new ArgumentException("Sender cannot be changed", nameof(model));
-            if (model.IsReturnMessage != existingModel.IsReturnMessage)
-                throw new ArgumentException("Message status cannot be changed", nameof(model));
             if (model.Date != existingModel.Date)
                 throw new ArgumentException("Date cannot be changed", nameof(model));
             if (model.IsRead == false && existingModel.IsRead)
@@ -97,6 +95,13 @@ namespace Business.Services
             existingModel = _mapper.Map(model, existingModel);
             _context.Messages.Update(existingModel);
             await _context.SaveChangesAsync();
+        }
+
+        public IEnumerable<MessageModel> GetNotReadMessagesForUser(int userId)
+        {
+            var tasksIds = _context.Tasks.Where(t => t.ExecutorId == userId).Select(t => t.Id);
+            var messages = _context.Messages.Where(m => tasksIds.Contains(m.TaskId) && m.SenderId != userId);
+            return _mapper.Map<IEnumerable<MessageModel>>(messages).Reverse();
         }
     }
 }

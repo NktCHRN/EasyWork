@@ -56,8 +56,6 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        [TestCase(null)]
-        [TestCase("")]
         [TestCase("Lorem ipsum dolor sit amet, consectetur vestibulum.")]
         public void ValidateCustomProperties_InvalidLastName_ReturnsFailed(string lastName)
         {

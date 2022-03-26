@@ -11,9 +11,6 @@ namespace Data.Entities
         public string Text { get; set; } = null!;
 
         [Required]
-        public bool IsReturnMessage { get; set; }
-
-        [Required]
         public bool IsEdited { get; set; }
 
         [Required]

@@ -8,9 +8,8 @@ namespace Data.Entities
         ToDo = 0,
         InProgress = 1,
         Validate = 2,
-        ReturnedToExecutor = 3,
-        Complete = 4,
-        Archived = 5
+        Complete = 3,
+        Archived = 4
     }
     public enum TaskPriorities : short
     {

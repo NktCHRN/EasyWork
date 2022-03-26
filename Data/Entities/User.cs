@@ -13,10 +13,9 @@ namespace Data.Entities
         public string FirstName { get; set; } = null!;
 
         [PersonalData]
-        [Required]
         [Column(TypeName = "nvarchar(50)")]
         [StringLength(50, ErrorMessage = "The maximum length of the last name is 50")]
-        public string LastName { get; set; } = null!;
+        public string? LastName { get; set; } 
 
         [PersonalData]
         public DateTime RegistrationDate { get; set; }

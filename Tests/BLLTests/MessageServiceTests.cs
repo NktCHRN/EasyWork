@@ -28,7 +28,6 @@ namespace Tests.BLLTests
                 Text = "This is a invalid message 1 text.",
                 SenderId = 1,
                 IsEdited = false,
-                IsReturnMessage = false,
                 TaskId = -1
             },
             new MessageModel()  // 1
@@ -36,7 +35,6 @@ namespace Tests.BLLTests
                 Text = "This is a invalid message 2 text.",
                 SenderId = -1,
                 IsEdited = false,
-                IsReturnMessage = false,
                 TaskId = 1
             },
             new MessageModel()  // 2
@@ -67,7 +65,6 @@ namespace Tests.BLLTests
                 "Quisque tortor ex, semper sit amet rutrum nulla. ",
                 SenderId = 1,
                 IsEdited = false,
-                IsReturnMessage = false,
                 TaskId = 1
             }
         };
@@ -79,7 +76,6 @@ namespace Tests.BLLTests
                 Text = "This is a valid message 1 text.",
                 SenderId = 1,
                 IsEdited = false,
-                IsReturnMessage = false,
                 TaskId = 1
             },
             new MessageModel()
@@ -87,7 +83,6 @@ namespace Tests.BLLTests
                 Text = "This is a valid message 2 (return message) text.",
                 SenderId = 1,
                 IsEdited = false,
-                IsReturnMessage = true,
                 TaskId = 1
             }
         };
@@ -116,7 +111,8 @@ namespace Tests.BLLTests
             {
                 new Data.Entities.Task() // id 2
                 {
-                    Name = "Task 2"
+                    Name = "Task 2",
+                    ExecutorId = 1
                 },
                 new Data.Entities.Task() // id 3
                 {
@@ -136,20 +132,21 @@ namespace Tests.BLLTests
                     SenderId = 2,
                     Text = "This is message 1",
                     TaskId = 1,
-                    IsEdited = true
+                    IsEdited = true,
+                    IsRead = true,
                 },
                 new Message()     // id 2
                 {
-                    SenderId = 3,
+                    SenderId = 1,
                     Text = "This is message 2",
-                    TaskId = 2
+                    TaskId = 2,
+                    IsRead = true,
                 },
                 new Message()     // id 3
                 {
                     SenderId = 1,
                     Text = "This is message 3",
                     TaskId = 1,
-                    IsReturnMessage = true
                 },
                 new Message()     // id 4
                 {
@@ -157,11 +154,10 @@ namespace Tests.BLLTests
                     Text = "This is message 4",
                     TaskId = 1,
                     IsEdited = true,
-                    IsReturnMessage = true
                 },
                 new Message()     // id 5
                 {
-                    SenderId = 1,
+                    SenderId = 3,
                     Text = "This is message 5",
                     TaskId = 2,
                     IsRead = true
@@ -226,24 +222,7 @@ namespace Tests.BLLTests
                     IsEdited = true,
                     Date = DateTime.MaxValue    // changed
                 },
-            new MessageModel()     // id 1, ind 3
-                {
-                Id = 1,
-                    SenderId = 2,
-                    Text = "This is message 1 edited",
-                    TaskId = 1,
-                    IsEdited = true,
-                    IsReturnMessage = true // changed
-                },
-            new MessageModel()     // id 3, ind 4
-                {
-                Id = 3,
-                    SenderId = 1,
-                    Text = "This is message 3",
-                    TaskId = 1,
-                    IsReturnMessage = false     // changed
-                },
-            new MessageModel()     // id 5, ind 5
+            new MessageModel()     // id 5, ind 3
                 {
                 Id = 5,
                                         SenderId = 1,
@@ -425,8 +404,6 @@ namespace Tests.BLLTests
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
-        [TestCase(4)]
-        [TestCase(5)]
         public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
         {
             // Arrange
@@ -454,6 +431,22 @@ namespace Tests.BLLTests
             // Assert
             var actual = await _context.Messages.FindAsync(model.Id);
             Assert.AreEqual(expectedText, actual!.Text, "Method does not update model");
+        }
+
+        [Test]
+        public void GetNotReadMessagesForUserTest_ReturnsRightNotifications()
+        {
+            // Arrange
+            SeedData();
+            var userId = 1;
+            var expectedMessageIds = new[] { 5 };
+
+            // Act
+            var actualMessageIds = _service.GetNotReadMessagesForUser(userId).Select(m => m.Id);
+
+            // Assert
+            Assert.AreEqual(expectedMessageIds.Length, actualMessageIds.Count(), "Method returned wrong elements");
+            Assert.IsTrue(expectedMessageIds.SequenceEqual(actualMessageIds), "Method returned wrong elements");
         }
     }
 }

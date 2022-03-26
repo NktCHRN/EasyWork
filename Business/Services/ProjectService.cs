@@ -107,7 +107,7 @@ namespace Business.Services
             catch (Exception) { }
         }
 
-        public IEnumerable<ProjectModel> GetAll() => _mapper.Map<IEnumerable<ProjectModel>>(_context.Projects);
+        public IEnumerable<ProjectModel> GetAll() => _mapper.Map<IEnumerable<ProjectModel>>(_context.Projects).Reverse();
 
         public async Task<ProjectModel> GetByIdAsync(int id)
         {
@@ -136,7 +136,7 @@ namespace Business.Services
 
             var united = projectsAsParticipant
                 .Union(projectsAsOwner)
-                .OrderBy(p => p.Id);
+                .OrderByDescending(p => p.Id);
             return _mapper.Map<IEnumerable<ProjectModel>>(united);
         }
 

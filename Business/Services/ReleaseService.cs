@@ -48,7 +48,8 @@ namespace Business.Services
 
         public IEnumerable<ReleaseModel> GetProjectReleases(int projectId)
         {
-            return _mapper.Map<IEnumerable<ReleaseModel>>(_context.Releases.Where(r => r.ProjectId == projectId));
+            return _mapper.Map<IEnumerable<ReleaseModel>>(_context.Releases.Where(r => r.ProjectId == projectId))
+                .Reverse();
         }
 
         public bool IsValid(ReleaseModel model, out string? firstErrorMessage)

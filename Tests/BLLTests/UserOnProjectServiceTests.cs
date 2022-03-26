@@ -170,6 +170,57 @@ namespace Tests.BLLTests
                 _context.UsersOnProjects.Add(uop);
                 _context.SaveChanges();
             }
+
+            var tasks = new Data.Entities.Task[]
+            {
+                new Data.Entities.Task()
+                {
+                    Name = "Task 1",
+                    ProjectId = 1,
+                    ExecutorId = 1,
+                    Status = TaskStatuses.InProgress
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 2",
+                    ProjectId = 1,
+                    ExecutorId = 1,
+                    Status = TaskStatuses.Validate
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 3",
+                    ProjectId = 1,
+                    ExecutorId = 7,
+                    Status = TaskStatuses.ToDo
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 4",
+                    ProjectId = 1,
+                    ExecutorId = 7,
+                    Status = TaskStatuses.Complete
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 5",
+                    ProjectId = 1,
+                    ExecutorId = 7,
+                    Status = TaskStatuses.Complete
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Task 6",
+                    ProjectId = 3,
+                    ExecutorId = 5,
+                    Status = TaskStatuses.Archived
+                }
+            };
+            foreach (var task in tasks)
+            {
+                _context.Tasks.Add(task);
+                _context.SaveChanges();
+            }
         }
 
         private readonly IEnumerable<UserOnProjectModel> _invalidForAddUoP = new UserOnProjectModel[]
@@ -389,98 +440,71 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedStatus, actual.IsManager, "Method does not update model");
         }
 
-        private readonly IEnumerable<IEnumerable<UserOnProjectModel>> _expectedGetProjectUsers = new IEnumerable<UserOnProjectModel>[]
+        private readonly IEnumerable<IEnumerable<UserOnProjectModelExtended>> _expectedGetAllProjectUsersAsync = new IEnumerable<UserOnProjectModelExtended>[]
         {
-            new UserOnProjectModel[]        // ind 0 , project id 1
+            new UserOnProjectModelExtended[]        // ind 0 , project id 1
             {
-                new UserOnProjectModel()
+                new UserOnProjectModelExtended()
                 {
-                    ProjectId = 1,
+                    UserId = 1,
+                    Role = UserOnProjectRoles.Owner,
+                    TasksDone = 1,
+                    TasksNotDone = 1
+                },
+                new UserOnProjectModelExtended()
+                {
                     UserId = 3,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager,
                 },
-                new UserOnProjectModel()
+                new UserOnProjectModelExtended()
                 {
-                    ProjectId = 1,
                     UserId = 4,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager,
                 },
-                new UserOnProjectModel()
+                new UserOnProjectModelExtended()
                 {
-                    ProjectId = 1,
-                    UserId = 2,
-                    IsManager = false
-                },
-                new UserOnProjectModel()
-                {
-                    ProjectId = 1,
-                    UserId = 6,
-                    IsManager = false
-                },
-                new UserOnProjectModel()
-                {
-                    ProjectId = 1,
                     UserId = 7,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User,
+                    TasksDone = 2,
+                    TasksNotDone = 1
                 },
-            },
-            Array.Empty<UserOnProjectModel>(),          // ind 1, project id 2
-            new UserOnProjectModel[]        // ind 2 , project id 3
-            {
-                new UserOnProjectModel()
+                new UserOnProjectModelExtended()
                 {
-                    ProjectId = 3,
-                    UserId = 4,
-                    IsManager = false
+                    UserId = 2,
+                    Role = UserOnProjectRoles.User,
                 },
-                new UserOnProjectModel()
+                new UserOnProjectModelExtended()
                 {
-                    ProjectId = 3,
                     UserId = 6,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User,
+                },
+            },
+            new UserOnProjectModelExtended[]        // ind 1 , project id 2
+            {
+                new UserOnProjectModelExtended()
+                {
+                    UserId = 3,
+                    Role = UserOnProjectRoles.Owner,
                 }
-            }
-        };
-
-        [Test]
-        [TestCase(0)]
-        [TestCase(1)]
-        [TestCase(2)]
-        public void GetProjectUsersTest_ReturnsRealProjectUsers(int index)
-        {
-            // Arrange
-            SeedData();
-            var projectId = index + 1;
-            var expected = _expectedGetProjectUsers.ElementAt(index);
-
-            // Act
-            var actual = _service.GetProjectUsers(projectId);
-
-            // Assert
-            Assert.AreEqual(expected.Count(), actual.Count(), "Method returnes wrong elements");
-            Assert.IsTrue(expected.SequenceEqual(actual, new UserOnProjectModelEqualityComparer()), "Method returnes wrong elements");
-        }
-
-        private readonly IEnumerable<IEnumerable<(int, UserOnProjectRoles)>> _expectedGetAllProjectUsersAsync = new IEnumerable<(int, UserOnProjectRoles)>[]
-        {
-            new (int, UserOnProjectRoles)[]        // ind 0 , project id 1
-            {
-                (1, UserOnProjectRoles.Owner),
-                (3, UserOnProjectRoles.Manager),
-                (4, UserOnProjectRoles.Manager),
-                (2, UserOnProjectRoles.User),
-                (6, UserOnProjectRoles.User),
-                (7, UserOnProjectRoles.User)
             },
-            new (int, UserOnProjectRoles)[]          // ind 1, project id 2
+            new UserOnProjectModelExtended[]        // ind 2 , project id 3
             {
-                (3, UserOnProjectRoles.Owner)
-            },
-            new (int, UserOnProjectRoles)[]        // ind 2 , project id 3
-            {
-                (5, UserOnProjectRoles.Owner),
-                (4, UserOnProjectRoles.User),
-                (6, UserOnProjectRoles.User)
+                new UserOnProjectModelExtended()
+                {
+                    UserId = 5,
+                    Role = UserOnProjectRoles.Owner,
+                    TasksDone = 1,
+                },
+new UserOnProjectModelExtended()
+                {
+                    UserId = 4,
+                    Role = UserOnProjectRoles.User,
+                },
+                new UserOnProjectModelExtended()
+                {
+                    UserId = 6,
+                    Role = UserOnProjectRoles.User,
+                },
             }
         };
 

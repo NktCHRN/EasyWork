@@ -45,30 +45,44 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<(int UserId, UserOnProjectRoles Role)>> GetAllProjectUsersAsync(int projectId)
+        public async Task<IEnumerable<UserOnProjectModelExtended>> GetAllProjectUsersAsync(int projectId)
         {
-            ICollection<(int UserId, UserOnProjectRoles Role)> teamMembers = await _context.UsersOnProjects
+            var projectTasks = _context.Tasks.Where(t => t.ProjectId == projectId);
+
+            var teamMembers = await _context.UsersOnProjects
+                .Include(uop => uop.User)
                 .Where(uop => uop.ProjectId == projectId)
-                .Select(uop => new ValueTuple<int, UserOnProjectRoles>(uop.UserId, 
-                    (UserOnProjectRoles)Convert.ToUInt16(uop.IsManager))).ToListAsync();
+                .Select(uop => new UserOnProjectModelExtended()
+                {
+                    UserId = uop.UserId,
+                    Role = (UserOnProjectRoles)Convert.ToUInt16(uop.IsManager),
+                    TasksDone = projectTasks
+                    .Where(t => t.ExecutorId == uop.UserId && TaskService.IsDone(t.Status))
+                    .Count(),
+                    TasksNotDone = projectTasks
+                    .Where(t => t.ExecutorId == uop.UserId && !TaskService.IsDone(t.Status))
+                    .Count()
+                }).ToListAsync();
 
             var project = await _context.Projects.FindAsync(projectId);
             if (project is not null)
-                teamMembers.Add((project.OwnerId, UserOnProjectRoles.Owner));
+                teamMembers.Add(new UserOnProjectModelExtended()
+                {
+                    UserId = project.OwnerId,
+                    Role = UserOnProjectRoles.Owner,
+                    TasksDone = projectTasks
+                    .Where(t => t.ExecutorId == project.OwnerId && TaskService.IsDone(t.Status))
+                    .Count(),
+                    TasksNotDone = projectTasks
+                    .Where(t => t.ExecutorId == project.OwnerId && !TaskService.IsDone(t.Status))
+                    .Count()
+                });
 
-            return teamMembers.OrderByDescending(t => t.Role).ThenBy(t => t.UserId);
+            return teamMembers.OrderByDescending(t => t.Role).ThenByDescending(t => t.TasksDone).ThenBy(t => t.UserId);
         }
 
         public async Task<UserOnProjectModel> GetByIdAsync(int projectId, int userId) 
             => _mapper.Map<UserOnProjectModel>(await GetNotMappedByIdAsync(projectId, userId));
-
-        public IEnumerable<UserOnProjectModel> GetProjectUsers(int projectId)
-        {
-            return _mapper.Map<IEnumerable<UserOnProjectModel>>(_context.UsersOnProjects
-                .Where(uop => uop.ProjectId == projectId)
-                .OrderByDescending(uop => uop.IsManager)
-                .ThenBy(uop => uop.UserId));
-        }
 
         public bool IsValid(UserOnProjectModel model, out string? firstErrorMessage)
         {

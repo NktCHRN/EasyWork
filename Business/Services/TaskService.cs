@@ -2,6 +2,7 @@
 using Business.Interfaces;
 using Business.Models;
 using Data;
+using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Task = System.Threading.Tasks.Task;
 using TaskEntity = Data.Entities.Task;
@@ -85,21 +86,25 @@ namespace Business.Services
             return _mapper.Map<TaskModel>(model);
         }
 
-        public IEnumerable<TaskModel> GetProjectTasks(int projectId)
-        {
-            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks.Where(t => t.ProjectId == projectId));
-        }
-
-        public IEnumerable<TaskModel> GetProjectUserTasks(int projectId, int userId)
+        public IEnumerable<TaskModel> GetProjectNotArchivedTasks(int projectId)
         {
             return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
-                .Where(t => t.ProjectId == projectId && t.ExecutorId == userId));
+                .Where(t => t.ProjectId == projectId && t.Status != Data.Entities.TaskStatuses.Archived)).Reverse();
+        }
+
+        public IEnumerable<TaskModel> GetProjectArchivedTasks(int projectId)
+        {
+            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
+                .Where(t => t.ProjectId == projectId && t.Status == Data.Entities.TaskStatuses.Archived)).Reverse();
         }
 
         public IEnumerable<TaskModel> GetUserTasks(int userId)
         {
-            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks.Where(t => t.ExecutorId == userId));
+            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
+                .Where(t => t.ExecutorId == userId)).OrderBy(t => IsDone(t.Status)).ThenByDescending(t => t.Id);
         }
+
+        internal static bool IsDone(TaskStatuses status) => status >= TaskStatuses.Validate;
 
         public bool IsValid(TaskModel model, out string? firstErrorMessage)
         {
@@ -136,6 +141,14 @@ namespace Business.Services
             existingModel = _mapper.Map(model, existingModel);
             _context.Tasks.Update(existingModel);
             await _context.SaveChangesAsync();
+        }
+
+        public IEnumerable<TaskModel> GetProjectTasksByDate(int projectId, DateTime from, DateTime to)
+        {
+            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
+                .Where(t => t.ProjectId == projectId 
+                    && !(t.EndDate != null && t.EndDate <= from)
+                    && !(t.StartDate >= to)));
         }
     }
 }

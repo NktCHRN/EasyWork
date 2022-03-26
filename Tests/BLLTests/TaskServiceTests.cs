@@ -220,16 +220,18 @@ namespace Tests.BLLTests
                 },
                 new TaskEntity()            // id 2
                 {
-                    Name = "Task 1",
+                    Name = "Task 1.5",
                 Status = TaskStatuses.ToDo,
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Highest,
-                ProjectId = 2
+                ProjectId = 2,
+                EndDate = DateTime.MinValue.AddMonths(1)
                 },
                 new TaskEntity()            // id 3
                 {
                     Name = "Task 2",
-                StartDate = new DateTime(2022, 1, 1),
+                StartDate = new DateTime(2022, 1, 3),
+                EndDate = new DateTime(2022, 2, 3),
                 Status = TaskStatuses.ToDo,
                 Priority = TaskPriorities.Low,
                 ProjectId = 1,
@@ -257,7 +259,7 @@ namespace Tests.BLLTests
                 new TaskEntity()            // id 5
                 {
                     Name = "Task 3",
-                StartDate = new DateTime(2022, 1, 1),
+                StartDate = new DateTime(2022, 3, 1),
                 Deadline = new DateTime(2022, 3, 20),
                 EndDate = new DateTime(2022, 3, 19),
                 Status = TaskStatuses.Complete,
@@ -265,6 +267,22 @@ namespace Tests.BLLTests
                 ProjectId = 1,
                 ExecutorId = 5
                 },
+                new TaskEntity()                // id 6
+                {
+                    Name = "Task 4",
+                    ProjectId = 1,
+                    Status = TaskStatuses.Archived,
+                    StartDate = new DateTime(2022, 2, 5),
+                                Deadline = new DateTime(2022, 2, 20),
+                EndDate = new DateTime(2022, 2, 26),
+                },
+                new TaskEntity()                // id 7
+                {
+                    Name = "Task 5",
+                    ProjectId = 1,
+                    Status = TaskStatuses.Archived,
+                    EndDate = DateTime.MinValue.AddMonths(1)
+                }
             };
             foreach (var task in tasks)
             {
@@ -406,7 +424,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(7)]
+        [TestCase(8)]
         public void GetByIdAsync_InvalidId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
@@ -436,7 +454,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(7)]
+        [TestCase(8)]
         public void DeleteByIdAsync_InvalidId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
@@ -558,15 +576,33 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetProjectTasksTest_ReturnsRealProjectTasks()
+        public void GetProjectNotArchivedTasksTest_ReturnsRealProjectTasks()
         {
             // Arrange
             SeedData();
             var projectId = 1;
-            IEnumerable<int> expectedTasksIds = new[] { 1, 3, 5 };
+            IEnumerable<int> expectedTasksIds = new[] { 5, 3, 1 };
 
             // Act
-            var actualTasks = _service.GetProjectTasks(projectId);
+            var actualTasks = _service.GetProjectNotArchivedTasks(projectId);
+
+            // Assert
+            Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
+            var actualTasksIds = actualTasks.Select(r => r.Id);
+            Assert.IsTrue(expectedTasksIds.SequenceEqual(actualTasksIds),
+                "Method returnes wrong elements or the order is wrong");
+        }
+
+        [Test]
+        public void GetProjectArchivedTasksTest_ReturnsRealProjectTasks()
+        {
+            // Arrange
+            SeedData();
+            var projectId = 1;
+            IEnumerable<int> expectedTasksIds = new[] { 7, 6 };
+
+            // Act
+            var actualTasks = _service.GetProjectArchivedTasks(projectId);
 
             // Assert
             Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
@@ -581,7 +617,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var userId = 5;
-            IEnumerable<int> expectedTasksIds = new[] { 3, 4, 5 };
+            IEnumerable<int> expectedTasksIds = new[] { 3, 5, 4 };
 
             // Act
             var actualTasks = _service.GetUserTasks(userId);
@@ -594,28 +630,9 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetProjectUserTasksTest_ReturnsRightTasks()
-        {
-            // Arrange
-            SeedData();
-            var userId = 5;
-            var projectId = 1;
-            IEnumerable<int> expectedTasksIds = new[] { 3, 5 };
-
-            // Act
-            var actualTasks = _service.GetProjectUserTasks(projectId, userId);
-
-            // Assert
-            Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
-            var actualTasksIds = actualTasks.Select(r => r.Id);
-            Assert.IsTrue(expectedTasksIds.SequenceEqual(actualTasksIds),
-                "Method returnes wrong elements or the order is wrong");
-        }
-
-        [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(6)]
+        [TestCase(8)]
         public void AddTagToTaskAsyncTest_InvalidTaskId_ThrowsInvalidOperationException(int taskId)
         {
             // Arrange
@@ -720,7 +737,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(6)]
+        [TestCase(8)]
         public void DeleteTagFromTaskAsyncTest_InvalidTaskId_ThrowsInvalidOperationException(int taskId)
         {
             // Arrange
@@ -767,6 +784,24 @@ namespace Tests.BLLTests
             var tag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
             Assert.AreEqual(expectedTaskTagsCount, task.Tags.Count, "Method does not delete a tag from a task");
             Assert.AreEqual(expectedTagTasksCount, tag.Tasks.Count, "Method does not delete a task from a tag");
+        }
+
+        [Test]
+        public void GetProjectTasksByDate_ReturnsRightTasks()
+        {
+            // Arrange
+            SeedData();
+            var projectId = 1;
+            var from = new DateTime(2022, 1, 2);
+            var to = new DateTime(2022, 2, 6);
+            var expectedIds = new int[] { 1, 3, 6 };
+
+            // Act
+            var actualIds = _service.GetProjectTasksByDate(projectId, from, to).Select(t => t.Id);
+
+            // Assert
+            Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
+            Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
         }
     }
 }

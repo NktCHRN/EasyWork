@@ -354,7 +354,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var projectId = 1;
-            IEnumerable<int> expectedReleasesIds = new[] { 1, 2, 4 };
+            IEnumerable<int> expectedReleasesIds = new[] { 4, 2, 1 };
 
             // Act
             var actualReleases = _service.GetProjectReleases(projectId);
