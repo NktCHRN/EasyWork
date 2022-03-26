@@ -112,5 +112,19 @@ namespace Business.Services
             _context.UsersOnProjects.Update(existingModel);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<UserOnProjectRoles> GetRoleOnProjectAsync(int projectId, int userId)
+        {
+            var uop = await _context.UsersOnProjects
+                .SingleOrDefaultAsync(uop => uop.ProjectId == projectId && uop.UserId == userId);
+            if (uop is not null)
+                return (UserOnProjectRoles)Convert.ToUInt16(uop.IsManager);
+
+            var project = await _context.Projects.FindAsync(projectId);
+            if (project is not null && project.OwnerId == userId)
+                return UserOnProjectRoles.Owner;
+
+            throw new InvalidOperationException("This user does not participate on project with such an id");
+        }
     }
 }

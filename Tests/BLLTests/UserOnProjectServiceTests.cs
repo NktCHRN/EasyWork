@@ -10,7 +10,6 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tests.Comparers;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tests.BLLTests
@@ -525,6 +524,39 @@ new UserOnProjectModelExtended()
             // Assert
             Assert.AreEqual(expected.Count(), actual.Count(), "Method returnes wrong elements");
             Assert.IsTrue(expected.SequenceEqual(actual), "Method returnes wrong elements");
+        }
+
+        [Test]
+        [TestCase(-1, 1)]
+        [TestCase(0, 1)]
+        [TestCase(7, 3)]
+        [TestCase(2, 5)]
+        [TestCase(3, 1)]
+        public void GetRoleOnProjectAsyncTest_InvalidId_ThrowsInvalidOperationException(int projectId, int userId)
+        {
+            // Arrange
+            SeedData();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteByIdAsync(projectId, userId),
+                "Method does not throw an InvalidOperationException if id is invalid");
+        }
+
+        [Test]
+        [TestCase(1,2, UserOnProjectRoles.User)]
+        [TestCase(1, 4, UserOnProjectRoles.Manager)]
+        [TestCase(3, 5, UserOnProjectRoles.Owner)]
+        public async Task GetRoleOnProjectAsyncTest_ValidId_ReturnsRightRole(int projectId, int userId, 
+            UserOnProjectRoles expected)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var actual = await _service.GetRoleOnProjectAsync(projectId, userId);
+
+            // Assert
+            Assert.AreEqual(expected, actual, "Method returnes wrong role");
         }
     }
 }
