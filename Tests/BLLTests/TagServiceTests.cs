@@ -336,7 +336,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var projectId = 1;
-            IEnumerable<int> expectedTagsIds = new[] { 1, 3, 4 };
+            IEnumerable<int> expectedTagsIds = new[] { 1, 4, 3 };
 
             // Act
             var actualTags = _service.GetProjectTags(projectId);
@@ -345,7 +345,7 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedTagsIds.Count(), actualTags.Count(), "Method returnes wrong elements");
             var actualTagsIds = actualTags.Select(r => r.Id);
             Assert.IsTrue(expectedTagsIds.SequenceEqual(actualTagsIds),
-                "Method returnes wrong elements or the order is wrong");
+                "Method returnes wrong elements or the order is wrong (sorted not by name)");
         }
 
         [Test]

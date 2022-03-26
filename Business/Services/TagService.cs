@@ -56,7 +56,8 @@ namespace Business.Services
 
         public IEnumerable<TagModel> GetProjectTags(int projectId)
         {
-            return _mapper.Map<IEnumerable<TagModel>>(_context.Tags.Where(t => t.ProjectId == projectId));
+            return _mapper.Map<IEnumerable<TagModel>>(_context.Tags.Where(t => t.ProjectId == projectId))
+                .OrderBy(t => t.Name);
         }
 
         public async Task<IEnumerable<TagModel>> GetTaskTagsAsync(int taskId)
