@@ -38,12 +38,12 @@ namespace Data
             builder.Entity<Entities.File>()
             .HasOne(f => f.Message)
             .WithMany(m => m.Files)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Entities.File>()
             .HasOne(f => f.Task)
             .WithMany(t => t.Files)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Message>()
             .HasOne(m => m.Task)
@@ -60,18 +60,20 @@ namespace Data
             .WithMany(p => p.Releases)
             .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Tag>()
-            .HasOne(r => r.Project)
-            .WithMany(p => p.Tags)
-            .OnDelete(DeleteBehavior.Cascade);
-
             builder.Entity<UserOnProject>()
             .HasOne(u => u.Project)
             .WithMany(p => p.TeamMembers)
             .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<User>()
-                .HasIndex(u => u.PhoneNumber).IsUnique();
+            builder.Entity<UserOnProject>()
+            .HasOne(u => u.User)
+            .WithMany(p => p.Projects)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Ban>()
+            .HasOne(u => u.User)
+            .WithMany(p => p.Bans)
+            .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

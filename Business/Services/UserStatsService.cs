@@ -21,7 +21,7 @@ namespace Business.Services
             {
                 UserId = userId,
                 Projects = _context.Projects
-                .Where(p => p.OwnerId == userId || _context.UsersOnProjects
+                .Where(p => _context.UsersOnProjects
                     .Any(uop => uop.ProjectId == p.Id && uop.UserId == userId))
                 .Count(),
                 TasksDone = tasksDoneCount,

@@ -9,8 +9,6 @@ namespace Business.Interfaces
 
         IEnumerable<ProjectModel> GetUserProjects(int userId); // (as a participant or owner); sorted by project Id
 
-        Task ChangeOwnerByProjectIdAsync(int projectId, int newOwnerId);        // new owner should already be a manager on the project
-
         Task UpdateMainPictureByProjectIdAsync(int projectId, IFormFile image);
 
         Task DeleteMainPictureByProjectIdAsync(int projectId);

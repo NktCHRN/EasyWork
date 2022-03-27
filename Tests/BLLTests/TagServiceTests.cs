@@ -26,18 +26,11 @@ namespace Tests.BLLTests
         {
             new TagModel()      // 0
             {
-                ProjectId = 1
             },
             new TagModel()      // 1
             {
-                Name = "TooLongNameMoreThan20characters",
-                ProjectId = 1
+                Name = "TooLongNameMoreThan20characters"
             },
-            new TagModel()      // 2
-            {
-                Name = "Development",
-                ProjectId = -1
-            }
         };
 
         private readonly IEnumerable<TagModel> _validTags = new TagModel[]
@@ -45,7 +38,6 @@ namespace Tests.BLLTests
             new TagModel()      // 0
             {
                 Name = "Development",
-                ProjectId = 1
             }
         };
 
@@ -87,22 +79,18 @@ namespace Tests.BLLTests
                 new Tag()       // id 1
                 {
                     Name = "Automatisation",
-                    ProjectId = 1
                 },
                 new Tag()       // id 2
                 {
                     Name = "Testing",
-                    ProjectId = 2
                 },
                 new Tag()       // id 3
                 {
                     Name = "Programming",
-                    ProjectId = 1
                 },
                 new Tag()       // id 4
                 {
                     Name = "Hotfix",
-                    ProjectId = 1
                 }
             };
             foreach(var tag in tags)
@@ -138,7 +126,8 @@ namespace Tests.BLLTests
                     ProjectId = 1,
                     Tags = new List<Tag>()
                     {
-                        _context.Tags.Single(t => t.Id == 1)
+                        _context.Tags.Single(t => t.Id == 1),
+                        _context.Tags.Single(t => t.Id == 4)
                     }
                 }
             };
@@ -149,27 +138,15 @@ namespace Tests.BLLTests
             }
         }
 
-        private readonly IEnumerable<TagModel> _invalidForUpdateTags = new TagModel[]
-        {
-            new TagModel()       // id 1, ind 0
-                {
-                Id = 1,
-                    Name = "Automatisation",
-                    ProjectId = 2       // changed
-                }
-        };
-
         private readonly TagModel _validForUpdateTag = new()        // id 1
         {
             Id = 1,
             Name = "Engineering",       // changed
-            ProjectId = 1
         };
 
         [Test]
         [TestCase(0)]
         [TestCase(1)]
-        [TestCase(2)]
         public void IsValidTest_InvalidModel_ReturnsFalseWithError(int modelNumber)
         {
             // Arrange
@@ -303,18 +280,6 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        [TestCase(0)]
-        public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
-        {
-            // Arrange
-            SeedData();
-            var model = _invalidForUpdateTags.ElementAt(index);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateAsync(model));
-        }
-
-        [Test]
         public async Task UpdateAsyncTest_ValidModel_UpdatesModel()
         {
             // Arrange
@@ -364,6 +329,33 @@ namespace Tests.BLLTests
             var actualTagsIds = actualTags.Select(r => r.Id);
             Assert.IsTrue(expectedTagsIds.SequenceEqual(actualTagsIds),
                 "Method returnes wrong elements or the order is wrong");
+        }
+
+        [Test]
+        [TestCase("Testing", 2)]
+        [TestCase("Hotfix", 4)]
+        public async Task FindByNameTest_ReturnsModel(string name, int expectedId)
+        {
+            // Act
+            SeedData();
+            var actual = await _service.FindByName(name);
+
+            // Assert
+            Assert.IsNotNull(actual, "Method does not return a model");
+            Assert.AreEqual(expectedId, actual.Id, "Method does not return right model");
+        }
+
+        [Test]
+        [TestCase("dfsdfs")]
+        [TestCase("hOtFix")]
+        public async Task FindByNameTest_ReturnsNull(string name)
+        {
+            // Act
+            SeedData();
+            var actual = await _service.FindByName(name);
+
+            // Assert
+            Assert.IsNull(actual, "Method does not return null");
         }
     }
 }

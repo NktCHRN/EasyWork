@@ -29,7 +29,6 @@ namespace Tests.BLLTests
         [TestCase("1 (234) 567-8901")]
         [TestCase("1.234.567.8901")]
         [TestCase("1/234/567/8901")]
-        [TestCase("380677123238")]
         [TestCase("")]
         public void ValidatePhoneNumber_InvalidPhoneNumber_ReturnFailed(string phoneNumber)
         {

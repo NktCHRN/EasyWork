@@ -41,6 +41,11 @@ namespace Business.Services
         public async Task DeleteByIdAsync(int projectId, int userId)
         {
             var model = await GetNotMappedByIdAsync(projectId, userId);
+            if (model.Role == UserOnProjectRoles.Owner &&
+                !_context.UsersOnProjects.Any(uop => uop.ProjectId == projectId 
+                && uop.Role == UserOnProjectRoles.Owner
+                && uop.UserId != userId))
+                throw new InvalidOperationException("Add a new co-owner first or delete the whole project");
             _context.UsersOnProjects.Remove(model);
             await _context.SaveChangesAsync();
         }
@@ -55,7 +60,7 @@ namespace Business.Services
                 .Select(uop => new UserOnProjectModelExtended()
                 {
                     UserId = uop.UserId,
-                    Role = (UserOnProjectRoles)Convert.ToUInt16(uop.IsManager),
+                    Role = (UserOnProjectRoles)Convert.ToUInt16(uop.Role),
                     TasksDone = projectTasks
                     .Where(t => t.ExecutorId == uop.UserId && TaskService.IsDone(t.Status))
                     .Count(),
@@ -63,20 +68,6 @@ namespace Business.Services
                     .Where(t => t.ExecutorId == uop.UserId && !TaskService.IsDone(t.Status))
                     .Count()
                 }).ToListAsync();
-
-            var project = await _context.Projects.FindAsync(projectId);
-            if (project is not null)
-                teamMembers.Add(new UserOnProjectModelExtended()
-                {
-                    UserId = project.OwnerId,
-                    Role = UserOnProjectRoles.Owner,
-                    TasksDone = projectTasks
-                    .Where(t => t.ExecutorId == project.OwnerId && TaskService.IsDone(t.Status))
-                    .Count(),
-                    TasksNotDone = projectTasks
-                    .Where(t => t.ExecutorId == project.OwnerId && !TaskService.IsDone(t.Status))
-                    .Count()
-                });
 
             return teamMembers.OrderByDescending(t => t.Role).ThenByDescending(t => t.TasksDone).ThenBy(t => t.UserId);
         }
@@ -118,11 +109,7 @@ namespace Business.Services
             var uop = await _context.UsersOnProjects
                 .SingleOrDefaultAsync(uop => uop.ProjectId == projectId && uop.UserId == userId);
             if (uop is not null)
-                return (UserOnProjectRoles)Convert.ToUInt16(uop.IsManager);
-
-            var project = await _context.Projects.FindAsync(projectId);
-            if (project is not null && project.OwnerId == userId)
-                return UserOnProjectRoles.Owner;
+                return (UserOnProjectRoles)Convert.ToUInt16(uop.Role);
 
             throw new InvalidOperationException("This user does not participate on project with such an id");
         }

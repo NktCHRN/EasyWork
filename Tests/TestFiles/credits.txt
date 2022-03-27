@@ -3,3 +3,4 @@ image2.bmp: https://3axis.co/download/ro6yqkq7/
 image3.png: http://pngimg.com/uploads/free/free_PNG90748.png
 image4.svg: https://upload.wikimedia.org/wikipedia/commons/3/30/Home_free_icon.svg
 image5.webp: https://upload.wikimedia.org/wikipedia/commons/a/a1/Johnrogershousemay2020.webp?uselang=ru
+image6.jpg: https://upload.wikimedia.org/wikipedia/commons/f/ff/Pizigani_1367_Chart_10MB.jpg

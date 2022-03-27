@@ -31,12 +31,8 @@ namespace Business.Models
 
         public bool IsInviteCodeActive { get; set; }
 
-        [Required]
-        public int OwnerId { get; set; }
-
         public ICollection<int> ReleasesIds { get; set; } = new List<int>();
         public ICollection<(int ProjectId, int UserId)> TeamMembersIds { get; set; } = new List<(int, int)>();
         public ICollection<int> TasksIds { get; set; } = new List<int>();
-        public ICollection<int> TagsIds { get; set; } = new List<int>();
     }
 }

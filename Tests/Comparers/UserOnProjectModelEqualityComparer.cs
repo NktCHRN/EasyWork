@@ -13,12 +13,12 @@ namespace Tests.Comparers
                 return true;
             if (x is null || y is null)
                 return false;
-            return x.UserId == y.UserId && x.ProjectId == y.ProjectId && x.IsManager == y.IsManager;
+            return x.UserId == y.UserId && x.ProjectId == y.ProjectId && x.Role == y.Role;
         }
 
         public int GetHashCode([DisallowNull] UserOnProjectModel obj)
         {
-            return HashCode.Combine(obj.UserId, obj.ProjectId, obj.IsManager);
+            return HashCode.Combine(obj.UserId, obj.ProjectId, obj.Role);
         }
     }
 }

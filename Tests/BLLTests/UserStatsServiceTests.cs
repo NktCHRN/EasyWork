@@ -30,17 +30,14 @@ namespace Tests.BLLTests
                 new Project()       // id 1
                 {
                     Name = "Project 1",
-                    OwnerId = 1
                 },
                 new Project()       // id 2
                 {
                     Name = "Project 2",
-                    OwnerId = 3
                 },
                 new Project()       // id 3
                 {
                     Name = "Project 3",
-                    OwnerId = 5
                 },
             };
             foreach (var project in projects)
@@ -55,7 +52,25 @@ namespace Tests.BLLTests
                 {
                     ProjectId = 2,
                     UserId = 1,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 1,
+                    UserId = 1,
+                    Role = UserOnProjectRoles.Owner
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 2,
+                    UserId = 3,
+                    Role = UserOnProjectRoles.Owner
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 3,
+                    UserId = 5,
+                    Role = UserOnProjectRoles.Owner
                 }
             };
             foreach (var uop in uops)

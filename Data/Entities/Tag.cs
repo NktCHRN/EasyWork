@@ -11,10 +11,6 @@ namespace Data.Entities
         [Column(TypeName = "nvarchar(20)")]
         public string Name { get; set; } = null!;
 
-        [Required]
-        public int ProjectId { get; set; }
-        public Project? Project { get; set; }
-
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
     }
 }

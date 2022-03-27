@@ -19,6 +19,6 @@ namespace Business.Models
         public int UserId { get; set; }
 
         [Required]
-        public int AdminId { get; set; }
+        public int? AdminId { get; set; }
     }
 }

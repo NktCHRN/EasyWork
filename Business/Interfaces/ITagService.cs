@@ -7,5 +7,7 @@ namespace Business.Interfaces
         IEnumerable<TagModel> GetProjectTags(int projectId);
 
         Task<IEnumerable<TagModel>> GetTaskTagsAsync(int taskId);
+
+        Task<TagModel> FindByName(string name);
     }
 }

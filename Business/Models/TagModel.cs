@@ -10,9 +10,6 @@ namespace Business.Models
         [StringLength(20)]
         public string Name { get; set; } = null!;
 
-        [Required]
-        public int ProjectId { get; set; }
-
         public ICollection<int> TasksIds { get; set; } = new List<int>();
     }
 }

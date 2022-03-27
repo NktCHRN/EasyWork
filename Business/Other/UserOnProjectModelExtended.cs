@@ -1,4 +1,6 @@
-﻿namespace Business.Other
+﻿using Data.Entities;
+
+namespace Business.Other
 {
     public record UserOnProjectModelExtended
     {

@@ -56,7 +56,8 @@ namespace Business.Services
 
         public IEnumerable<TagModel> GetProjectTags(int projectId)
         {
-            return _mapper.Map<IEnumerable<TagModel>>(_context.Tags.Where(t => t.ProjectId == projectId))
+            return _mapper.Map<IEnumerable<TagModel>>(_context.Tags.Include(t => t.Tasks)
+                .Where(t => t.Tasks.Any(task => task.ProjectId == projectId)))
                 .OrderBy(t => t.Name);
         }
 
@@ -71,14 +72,7 @@ namespace Business.Services
         public bool IsValid(TagModel model, out string? firstErrorMessage)
         {
             var result = IModelValidator<TagModel>.IsValidByDefault(model, out firstErrorMessage);
-            if (!result)
-                return false;
-            if (!_context.Projects.Any(p => p.Id == model.ProjectId))
-            {
-                firstErrorMessage = "The project with such an id was not found";
-                return false;
-            }
-            return true;
+            return result;
         }
 
         public async Task UpdateAsync(TagModel model)
@@ -87,11 +81,12 @@ namespace Business.Services
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
             var existingModel = await GetNotMappedByIdAsync(model.Id);
-            if (model.ProjectId != existingModel.ProjectId)
-                throw new ArgumentException("Project id cannot be changed", nameof(model));
             existingModel = _mapper.Map(model, existingModel);
             _context.Tags.Update(existingModel);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<TagModel> FindByName(string name) => 
+            _mapper.Map<TagModel>(await _context.Tags.FirstOrDefaultAsync(t => t.Name == name));
     }
 }

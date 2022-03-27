@@ -22,8 +22,7 @@ namespace Data.Entities
         [InverseProperty("Bans")]
         public User? User { get; set; }
 
-        [Required]
-        public int AdminId { get; set; }
+        public int? AdminId { get; set; }
         [ForeignKey("AdminId")]
         [InverseProperty("GivenBans")]
         public User? Admin { get; set; }

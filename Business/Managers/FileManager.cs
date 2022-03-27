@@ -59,6 +59,8 @@ namespace Business.Managers
                 var realType = Path.GetExtension(file.FileName);
                 if (!IsValidImageType(type) || !IsValidImageType(realType))
                     throw new ArgumentException("This extension is not allowed");
+                if (ewtype == EasyWorkFileTypes.UserAvatar && file.Length > 8000000)
+                    throw new ArgumentException("The max length of the avatar is 8 MB");
             }
             var path = GetPathByEWType(name, ewtype);
             using var fileStream = new FileStream(path, FileMode.Create);

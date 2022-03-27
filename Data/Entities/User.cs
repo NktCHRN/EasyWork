@@ -29,8 +29,6 @@ namespace Data.Entities
         public ICollection<Ban> Bans { get; set; } = new List<Ban>();
         public ICollection<Ban> GivenBans { get; set; } = new List<Ban>();
 
-        public ICollection<Project> OwnedProjects { get; set; } = new List<Project>();
-
         public ICollection<UserOnProject> Projects { get; set; } = new List<UserOnProject>();
 
         public ICollection<Task> Tasks { get; set; } = new List<Task>();

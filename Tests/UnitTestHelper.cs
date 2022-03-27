@@ -72,7 +72,7 @@ namespace Tests
 
         public static Mapper CreateMapperProfile()
         {
-            var myProfile = new AutoMapperProfile();
+            var myProfile = new AutoMapperBusinessProfile();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
             return new Mapper(configuration);
         }

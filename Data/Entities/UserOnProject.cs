@@ -2,10 +2,16 @@
 
 namespace Data.Entities
 {
+    public enum UserOnProjectRoles : ushort
+    {
+        User = 0,
+        Manager = 1,
+        Owner = 2
+    }
     public class UserOnProject
     {
         [Required]
-        public bool IsManager { get; set; }
+        public UserOnProjectRoles Role { get; set; }
 
         [Required]
         public int ProjectId { get; set; }      // composite key

@@ -41,8 +41,6 @@ namespace Business.Identity
                     return IdentityResult.Failed(new IdentityError() { Description = "This phone number is too long" });
                 if (await System.Threading.Tasks.Task.Run(() => user.PhoneNumber.Any(c => !char.IsDigit(c))))
                     return IdentityResult.Failed(new IdentityError() { Description = "Phone number should contain only numbers" });
-                if (await System.Threading.Tasks.Task.Run(() => manager.Users.Where(u => u.Id != user.Id).Select(u => u.PhoneNumber).Contains(user.PhoneNumber)))
-                    return IdentityResult.Failed(new IdentityError() { Description = "This phone number is already taken" });
             }
             return IdentityResult.Success;
         }

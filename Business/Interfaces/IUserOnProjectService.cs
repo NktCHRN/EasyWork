@@ -1,5 +1,7 @@
 ﻿using Business.Models;
 using Business.Other;
+using Data.Entities;
+using Task = System.Threading.Tasks.Task;
 
 namespace Business.Interfaces
 {

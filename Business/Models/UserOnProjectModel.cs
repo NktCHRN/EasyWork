@@ -1,11 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Data.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace Business.Models
 {
     public class UserOnProjectModel
     {
         [Required]
-        public bool IsManager { get; set; }
+        public UserOnProjectRoles Role { get; set; }
 
         [Required]
         public int ProjectId { get; set; }

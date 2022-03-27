@@ -29,13 +29,13 @@ namespace Tests.BLLTests
             {
                 ProjectId = -1,
                 UserId = 5,
-                IsManager = true
+                Role = UserOnProjectRoles.Manager
             },
             new UserOnProjectModel()            // 1
             {
                 ProjectId = 1,
                 UserId = 0,
-                IsManager = false
+                Role = UserOnProjectRoles.User
             },
         };
 
@@ -45,13 +45,13 @@ namespace Tests.BLLTests
             {
                 ProjectId = 1,
                 UserId = 5,
-                IsManager = true
+                Role = UserOnProjectRoles.Manager
             },
             new UserOnProjectModel()            // 1
             {
                 ProjectId = 1,
                 UserId = 5,
-                IsManager = false
+                Role = UserOnProjectRoles.User
             }
         };
 
@@ -68,7 +68,6 @@ namespace Tests.BLLTests
             var project = new Project() // id 1
             {
                 Name = "Project 1",
-                OwnerId = 1
             };
             _context.Projects.Add(project);
             _context.SaveChanges();
@@ -105,12 +104,10 @@ namespace Tests.BLLTests
                 new Project()       // id 2
                 {
                     Name = "Project 2",
-                    OwnerId = 3
                 },
                 new Project()       // id 3
                 {
                     Name = "Project 3",
-                    OwnerId = 5
                 },
             };
             foreach (var project in projects)
@@ -125,44 +122,62 @@ namespace Tests.BLLTests
                 {
                     ProjectId = 1,
                     UserId = 2,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 1,
                     UserId = 3,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager
                 },
                 new UserOnProject()
                 {
                     ProjectId = 1,
                     UserId = 7,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 1,
                     UserId = 4,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager
                 },
                 new UserOnProject()
                 {
                     ProjectId = 1,
                     UserId = 6,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 3,
                     UserId = 4,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 3,
                     UserId = 6,
-                    IsManager = false
-                }
+                    Role = UserOnProjectRoles.User
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 1,
+                    UserId = 1,
+                    Role = UserOnProjectRoles.Owner
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 2,
+                    UserId = 3,
+                    Role = UserOnProjectRoles.Owner
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 3,
+                    UserId = 5,
+                    Role = UserOnProjectRoles.Owner
+                },
             };
             foreach(var uop in uops)
             {
@@ -228,19 +243,19 @@ namespace Tests.BLLTests
                 {
                     ProjectId = 1,
                     UserId = 2,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager
                 },
              new UserOnProjectModel()
                 {
                     ProjectId = 1,
                     UserId = 2,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProjectModel()
                 {
                     ProjectId = 1,
                     UserId = 3,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 }
         };
 
@@ -250,13 +265,13 @@ namespace Tests.BLLTests
                 {
                     ProjectId = 1,
                     UserId = 2,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager
                 },
                 new UserOnProjectModel()
                 {
                     ProjectId = 1,
                     UserId = 3,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 }
         };
 
@@ -342,6 +357,19 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void DeleteByIdAsync_OnlyOwnerId_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var projectId = 1;
+            var userId = 1;
+            SeedData();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteByIdAsync(projectId, userId),
+                "Method does not throw an InvalidOperationException if id is invalid");
+        }
+
+        [Test]
         [TestCase(1, 2)]
         [TestCase(1, 3)]
         [TestCase(3, 6)]
@@ -369,7 +397,7 @@ namespace Tests.BLLTests
             var model = _validUoP.First();
             var expectedProjectId = model.ProjectId;
             var expectedUserId = model.UserId;
-            var expectedStatus = model.IsManager;
+            var expectedRole = model.Role;
             var expectedCount = _context.UsersOnProjects.Count() + 1;
 
             // Act
@@ -381,7 +409,7 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedCount, actualCount, "Method does not add a model to DB");
             Assert.AreEqual(expectedProjectId, actual.ProjectId, "Method does not add model with needed information");
             Assert.AreEqual(expectedUserId, actual.UserId, "Method does not add model with needed information");
-            Assert.AreEqual(expectedStatus, actual.IsManager, "Method does not add model with needed information");
+            Assert.AreEqual(expectedRole, actual.Role, "Method does not add model with needed information");
         }
 
         [Test]
@@ -428,7 +456,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var model = _validForUpdateUoP.ElementAt(index);
-            var expectedStatus = model.IsManager;
+            var expectedRole = model.Role;
 
             // Act
             await _service.UpdateAsync(model);
@@ -436,7 +464,7 @@ namespace Tests.BLLTests
             // Assert
             var actual = await _context.UsersOnProjects
                 .SingleAsync(uop => uop.ProjectId == model.ProjectId && uop.UserId == model.UserId);
-            Assert.AreEqual(expectedStatus, actual.IsManager, "Method does not update model");
+            Assert.AreEqual(expectedRole, actual.Role, "Method does not update model");
         }
 
         private readonly IEnumerable<IEnumerable<UserOnProjectModelExtended>> _expectedGetAllProjectUsersAsync = new IEnumerable<UserOnProjectModelExtended>[]

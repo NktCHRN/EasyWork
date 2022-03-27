@@ -45,44 +45,6 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task ChangeOwnerByProjectIdAsync(int projectId, int newOwnerId)
-        {
-            var existingModel = await GetNotMappedByIdAsync(projectId);
-            var newOwner = await _context.UsersOnProjects
-                .Where(uop => uop.UserId == newOwnerId && uop.ProjectId == existingModel.Id && uop.IsManager)
-                .SingleOrDefaultAsync();
-            if (newOwner is null)
-                throw new InvalidOperationException("User with such an id (new owner) is not a manager on a project right now");
-
-            var oldOwnerId = existingModel.OwnerId;
-            // in case if old owner was also registered as user on project
-            var oldOwnerOnProject = await _context.UsersOnProjects
-                .Where(uop => uop.UserId == existingModel.OwnerId && uop.ProjectId == existingModel.Id)
-                .SingleOrDefaultAsync(); 
-            if (oldOwnerOnProject is not null)
-            {
-                _context.UsersOnProjects.Remove(oldOwnerOnProject);
-                await _context.SaveChangesAsync();
-            }
-            //
-
-            existingModel.OwnerId = newOwnerId;
-            _context.Projects.Update(existingModel);
-            await _context.SaveChangesAsync();
-
-            _context.UsersOnProjects.Remove(newOwner);
-            await _context.SaveChangesAsync();
-
-            var oldOwnerAsManager = new UserOnProject()
-            {
-                ProjectId = existingModel.Id,
-                UserId = oldOwnerId,
-                IsManager = true
-            };
-            await _context.UsersOnProjects.AddAsync(oldOwnerAsManager);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
@@ -114,7 +76,6 @@ namespace Business.Services
             var model = await _context.Projects
                 .Include(m => m.TeamMembers)
                 .Include(m => m.Tasks)
-                .Include(m => m.Tags)
                 .Include(m => m.Releases)
                 .SingleOrDefaultAsync(m => m.Id == id);
             if (model is null)
@@ -124,33 +85,19 @@ namespace Business.Services
 
         public IEnumerable<ProjectModel> GetUserProjects(int userId)
         {
-            var projectsAsParticipantIds = _context.UsersOnProjects
+            var projectsIds = _context.UsersOnProjects
                 .Where(uop => uop.UserId == userId)
                 .Select(uop => uop.ProjectId);
-            var projectsAsParticipant = _context.Projects
-                .Where(p => projectsAsParticipantIds
+            var projects = _context.Projects
+                .Where(p => projectsIds
                     .Contains(p.Id));
-
-            var projectsAsOwner = _context.Projects
-                .Where(p => p.OwnerId == userId);
-
-            var united = projectsAsParticipant
-                .Union(projectsAsOwner)
-                .OrderByDescending(p => p.Id);
-            return _mapper.Map<IEnumerable<ProjectModel>>(united);
+            return _mapper.Map<IEnumerable<ProjectModel>>(projects).Reverse();
         }
 
         public bool IsValid(ProjectModel model, out string? firstErrorMessage)
         {
             var result = IModelValidator<ProjectModel>.IsValidByDefault(model, out firstErrorMessage);
-            if (!result)
-                return false;
-            if (!_context.Users.Any(u => u.Id == model.OwnerId))
-            {
-                firstErrorMessage = "The user with such an id was not found";
-                return false;
-            }
-            return true;
+            return result;
         }
 
         public async Task UpdateAsync(ProjectModel model)
@@ -159,8 +106,6 @@ namespace Business.Services
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
             var existingModel = await GetNotMappedByIdAsync(model.Id);
-            if (model.OwnerId != existingModel.OwnerId)
-                throw new ArgumentException("Please, use dedicated method to change the owner of the project", nameof(model));
             if (model.MainPictureFormat != existingModel.MainPictureFormat)
                 throw new ArgumentException("Please, use dedicated method to change the main picture", nameof(model));
             if (model.StartDate != existingModel.StartDate)

@@ -15,16 +15,20 @@ namespace Business.Services
 
         private readonly IMapper _mapper;
 
-        public TaskService(ApplicationDbContext context, IMapper mapper)
+        private readonly IFileManager _manager;
+
+        public TaskService(ApplicationDbContext context, IMapper mapper, IFileManager manager)
         {
             _context = context;
             _mapper = mapper;
+            _manager = manager;
         }
 
         private async Task<TaskEntity> GetNotMappedByIdAsync(int id)
         {
             var model = await _context.Tasks
                 .Include(t => t.Tags)
+                .Include(t => t.Files)
                 .SingleOrDefaultAsync(t => t.Id == id);
             if (model is null)
                 throw new InvalidOperationException("Model with such an id was not found");
@@ -38,7 +42,29 @@ namespace Business.Services
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
             if (model.EndDate is not null)
-                throw new ArgumentException("EndDate should be null on creation", nameof(model)); 
+                throw new ArgumentException("EndDate should be null on creation", nameof(model));
+            var project = await _context.Projects.SingleAsync(p => p.Id == model.ProjectId);
+            switch (model.Status)
+            {
+                case TaskStatuses.ToDo:
+                    if (project.MaxToDo is not null &&
+                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.ToDo).Count()
+                        >= project.MaxToDo)
+                        throw new InvalidOperationException("You cannot exceed the \"ToDo\" tasks limit");
+                    break;
+                case TaskStatuses.InProgress:
+                    if (project.MaxInProgress is not null &&
+                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.InProgress).Count()
+                        >= project.MaxInProgress)
+                        throw new InvalidOperationException("You cannot exceed the \"InProgress\" tasks limit");
+                    break;
+                case TaskStatuses.Validate:
+                    if (project.MaxValidate is not null &&
+                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.Validate).Count()
+                        >= project.MaxValidate)
+                        throw new InvalidOperationException("You cannot exceed the \"Validate\" tasks limit");
+                    break;
+            }
             await _context.Tasks.AddAsync(_mapper.Map<TaskEntity>(model));
             await _context.SaveChangesAsync();
         }
@@ -49,8 +75,6 @@ namespace Business.Services
             if (tag is null)
                 throw new InvalidOperationException("Tag with such an id was not found");
             var task = await GetNotMappedByIdAsync(taskId);
-            if (tag.ProjectId != task.ProjectId)
-                throw new InvalidOperationException("Tag should belong to the same project task belongs to");
             if (task.Tags.Any(t => t.Id == tagId))
                 throw new InvalidOperationException("This task already has such a tag");
             task.Tags.Add(tag);
@@ -60,6 +84,20 @@ namespace Business.Services
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
+            var files = model.Files.ToList();
+            var messages = _context.Messages.Include(m => m.Files).Where(m => m.TaskId == id);
+            foreach (var message in messages)
+                files.AddRange(message.Files);
+            foreach (var file in files)
+            {
+                _context.Files.Remove(file);
+                await _context.SaveChangesAsync();
+                try
+                {
+                    _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                }
+                catch (Exception) { }
+            }
             _context.Tasks.Remove(model);
             await _context.SaveChangesAsync();
         }

@@ -5,6 +5,7 @@ using Business.Services;
 using Data;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace Tests.BLLTests
         private ApplicationDbContext _context = null!;
 
         private ITaskService _service = null!;
+
+        private readonly Mock<IFileManager> _managerMock = new();
 
         private readonly IEnumerable<TaskModel> _invalidTasks = new TaskModel[]
         {
@@ -116,7 +119,7 @@ namespace Tests.BLLTests
         {
             _context = new ApplicationDbContext(UnitTestHelper.GetUnitTestDbOptions());
             SeedRequiredData();
-            _service = new TaskService(_context, _mapper);
+            _service = new TaskService(_context, _mapper, _managerMock.Object);
         }
 
         private void SeedRequiredData()
@@ -157,22 +160,18 @@ namespace Tests.BLLTests
                 new Tag()       // id 1
                 {
                     Name = "Automatisation",
-                    ProjectId = 1
                 },
                 new Tag()       // id 2
                 {
                     Name = "Testing",
-                    ProjectId = 2
                 },
                 new Tag()       // id 3
                 {
                     Name = "Programming",
-                    ProjectId = 1
                 },
                 new Tag()       // id 4
                 {
                     Name = "Hotfix",
-                    ProjectId = 1
                 }
             };
             foreach (var tag in tags)
@@ -489,6 +488,10 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
             Assert.AreEqual(expectedTagsCount, actualTagsCount, "Method should not delete any tags");
+            _managerMock.Verify(t => t.DeleteFile("1.file", Business.Enums.EasyWorkFileTypes.File),
+                "Method does not remove the file from file system");
+            _managerMock.Verify(t => t.DeleteFile("2.file", Business.Enums.EasyWorkFileTypes.File),
+                "Method does not remove the file from file system");
         }
 
         [Test]
@@ -519,6 +522,96 @@ namespace Tests.BLLTests
 
             // Act & Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await _service.AddAsync(model));
+        }
+
+        [Test]
+        public void AddAsyncTest_ExceedsToDo_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var tempProject = new Project()             // id 2
+            {
+                Name = "Temp project",
+                MaxToDo = 1
+            };
+            _context.Projects.Add(tempProject);
+            _context.SaveChanges();
+            var tempTask = new TaskEntity()
+            {
+                ProjectId = 2,
+                Name = "Temp task",
+                Status = TaskStatuses.ToDo
+            };
+            _context.Tasks.Add(tempTask);
+            _context.SaveChanges();
+            var model = new TaskModel()
+            {
+                ProjectId = 2,
+                Name = "New task",
+                Status = TaskStatuses.ToDo
+            };
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+        }
+
+        [Test]
+        public void AddAsyncTest_ExceedsInProgress_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var tempProject = new Project()             // id 2
+            {
+                Name = "Temp project",
+                MaxInProgress = 1
+            };
+            _context.Projects.Add(tempProject);
+            _context.SaveChanges();
+            var tempTask = new TaskEntity()
+            {
+                ProjectId = 2,
+                Name = "Temp task",
+                Status = TaskStatuses.InProgress
+            };
+            _context.Tasks.Add(tempTask);
+            _context.SaveChanges();
+            var model = new TaskModel()
+            {
+                ProjectId = 2,
+                Name = "New task",
+                Status = TaskStatuses.InProgress
+            };
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+        }
+
+        [Test]
+        public void AddAsyncTest_ExceedsValidate_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var tempProject = new Project()             // id 2
+            {
+                Name = "Temp project",
+                MaxValidate = 1
+            };
+            _context.Projects.Add(tempProject);
+            _context.SaveChanges();
+            var tempTask = new TaskEntity()
+            {
+                ProjectId = 2,
+                Name = "Temp task",
+                Status = TaskStatuses.Validate
+            };
+            _context.Tasks.Add(tempTask);
+            _context.SaveChanges();
+            var model = new TaskModel()
+            {
+                ProjectId = 2,
+                Name = "New task",
+                Status = TaskStatuses.Validate
+            };
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
@@ -657,19 +750,6 @@ namespace Tests.BLLTests
             // Act & Assert
             Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddTagToTaskAsync(taskId, tagId),
                 "Method does not throw InvalidOperationException if the tag id is invalid");
-        }
-
-        [Test]    
-        public void AddTagToTaskAsyncTest_NotProjectTagId_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            SeedData();
-            var tagId = 2;          // projectId = 2
-            var taskId = 1;         // projectId = 1
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddTagToTaskAsync(taskId, tagId),
-                "Method does not throw InvalidOperationException if the tag does not belong to the project");
         }
 
         [Test]

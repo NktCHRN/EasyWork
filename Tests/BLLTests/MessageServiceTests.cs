@@ -4,6 +4,7 @@ using Business.Models;
 using Business.Services;
 using Data;
 using Data.Entities;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace Tests.BLLTests
         private ApplicationDbContext _context = null!;
 
         private IMessageService _service = null!;
+
+        private Mock<IFileManager> _managerMock = new();
 
         private readonly IEnumerable<MessageModel> _invalidMessages = new MessageModel[]
         {
@@ -90,9 +93,10 @@ namespace Tests.BLLTests
         [SetUp]
         public void Setup()
         {
+            _managerMock = new Mock<IFileManager>();
             _context = new ApplicationDbContext(UnitTestHelper.GetUnitTestDbOptions());
             SeedRequiredData();
-            _service = new MessageService(_context, _mapper);
+            _service = new MessageService(_context, _mapper, _managerMock.Object);
         }
 
         private void SeedRequiredData()
@@ -345,7 +349,8 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var expectedCount = _context.Messages.Count() - 1;
-            var expectedFilesCount = _context.Files.Count() - _context.Files.Where(f => f.MessageId == id).Count();
+            var deletedFiles = _context.Files.Where(f => f.MessageId == id).Count();
+            var expectedFilesCount = _context.Files.Count() - deletedFiles;
 
             // Act
             await _service.DeleteByIdAsync(id);
@@ -356,6 +361,8 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Messages.Any(m => m.Id == id), "Method deletes wrong element");
             Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
+            _managerMock.Verify(t => t.DeleteFile(It.IsAny<string>(), Business.Enums.EasyWorkFileTypes.File), 
+                Times.Exactly(deletedFiles), "Method does not remove the file from file system");
         }
 
         [Test]

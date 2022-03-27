@@ -182,6 +182,22 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void AddFileAsyncTest_TooBigSize_ThrowsArgumentException()
+        {
+            // Arrange
+            var newFileName = "Temp.jpg";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image6.jpg";
+            var path = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            using var stream = new MemoryStream(File.ReadAllBytes(path).ToArray());
+            var formFile = new FormFile(stream, 0, stream.Length, "streamFile", oldFileName);
+
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => await _manager.AddFileAsync(formFile, newFileName, ewtype),
+                "Method does not throw ArgumentException if image size is too big");
+        }
+
+        [Test]
         public void AddFileAsyncTest_InvalidUserAvatarType_ThrowsArgumentException()
         {
             // Arrange

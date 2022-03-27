@@ -38,7 +38,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1
             },
             new ProjectModel()      // index 1
             {
@@ -49,7 +48,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = false,
-                OwnerId = 1
             },
             new ProjectModel()      // index 2
             {
@@ -58,7 +56,6 @@ namespace Tests.BLLTests
                 MaxInProgress = 3,
                 MaxToDo = -1,
                 MaxValidate = 5,
-                OwnerId = 1
             },
             new ProjectModel()      // index 3
             {
@@ -67,16 +64,7 @@ namespace Tests.BLLTests
                 MaxInProgress = 3,
                 MaxToDo = 1,
                 MaxValidate = -5,
-                OwnerId = 1
-            },
-            new ProjectModel()      // index 4
-            {
-                Name = "Valid project 5",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 5,
-                OwnerId = -1
-            },
+            }
         };
 
         private readonly IEnumerable<ProjectModel> _validProjects = new ProjectModel[]
@@ -90,7 +78,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1
             },
             new ProjectModel()      // index 1
             {
@@ -100,7 +87,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1
             },
             new ProjectModel()      // index 2
             {
@@ -111,7 +97,6 @@ namespace Tests.BLLTests
                 MaxValidate = 0,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = false,
-                OwnerId = 1
             },
             new ProjectModel()      // index 3
             {
@@ -120,7 +105,6 @@ namespace Tests.BLLTests
                 MaxInProgress = 13,
                 MaxToDo = 100,
                 MaxValidate = 50,
-                OwnerId = 1
             }
         };
 
@@ -145,7 +129,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1
             },
                 new Project()
             {
@@ -156,7 +139,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = false,
-                OwnerId = 1,
                 MainPictureFormat = "jpg"
             },
                 new Project()
@@ -167,7 +149,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 2
             },
             };
             foreach (var project in projects)
@@ -221,37 +202,55 @@ namespace Tests.BLLTests
                 {
                     ProjectId = 1,
                     UserId = 2,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 2,
                     UserId = 2,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager
                 },
                 new UserOnProject()
                 {
                     ProjectId = 2,
                     UserId = 3,
-                    IsManager = true
+                    Role = UserOnProjectRoles.Manager
                 },
                 new UserOnProject()
                 {
                     ProjectId = 3,
                     UserId = 3,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 2,
                     UserId = 4,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
                 },
                 new UserOnProject()
                 {
                     ProjectId = 3,
                     UserId = 1,
-                    IsManager = false
+                    Role = UserOnProjectRoles.User
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 1,
+                    UserId = 1,
+                    Role = UserOnProjectRoles.Owner
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 2,
+                    UserId = 1,
+                    Role = UserOnProjectRoles.Owner
+                },
+                new UserOnProject()
+                {
+                    ProjectId = 3,
+                    UserId = 5,
+                    Role = UserOnProjectRoles.Owner
                 }
             };
             foreach (var uop in uops)
@@ -265,12 +264,10 @@ namespace Tests.BLLTests
                 new Tag()
                 {
                     Name = "Automatisation",
-                    ProjectId = 1
                 },
                 new Tag()
                 {
                     Name = "Testing",
-                    ProjectId = 2
                 }
             };
             foreach(var tag in tags)
@@ -304,22 +301,7 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1,
                 MainPictureFormat = "png"   // changed
-                // Do not forget to fix start date
-            },
-            new ProjectModel()      // id 2, ind 1
-            {
-                Id = 2,
-                Name = "Project sample 2",
-                Description = "This is project two description...",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 5,
-                InviteCode = Guid.NewGuid(),
-                IsInviteCodeActive = false,
-                OwnerId = 3,        // changed
-                MainPictureFormat = "jpg"
                 // Do not forget to fix start date
             },
             new ProjectModel()      // id 1, ind 2
@@ -332,7 +314,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1,
                 StartDate = DateTime.MaxValue       // changed
             },
         };
@@ -347,7 +328,6 @@ namespace Tests.BLLTests
                 MaxValidate = 7,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
-                OwnerId = 1
             // Do not forget to fix start date
         };
 
@@ -374,7 +354,6 @@ namespace Tests.BLLTests
             var expectedCount = _context.Projects.Count() - 1;
             var expectedTasksCount = 1;
             var expectedMessagesCount = 0;
-            var expectedTagsCount = 1;
 
             // Act
             await _service.DeleteByIdAsync(id);
@@ -383,12 +362,10 @@ namespace Tests.BLLTests
             var actualCount = _context.Projects.Count();
             var actualTasksCount = _context.Tasks.Count();
             var actualMessagesCount = _context.Messages.Count();
-            var actualTagsCount = _context.Tags.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Projects.Any(t => t.Id == id), "Method deletes wrong element");
             Assert.AreEqual(expectedTasksCount, actualTasksCount, "Method does not delete all tasks cascadely");
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
-            Assert.AreEqual(expectedTagsCount, actualTagsCount, "Method does not delete all tags cascadely");
         }
 
         [Test]
@@ -454,7 +431,6 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(0)]
         [TestCase(1)]
-        [TestCase(2)]
         public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
         {
             // Arrange
@@ -486,7 +462,6 @@ namespace Tests.BLLTests
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
-        [TestCase(4)]
         public void IsValidTest_InvalidModel_ReturnsFalseWithError(int modelNumber)
         {
             // Arrange
@@ -547,7 +522,6 @@ namespace Tests.BLLTests
             // Assert
             Assert.AreEqual(id, actual.Id, "Method returns wrong element");
             Assert.AreNotEqual(null, actual.ReleasesIds, "Method does not load releases ids");
-            Assert.AreNotEqual(null, actual.TagsIds, "Method does not load tags ids");
             Assert.AreNotEqual(null, actual.TasksIds, "Method does not load tasks ids");
             Assert.AreNotEqual(null, actual.TeamMembersIds, "Method does not load team members ids");
         }
@@ -583,55 +557,6 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedProjectNumbers.Count(), actualProjectNumbers.Count(), "The quantities of elements are not equal. " +
                 "Wrong elements returned");
             Assert.IsTrue(expectedProjectNumbers.SequenceEqual(actualProjectNumbers), "Elements are wrong or not sorted correctly");
-        }
-
-        [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(6)]
-        public void ChangeOwnerAsyncTest_InvalidUserId_ThrowsInvalidOperationException(int userId)
-        {
-            // Arrange
-            SeedData();
-            var projectId = 1;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.ChangeOwnerByProjectIdAsync(projectId, userId),
-                "Method does not throw an InvalidOperationException if id is invalid");
-        }
-
-        [Test]
-        public void ChangeOwnerAsyncTest_ValidUserIdButNotManager_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            SeedData();
-            var userId = 1;
-            var projectId = 3;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.ChangeOwnerByProjectIdAsync(projectId, userId),
-                "Method does not throw an InvalidOperationException if user is not a manager right now");
-        }
-
-        [Test]
-        public async Task ChangeOwnerAsyncTest_ManagerId_ChangesOwnerAndAddsOldOwnerAsManager()
-        {
-            // Arrange
-            SeedData();
-            var userId = 3;
-            var projectId = 2;
-            var oldProjectOwnerId = (await _context.Projects.SingleAsync(p => p.Id == projectId)).OwnerId;
-
-            // Act
-            await _service.ChangeOwnerByProjectIdAsync(projectId, userId);
-
-            // Assert
-            var project = await _context.Projects.SingleAsync(p => p.Id == projectId);
-            Assert.AreEqual(userId, project.OwnerId, "Method does not change the owner of the project");
-            Assert.IsTrue(_context.UsersOnProjects.Any(uop => uop.UserId == oldProjectOwnerId 
-            && uop.ProjectId == projectId && uop.IsManager), "Method does not add old project owner as a project manager");
-            Assert.IsFalse(_context.UsersOnProjects.Any(uop => uop.UserId == userId
-            && uop.ProjectId == projectId), "Method does not delete new owner manager account");
         }
 
         [Test]
