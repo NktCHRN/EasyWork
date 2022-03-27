@@ -8,10 +8,6 @@ namespace Business.Interfaces
     {
         IEnumerable<TaskModel> GetProjectTasksByDate(int projectId, DateTime from, DateTime to);
 
-        IEnumerable<TaskModel> GetProjectNotArchivedTasks(int projectId);
-
-        IEnumerable<TaskModel> GetProjectArchivedTasks(int projectId);
-
         IEnumerable<TaskModel> GetProjectTasksByStatus(int projectId, TaskStatuses status);
 
         IEnumerable<TaskModel> GetUserTasks(int userId);

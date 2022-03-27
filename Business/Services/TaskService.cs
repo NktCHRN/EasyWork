@@ -124,18 +124,6 @@ namespace Business.Services
             return _mapper.Map<TaskModel>(model);
         }
 
-        public IEnumerable<TaskModel> GetProjectNotArchivedTasks(int projectId)
-        {
-            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
-                .Where(t => t.ProjectId == projectId && t.Status != Data.Entities.TaskStatuses.Archived)).Reverse();
-        }
-
-        public IEnumerable<TaskModel> GetProjectArchivedTasks(int projectId)
-        {
-            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
-                .Where(t => t.ProjectId == projectId && t.Status == TaskStatuses.Archived)).Reverse();
-        }
-
         public IEnumerable<TaskModel> GetUserTasks(int userId)
         {
             return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks

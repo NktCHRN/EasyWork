@@ -669,33 +669,16 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetProjectNotArchivedTasksTest_ReturnsRealProjectTasks()
+        public void GetProjectTasksByStatusTest_Archived_ReturnsRightTasks()
         {
             // Arrange
             SeedData();
-            var projectId = 1;
-            IEnumerable<int> expectedTasksIds = new[] { 5, 3, 1 };
-
-            // Act
-            var actualTasks = _service.GetProjectNotArchivedTasks(projectId);
-
-            // Assert
-            Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
-            var actualTasksIds = actualTasks.Select(r => r.Id);
-            Assert.IsTrue(expectedTasksIds.SequenceEqual(actualTasksIds),
-                "Method returnes wrong elements or the order is wrong");
-        }
-
-        [Test]
-        public void GetProjectArchivedTasksTest_ReturnsRealProjectTasks()
-        {
-            // Arrange
-            SeedData();
+            var status = TaskStatuses.Archived;
             var projectId = 1;
             IEnumerable<int> expectedTasksIds = new[] { 7, 6 };
 
             // Act
-            var actualTasks = _service.GetProjectArchivedTasks(projectId);
+            var actualTasks = _service.GetProjectTasksByStatus(projectId, status);
 
             // Assert
             Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
