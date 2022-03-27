@@ -883,5 +883,22 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
             Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
         }
+
+        [Test]
+        public void GetProjectTasksByStatusTest_ReturnsRightTasks()
+        {
+            // Arrange
+            SeedData();
+            var projectId = 1;
+            var status = TaskStatuses.ToDo;
+            var expectedIds = new int[] { 3, 1};
+
+            // Act
+            var actualIds = _service.GetProjectTasksByStatus(projectId, status).Select(t => t.Id);
+
+            // Assert
+            Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
+            Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
+        }
     }
 }

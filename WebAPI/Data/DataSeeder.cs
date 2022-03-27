@@ -37,7 +37,7 @@ namespace WebAPI.Data
             user.NormalizedEmail = user.Email.ToUpperInvariant();
             user.UserName = user.Email;
             user.NormalizedUserName = user.NormalizedEmail;
-            var password = "P4ssw0rd";                          // initial password. Should be change after the creation
+            var password = "P4ssw0rd";                          // initial password. Should be changed after the creation
             if (await UserManager.FindByEmailAsync(user.Email) is null)
                 await UserManager.CreateAsync(user, password);
         }

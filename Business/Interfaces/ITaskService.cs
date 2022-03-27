@@ -1,4 +1,6 @@
 ﻿using Business.Models;
+using Data.Entities;
+using Task = System.Threading.Tasks.Task;
 
 namespace Business.Interfaces
 {
@@ -9,6 +11,8 @@ namespace Business.Interfaces
         IEnumerable<TaskModel> GetProjectNotArchivedTasks(int projectId);
 
         IEnumerable<TaskModel> GetProjectArchivedTasks(int projectId);
+
+        IEnumerable<TaskModel> GetProjectTasksByStatus(int projectId, TaskStatuses status);
 
         IEnumerable<TaskModel> GetUserTasks(int userId);
 
