@@ -678,7 +678,7 @@ namespace Tests.BLLTests
             IEnumerable<int> expectedTasksIds = new[] { 7, 6 };
 
             // Act
-            var actualTasks = _service.GetProjectTasksByStatus(projectId, status);
+            var actualTasks = _service.GetProjectTasksByStatusAndTag(projectId, status);
 
             // Assert
             Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
@@ -877,7 +877,37 @@ namespace Tests.BLLTests
             var expectedIds = new int[] { 3, 1};
 
             // Act
-            var actualIds = _service.GetProjectTasksByStatus(projectId, status).Select(t => t.Id);
+            var actualIds = _service.GetProjectTasksByStatusAndTag(projectId, status).Select(t => t.Id);
+
+            // Assert
+            Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
+            Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
+        }
+
+        [Test]
+        public void GetProjectTasksByStatusAndTagTest_ReturnsRightTasks()
+        {
+            // Arrange
+            SeedData();        
+            var projectId = 1;
+            var status = TaskStatuses.ToDo;
+            var tagId = 3;
+            var tempTask = new TaskEntity()     // id 8
+            {
+                Name = "Temp task",
+                ProjectId = projectId,
+                Status = status,
+                Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 3)
+                    }
+            };
+            _context.Tasks.Add(tempTask);
+            _context.SaveChanges();
+            var expectedIds = new int[] { 8, 1 };
+
+            // Act
+            var actualIds = _service.GetProjectTasksByStatusAndTag(projectId, status, tagId).Select(t => t.Id);
 
             // Assert
             Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");

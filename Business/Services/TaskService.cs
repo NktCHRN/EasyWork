@@ -177,10 +177,15 @@ namespace Business.Services
                     && !(t.StartDate >= to)));
         }
 
-        public IEnumerable<TaskModel> GetProjectTasksByStatus(int projectId, TaskStatuses status)
+        public IEnumerable<TaskModel> GetProjectTasksByStatusAndTag(int projectId, TaskStatuses status, int? tagId = null)
         {
-            return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks.Where(t => t.ProjectId == projectId && t.Status == status))
-                .Reverse();
+            if (tagId is null)
+                return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks.Where(t => t.ProjectId == projectId && t.Status == status))
+                    .Reverse();
+            var result = _context.Tasks
+                .Include(t => t.Tags)
+                .Where(t => t.ProjectId == projectId && t.Status == status && t.Tags.Any(t => t.Id == tagId));
+            return _mapper.Map<IEnumerable<TaskModel>>(result).Reverse();
         }
     }
 }
