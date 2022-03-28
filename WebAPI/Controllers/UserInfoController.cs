@@ -1,9 +1,9 @@
 ﻿using Business.Interfaces;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
-using WebAPI.Other;
 
 namespace WebAPI.Controllers
 {
@@ -21,12 +21,11 @@ namespace WebAPI.Controllers
             _fileManager = fileManager;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            if (User.IsAuthenticated())
-            {
-                var user = await _Usermanager.GetUserAsync(User);
+                var user = await _Usermanager.FindByEmailAsync(User.Identity!.Name);
                 var name = user.FirstName;
                 if (user.LastName is not null)
                     name += " " + user.LastName;
@@ -44,8 +43,6 @@ namespace WebAPI.Controllers
                     MIMEAvatarType = avatarType,
                     Avatar = avatar
                 });
-            }
-            return NoContent();
         }
     }
 }
