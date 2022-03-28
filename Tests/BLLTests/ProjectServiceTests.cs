@@ -4,9 +4,7 @@ using Business.Models;
 using Business.Services;
 using Data;
 using Data.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -23,10 +21,6 @@ namespace Tests.BLLTests
         private ApplicationDbContext _context = null!;
 
         private IProjectService _service = null!;
-
-        private readonly Mock<IFileManager> _managerMock = new();
-
-        private IFileManager _manager = null!;
 
         private readonly IEnumerable<ProjectModel> _invalidProjects = new ProjectModel[]
         {
@@ -112,8 +106,7 @@ namespace Tests.BLLTests
         public void Setup()
         {
             _context = new ApplicationDbContext(UnitTestHelper.GetUnitTestDbOptions());
-            _manager = _managerMock.Object;
-            _service = new ProjectService(_context, _mapper, _manager);
+            _service = new ProjectService(_context, _mapper);
         }
 
         private void SeedData()
@@ -139,7 +132,6 @@ namespace Tests.BLLTests
                 MaxValidate = 5,
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = false,
-                MainPictureFormat = "jpg"
             },
                 new Project()
             {
@@ -291,19 +283,6 @@ namespace Tests.BLLTests
 
         private readonly IEnumerable<ProjectModel> _invalidForUpdateProjects = new ProjectModel[]
         {
-            new ProjectModel()      // id 1, ind 0
-            {
-                Id = 1,
-                Name = "Project sample 1",
-                Description = "This is project one description...",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 5,
-                InviteCode = Guid.NewGuid(),
-                IsInviteCodeActive = true,
-                MainPictureFormat = "png"   // changed
-                // Do not forget to fix start date
-            },
             new ProjectModel()      // id 1, ind 2
             {
                 Id = 1,
@@ -369,7 +348,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task DeleteByIdAsync_ValidId_DeletesElementAndMainPicture()
+        public async Task DeleteByIdAsync_ValidId_DeletesElement()
         {
             // Arrange
             SeedData();
@@ -383,8 +362,6 @@ namespace Tests.BLLTests
             var actualCount = _context.Projects.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Projects.Any(t => t.Id == id), "Method deletes wrong element");
-            _managerMock.Verify(t => t.DeleteFile("2.jpg", Business.Enums.EasyWorkFileTypes.ProjectMainPicture),
-                "Method does not remove the file from file system");
         }
 
         [Test]
@@ -430,7 +407,6 @@ namespace Tests.BLLTests
 
         [Test]
         [TestCase(0)]
-        [TestCase(1)]
         public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
         {
             // Arrange
@@ -556,97 +532,6 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedProjectNumbers.Count(), actualProjectNumbers.Count(), "The quantities of elements are not equal. " +
                 "Wrong elements returned");
             Assert.IsTrue(expectedProjectNumbers.SequenceEqual(actualProjectNumbers), "Elements are wrong or not sorted correctly");
-        }
-
-        [Test]
-        public async Task UpdateMainPictureAsyncTest_ValidProjectIdAndFile_DeletesOldFileAndAddsNew()
-        {
-            // Arrange
-            SeedData();
-            var fileMock = new Mock<IFormFile>();
-            var expectedformat = "bmp";
-            fileMock.Setup(m => m.FileName).Returns($"avtr.{expectedformat}");
-            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "bmp" || s == ".bmp"))).Returns(true);
-            var file = fileMock.Object;
-            var projectId = 2;
-
-            // Act
-            await _service.UpdateMainPictureByProjectIdAsync(projectId, file);
-
-            // Assert
-            var actualProject = await _context.Projects.SingleAsync(p => p.Id == projectId);
-            Assert.AreEqual(expectedformat, actualProject.MainPictureFormat, "Method does not change the file format");
-            _managerMock.Verify(t => t.DeleteFile("2.jpg", Business.Enums.EasyWorkFileTypes.ProjectMainPicture),
-                "Method does not remove old file from the file system");
-            _managerMock.Verify(t => t.AddFileAsync(file, "2.bmp", Business.Enums.EasyWorkFileTypes.ProjectMainPicture),
-                "Method does not add file to file system");
-        }
-
-        [Test]
-        public void UpdateMainPictureAsyncTest_InvalidFileFormat_ThrowsArgumentException()
-        {
-            // Arrange
-            SeedData();
-            var fileMock = new Mock<IFormFile>();
-            var expectedformat = "pdf";
-            fileMock.Setup(m => m.FileName).Returns($"avtr.{expectedformat}");
-            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "pdf" || s == ".pdf"))).Returns(false);
-            var file = fileMock.Object;
-            var projectId = 2;
-
-            // Act
-            Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateMainPictureByProjectIdAsync(projectId, file),
-                "Method does not throw an ArgumentException if the file format is not appropriate");
-        }
-
-        [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(6)]
-        public void UpdateMainPictureAsyncTest_InvalidId_ThrowsInvalidOperationException(int projectId)
-        {
-            // Arrange
-            SeedData();
-            var fileMock = new Mock<IFormFile>();
-            var expectedformat = "bmp";
-            fileMock.Setup(m => m.FileName).Returns($"avtr.{expectedformat}");
-            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "bmp" || s == ".bmp"))).Returns(true);
-            var file = fileMock.Object;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateMainPictureByProjectIdAsync(projectId, file),
-                "Method does not throw an InvalidOperationException if project id is invalid");
-        }
-
-        [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(6)]
-        public void DeleteMainPictureAsyncTest_InvalidId_ThrowsInvalidOperationException(int projectId)
-        {
-            // Arrange
-            SeedData();
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteMainPictureByProjectIdAsync(projectId),
-                "Method does not throw an InvalidOperationException if project id is invalid");
-        }
-
-        [Test]
-        public async Task DeleteMainPictureAsyncTest_ValidId_DeletesPictureFromFileSystemAndChangesModel()
-        {
-            // Arrange
-            SeedData();
-            var projectId = 2;
-
-            // Act
-            await _service.DeleteMainPictureByProjectIdAsync(projectId);
-
-            // Assert
-            var actualProject = await _context.Projects.SingleAsync(p => p.Id == projectId);
-            Assert.IsNull(actualProject.MainPictureFormat, "Method does not change the file format to null");
-            _managerMock.Verify(t => t.DeleteFile("2.jpg", Business.Enums.EasyWorkFileTypes.ProjectMainPicture),
-                "Method does not remove file from the file system");
         }
     }
 }

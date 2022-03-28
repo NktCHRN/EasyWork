@@ -72,12 +72,30 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        [TestCase("jpeg", "image/jpeg")]
+        [TestCase("png", "image/png")]
+        [TestCase("tif", "image/tiff")]
+        [TestCase("svg", "svg+xml")]
+        [TestCase("bmp", "image/bmp")]
+        [TestCase("ico", "image/vnd.microsoft.icon")]
+        [TestCase("gif", "gif")]
+        [TestCase("webp", "image/webp")]
+        public void GetImageTypeTest_ValidType_ReturnsTrueMIMEType(string expected, string MIMEType)
+        {
+            // Act
+            var actual = _manager.GetImageType(MIMEType);
+
+            // Assert
+            Assert.AreEqual(expected, actual, "Method does not return correct image type");
+        }
+
+        [Test]
         [TestCase(".jp")]
         [TestCase(".docx")]
         [TestCase("photo.png")]
         [TestCase("pdf")]
         [TestCase(".cs")]
-        public void GetMIMETypeTest_ValidType_ReturnsTrueMIMEType(string type)
+        public void GetMIMETypeTest_InvalidType_ReturnsNull(string type)
         {
             // Arrange
             string? expected = null;
@@ -126,34 +144,6 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task AddFileAsyncTest_ValidProjectMainPicture_AddsFile()
-        {
-            // Arrange
-            var newFileName = "Temp.jpg";
-            var ewtype = EasyWorkFileTypes.ProjectMainPicture;
-            var oldFileName = "image1.jpg";
-            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
-            long oldLength = new FileInfo(oldPath).Length;
-            using var stream = new MemoryStream(File.ReadAllBytes(oldPath).ToArray());
-            var formFile = new FormFile(stream, 0, stream.Length, "streamFile", oldFileName);
-
-            // Act
-            await _manager.AddFileAsync(formFile, newFileName, ewtype);
-
-            // Assert
-            long newLength = 0;
-            string newPath = GetSolutionPath() + "\\Data\\ProjectMainPictures\\" + newFileName;
-            var exists = File.Exists(newPath);
-            if (exists)
-            {
-                newLength = new FileInfo(newPath).Length;
-                File.Delete(newPath);
-            }
-            Assert.IsTrue(exists, "Method does not copy a file to folder");
-            Assert.AreEqual(oldLength, newLength, "Method damages the file");
-        }
-
-        [Test]
         public async Task AddFileAsyncTest_ValidUserAvatar_AddsFile()
         {
             // Arrange
@@ -167,6 +157,34 @@ namespace Tests.BLLTests
 
             // Act
             await _manager.AddFileAsync(formFile, newFileName, ewtype);
+
+            // Assert
+            long newLength = 0;
+            string newPath = GetSolutionPath() + "\\Data\\UserAvatars\\" + newFileName;
+            var exists = File.Exists(newPath);
+            if (exists)
+            {
+                newLength = new FileInfo(newPath).Length;
+                File.Delete(newPath);
+            }
+            Assert.IsTrue(exists, "Method does not copy a file to folder");
+            Assert.AreEqual(oldLength, newLength, "Method damages the file");
+        }
+
+        [Test]
+        public async Task AddFileAsyncByteArrayTestB_ValidUserAvatar_AddsFile()
+        {
+            // Arrange
+            var newFileName = "Temp.svg";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image4.svg";
+            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            long oldLength = new FileInfo(oldPath).Length;
+            using var stream = new MemoryStream(File.ReadAllBytes(oldPath).ToArray());
+            var file = await File.ReadAllBytesAsync(oldPath);
+
+            // Act
+            await _manager.AddFileAsync(file, newFileName, ewtype);
 
             // Assert
             long newLength = 0;
@@ -198,28 +216,28 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void AddFileAsyncByteArrayTest_TooBigSize_ThrowsArgumentException()
+        {
+            // Arrange
+            var newFileName = "Temp.jpg";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image6.jpg";
+            var path = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            using var stream = new MemoryStream(File.ReadAllBytes(path).ToArray());
+            var file = File.ReadAllBytes(path);
+
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => await _manager.AddFileAsync(file, newFileName, ewtype),
+                "Method does not throw ArgumentException if image size is too big");
+        }
+
+        [Test]
         public void AddFileAsyncTest_InvalidUserAvatarType_ThrowsArgumentException()
         {
             // Arrange
             var newFileName = "Temp.png";
             var ewtype = EasyWorkFileTypes.UserAvatar;
             var oldFileName = "file2.docx";
-            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
-            using var stream = new MemoryStream(File.ReadAllBytes(oldPath).ToArray());
-            var formFile = new FormFile(stream, 0, stream.Length, "streamFile", oldFileName);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ArgumentException>(async () => await _manager.AddFileAsync(formFile, newFileName, ewtype),
-                "Method does not throw ArgumentException if image type is invalid");
-        }
-
-        [Test]
-        public void AddFileAsyncTest_InvalidProjectMainPictureType_ThrowsArgumentException()
-        {
-            // Arrange
-            var newFileName = "Temp.jpg";
-            var ewtype = EasyWorkFileTypes.ProjectMainPicture;
-            var oldFileName = "file1.pdf";
             var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
             using var stream = new MemoryStream(File.ReadAllBytes(oldPath).ToArray());
             var formFile = new FormFile(stream, 0, stream.Length, "streamFile", oldFileName);

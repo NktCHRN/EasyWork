@@ -49,7 +49,7 @@ namespace Business.Services
                 oldFileName = user.Id + "." + user.AvatarFormat;
             var extension = Path.GetExtension(image.FileName);
             if (!_manager.IsValidImageType(extension))
-                throw new ArgumentException("Not appropriate file type", image.FileName);
+                throw new ArgumentException("Not appropriate file type", nameof(image));
             var newFileName = userId + extension;
             try
             {
@@ -57,6 +57,32 @@ namespace Business.Services
                 if (oldFileName != newFileName)
                 {
                     user.AvatarFormat = extension[1..];
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    if (!string.IsNullOrEmpty(oldFileName))
+                        _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.UserAvatar);
+                }
+            }
+            catch (Exception) { }
+        }
+
+        public async Task UpdateAvatarAsync(int userId, byte[] image, string imageType)
+        {
+            var user = await GetNotMappedByIdAsync(userId);
+            string? oldFileName = null;
+            if (!string.IsNullOrEmpty(user.AvatarFormat))
+                oldFileName = user.Id + "." + user.AvatarFormat;
+            if (!_manager.IsValidImageType(imageType))
+                throw new ArgumentException("Not appropriate file type", nameof(imageType));
+            if (!imageType.StartsWith("."))
+                imageType = "." + imageType;
+            var newFileName = userId + imageType;
+            try
+            {
+                await _manager.AddFileAsync(image, newFileName, Enums.EasyWorkFileTypes.UserAvatar);
+                if (oldFileName != newFileName)
+                {
+                    user.AvatarFormat = imageType[1..];
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
                     if (!string.IsNullOrEmpty(oldFileName))

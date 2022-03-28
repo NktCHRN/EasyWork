@@ -3,7 +3,6 @@ using Business.Interfaces;
 using Business.Models;
 using Data;
 using Data.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Task = System.Threading.Tasks.Task;
 
@@ -15,13 +14,10 @@ namespace Business.Services
 
         private readonly IMapper _mapper;
 
-        private readonly IFileManager _manager;
-
-        public ProjectService(ApplicationDbContext context, IMapper mapper, IFileManager manager)
+        public ProjectService(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _manager = manager;
         }
 
         private async Task<Project> GetNotMappedByIdAsync(int id)
@@ -38,9 +34,6 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
-            if (!string.IsNullOrEmpty(model.MainPictureFormat))
-                throw new ArgumentException("Main picture format should be null or empty at the creation of the project", 
-                    nameof(model));
             await _context.Projects.AddAsync(_mapper.Map<Project>(model));
             await _context.SaveChangesAsync();
         }
@@ -48,25 +41,8 @@ namespace Business.Services
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
-            if (!string.IsNullOrEmpty(model.MainPictureFormat))
-                await DeleteMainPictureByProjectIdAsync(id);
             _context.Projects.Remove(model);
             await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteMainPictureByProjectIdAsync(int projectId)
-        {
-            var model = await GetNotMappedByIdAsync(projectId);
-            if (string.IsNullOrEmpty(model.MainPictureFormat))
-                throw new InvalidOperationException("The project does not have any main picture right now");
-            try
-            {
-                _manager.DeleteFile(model.Id.ToString() + '.' + model.MainPictureFormat, Enums.EasyWorkFileTypes.ProjectMainPicture);
-                model.MainPictureFormat = null;
-                _context.Projects.Update(model);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception) { }
         }
 
         public int GetCount() => _context.Projects.Count();
@@ -106,38 +82,11 @@ namespace Business.Services
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
             var existingModel = await GetNotMappedByIdAsync(model.Id);
-            if (model.MainPictureFormat != existingModel.MainPictureFormat)
-                throw new ArgumentException("Please, use dedicated method to change the main picture", nameof(model));
             if (model.StartDate != existingModel.StartDate)
                 throw new ArgumentException("Project's start date cannot be changed", nameof(model));
             existingModel = _mapper.Map(model, existingModel);
             _context.Projects.Update(existingModel);
             await _context.SaveChangesAsync();
-        }
-
-        public async Task UpdateMainPictureByProjectIdAsync(int projectId, IFormFile image)
-        {
-            var model = await GetNotMappedByIdAsync(projectId);
-            string? oldFileName = null;
-            if (!string.IsNullOrEmpty(model.MainPictureFormat))
-                oldFileName = model.Id + "." + model.MainPictureFormat;
-            var extension = Path.GetExtension(image.FileName);
-            if (!_manager.IsValidImageType(extension))
-                throw new ArgumentException("Not appropriate file type", image.FileName);
-            var newFileName = projectId + extension;
-            try
-            {
-                await _manager.AddFileAsync(image, newFileName, Enums.EasyWorkFileTypes.ProjectMainPicture);
-                if (oldFileName != newFileName)
-                {
-                    model.MainPictureFormat = extension[1..];
-                    _context.Projects.Update(model);
-                    await _context.SaveChangesAsync();
-                    if (!string.IsNullOrEmpty(oldFileName))
-                        _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.ProjectMainPicture);
-                }
-            }
-            catch (Exception) { }
         }
     }
 }

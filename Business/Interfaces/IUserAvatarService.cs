@@ -2,9 +2,11 @@
 
 namespace Business.Interfaces
 {
-    public interface IUserAvatarService // Add UserManager to constructor!!!
+    public interface IUserAvatarService
     {
         Task UpdateAvatarAsync(int userId, IFormFile image);
+
+        Task UpdateAvatarAsync(int userId, byte[] image, string imageType);
 
         Task DeleteAvatarByUserIdAsync(int userId);
     }

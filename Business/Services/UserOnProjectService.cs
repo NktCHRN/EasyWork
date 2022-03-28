@@ -60,7 +60,7 @@ namespace Business.Services
                 .Select(uop => new UserOnProjectModelExtended()
                 {
                     UserId = uop.UserId,
-                    Role = (UserOnProjectRoles)Convert.ToUInt16(uop.Role),
+                    Role = uop.Role,
                     TasksDone = projectTasks
                     .Where(t => t.ExecutorId == uop.UserId && TaskService.IsDone(t.Status))
                     .Count(),
@@ -109,7 +109,7 @@ namespace Business.Services
             var uop = await _context.UsersOnProjects
                 .SingleOrDefaultAsync(uop => uop.ProjectId == projectId && uop.UserId == userId);
             if (uop is not null)
-                return (UserOnProjectRoles)Convert.ToUInt16(uop.Role);
+                return uop.Role;
 
             throw new InvalidOperationException("This user does not participate on project with such an id");
         }

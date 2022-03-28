@@ -41,25 +41,26 @@ namespace Business.Managers
             path += ewtype switch
             {
                 EasyWorkFileTypes.UserAvatar => "UserAvatars\\",
-                EasyWorkFileTypes.ProjectMainPicture => "ProjectMainPictures\\",
                 _ => "Files\\",
             };
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
             return path + name;
         }
 
-        public async Task AddFileAsync(IFormFile file, string name, EasyWorkFileTypes ewtype)
+        public async Task AddFileAsync(IFormFile file, string? name, EasyWorkFileTypes ewtype)
         {
             if (file is null)
                 throw new ArgumentNullException(nameof(file), "File cannot be null");
             if (name is null)
                 name = file.FileName;
-            if (ewtype == EasyWorkFileTypes.ProjectMainPicture || ewtype == EasyWorkFileTypes.UserAvatar)
+            if (ewtype == EasyWorkFileTypes.UserAvatar)
             {
                 var type = Path.GetExtension(name);
                 var realType = Path.GetExtension(file.FileName);
                 if (!IsValidImageType(type) || !IsValidImageType(realType))
                     throw new ArgumentException("This extension is not allowed");
-                if (ewtype == EasyWorkFileTypes.UserAvatar && file.Length > 8000000)
+                if (file.Length > 8000000)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
             }
             var path = GetPathByEWType(name, ewtype);
@@ -92,8 +93,38 @@ namespace Business.Managers
             return null;
         }
 
+        public string? GetImageType(string MIMEtype)
+        {
+            var start = "image/";
+            if (MIMEtype.StartsWith(start))
+                MIMEtype = MIMEtype[start.Length..];
+            var found = AllowedImageTypes.FirstOrDefault(t => t.Item2 == MIMEtype);
+            if (!(found == default))
+                return found.Item1;
+            return null;
+        }
+
         public FileStream GetFileStream(string name, EasyWorkFileTypes ewtype) => File.OpenRead(GetPathByEWType(name, ewtype));
 
         public byte[] GetFileContent(string name, EasyWorkFileTypes ewtype) => File.ReadAllBytes(GetPathByEWType(name, ewtype));
+
+        public async Task AddFileAsync(byte[] file, string name, EasyWorkFileTypes ewtype)
+        {
+            if (file is null)
+                throw new ArgumentNullException(nameof(file), "File cannot be null");
+            if (name is null)
+                throw new ArgumentNullException(nameof(name), "Name cannot be null");
+            if (ewtype == EasyWorkFileTypes.UserAvatar)
+            {
+                var type = Path.GetExtension(name);
+                if (!IsValidImageType(type))
+                    throw new ArgumentException("This extension is not allowed");
+                if (file.Length > 8000000)
+                    throw new ArgumentException("The max length of the avatar is 8 MB");
+            }
+            var path = GetPathByEWType(name, ewtype);
+            using var fileStream = new FileStream(path, FileMode.Create);
+            await fileStream.WriteAsync(file);
+        }
     }
 }

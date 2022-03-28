@@ -16,9 +16,6 @@ namespace Data.Entities
         [Required]
         public DateTime StartDate { get; set; }
 
-        [Column(TypeName = "nvarchar(10)")]
-        public string? MainPictureFormat { get; set; }
-
         public int? MaxToDo { get; set; }
 
         public int? MaxInProgress { get; set; }

@@ -108,6 +108,82 @@ namespace Tests.BLLTests
                 "Method does not throw an ArgumentException if the file format is not appropriate");
         }
 
+
+        [Test]
+        [TestCase(".png")]
+        [TestCase("png")]
+        public async Task UpdateAvatarAsyncByteArrayTest_ValidUserIdAndFile_AddsNewFile(string expectedFormat)
+        {
+            // Arrange
+            var file = Array.Empty<byte>();
+            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "png" || s == ".png"))).Returns(true);
+            var userId = 2;
+
+            // Act
+            await _service.UpdateAvatarAsync(userId, file, expectedFormat);
+
+            // Assert
+            var actualUser = await _context.Users.SingleAsync(p => p.Id == userId);
+            if (expectedFormat.StartsWith("."))
+                expectedFormat = expectedFormat[1..];
+            Assert.AreEqual(expectedFormat, actualUser.AvatarFormat, "Method does not change the file format");
+            _managerMock.Verify(t => t.AddFileAsync(file, "2.png", Business.Enums.EasyWorkFileTypes.UserAvatar),
+                "Method does not add file to file system");
+        }
+
+        [Test]
+        public async Task UpdateAvatarAsyncByteArrayTest_ValidUserIdAndFile_DeletesOldFileAndAddsNew()
+        {
+            // Arrange
+            var expectedFormat = "jpg";
+            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "jpg" || s == ".jpg"))).Returns(true);
+            var file = Array.Empty<byte>();
+            var userId = 4;
+
+            // Act
+            await _service.UpdateAvatarAsync(userId, file, expectedFormat);
+
+            // Assert
+            var actualUser = await _context.Users.SingleAsync(p => p.Id == userId);
+            Assert.AreEqual(expectedFormat, actualUser.AvatarFormat, "Method does not change the file format");
+            _managerMock.Verify(t => t.DeleteFile("4.png", Business.Enums.EasyWorkFileTypes.UserAvatar),
+                "Method does not remove old file from the file system");
+            _managerMock.Verify(t => t.AddFileAsync(file, "4.jpg", Business.Enums.EasyWorkFileTypes.UserAvatar),
+                "Method does not add file to file system");
+        }
+
+        [Test]
+        [TestCase("av.ppt")]
+        [TestCase("")]
+        [TestCase(null)]
+        public void UpdateAvatarAsyncByteArrayTest_InvalidFileFormat_ThrowsArgumentException(string name)
+        {
+            // Arrange
+            var userId = 2;
+            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "ppt" || s == ".ppt"))).Returns(false);
+            var file = Array.Empty<byte>();
+
+            // Act
+            Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateAvatarAsync(userId, file, name),
+                "Method does not throw an ArgumentException if the file format is not appropriate");
+        }
+
+        [Test]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(6)]
+        public void UpdateAvatarAsyncByteArrayTest_InvalidId_ThrowsInvalidOperationException(int userId)
+        {
+            // Arrange
+            var name = "file.bmp";
+            _managerMock.Setup(m => m.IsValidImageType(It.Is<string>(s => s == "bmp" || s == ".bmp"))).Returns(true);
+            var file = Array.Empty<byte>();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAvatarAsync(userId, file, name),
+                "Method does not throw an InvalidOperationException if user id is invalid");
+        }
+
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
