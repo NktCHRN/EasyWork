@@ -38,8 +38,15 @@ namespace WebAPI.Data
             user.UserName = user.Email;
             user.NormalizedUserName = user.NormalizedEmail;
             var password = "P4ssw0rd";                          // initial password. Should be changed after the creation
-            if (await UserManager.FindByEmailAsync(user.Email) is null)
+            var foundUser = await UserManager.FindByEmailAsync(user.Email);
+            if (foundUser is null)
+            {
                 await UserManager.CreateAsync(user, password);
+                foundUser = await UserManager.FindByEmailAsync(user.Email);
+            }
+            var role = "Admin";
+            if (!(await UserManager.IsInRoleAsync(foundUser, role)))
+                await UserManager.AddToRoleAsync(foundUser, role);
         }
     }
 }

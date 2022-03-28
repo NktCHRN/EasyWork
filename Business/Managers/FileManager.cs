@@ -106,7 +106,7 @@ namespace Business.Managers
 
         public FileStream GetFileStream(string name, EasyWorkFileTypes ewtype) => File.OpenRead(GetPathByEWType(name, ewtype));
 
-        public byte[] GetFileContent(string name, EasyWorkFileTypes ewtype) => File.ReadAllBytes(GetPathByEWType(name, ewtype));
+        public async Task<byte[]> GetFileContentAsync(string name, EasyWorkFileTypes ewtype) => await File.ReadAllBytesAsync(GetPathByEWType(name, ewtype));
 
         public async Task AddFileAsync(byte[] file, string name, EasyWorkFileTypes ewtype)
         {

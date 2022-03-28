@@ -2,10 +2,10 @@
 {
     public record UserReducedDTO
     {
-        byte[]? Avatar { get; init; }
+        public byte[]? Avatar { get; init; }
 
-        string? MIMEAvatarType { get; init; }
+        public string? MIMEAvatarType { get; init; }
 
-        string FullName { get; init; } = string.Empty;
+        public string FullName { get; init; } = string.Empty;
     }
 }
