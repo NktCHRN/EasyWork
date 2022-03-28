@@ -14,15 +14,20 @@ namespace Business.Services
 
         private readonly IMapper _mapper;
 
-        public ProjectService(ApplicationDbContext context, IMapper mapper)
+        private readonly IFileManager _manager;
+
+        public ProjectService(ApplicationDbContext context, IMapper mapper, IFileManager manager)
         {
             _context = context;
             _mapper = mapper;
+            _manager = manager;
         }
 
         private async Task<Project> GetNotMappedByIdAsync(int id)
         {
-            var model = await _context.Projects.FindAsync(id);
+            var model = await _context.Projects
+                .Include(p => p.Tasks)
+                .SingleOrDefaultAsync(p => p.Id == id);
             if (model is null)
                 throw new InvalidOperationException("Model with such an id was not found");
             return model;
@@ -40,8 +45,27 @@ namespace Business.Services
 
         public async Task DeleteByIdAsync(int id)
         {
-            var model = await GetNotMappedByIdAsync(id);
-            _context.Projects.Remove(model);
+            var mdl = await GetNotMappedByIdAsync(id);
+            var tasks = _context.Tasks.Include(t => t.Files).Where(t => t.ProjectId == id);
+            var files = new List<Data.Entities.File>();
+            foreach (var task in tasks)
+            {
+                files.AddRange(task.Files);
+                var messages = _context.Messages.Include(m => m.Files).Where(m => m.TaskId == task.Id);
+                foreach (var message in messages)
+                    files.AddRange(message.Files);
+            }
+            foreach (var file in files)
+            {
+                _context.Files.Remove(file);
+                await _context.SaveChangesAsync();
+                try
+                {
+                    _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                }
+                catch (Exception) { }
+            }
+            _context.Projects.Remove(mdl);
             await _context.SaveChangesAsync();
         }
 

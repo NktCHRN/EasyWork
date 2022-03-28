@@ -5,6 +5,7 @@ using Business.Services;
 using Data;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace Tests.BLLTests
         private ApplicationDbContext _context = null!;
 
         private IProjectService _service = null!;
+
+        private readonly Mock<IFileManager> _managerMock = new();
 
         private readonly IEnumerable<ProjectModel> _invalidProjects = new ProjectModel[]
         {
@@ -106,7 +109,7 @@ namespace Tests.BLLTests
         public void Setup()
         {
             _context = new ApplicationDbContext(UnitTestHelper.GetUnitTestDbOptions());
-            _service = new ProjectService(_context, _mapper);
+            _service = new ProjectService(_context, _mapper, _managerMock.Object);
         }
 
         private void SeedData()
@@ -180,7 +183,12 @@ namespace Tests.BLLTests
                 {
                     Text = "This is message 1",
                     TaskId = 1
-                }
+                },
+                new Message()
+                {
+                    Text = "This is message 2",
+                    TaskId = 3
+                },
             };
             foreach(var message in messages)
             {
@@ -268,6 +276,50 @@ namespace Tests.BLLTests
                 _context.SaveChanges();
             }
 
+            var files = new File[]
+            {
+                new File()
+                {
+                    Name = "File1.fl",
+                    TaskId = 1
+                },
+                new File()
+                {
+                    Name = "File2.fl",
+                    TaskId = 1
+                },
+                new File()
+                {
+                    Name = "File3.fl",
+                    TaskId = 3
+                },
+                new File()
+                {
+                    Name = "File4.fl",
+                    MessageId = 1
+                },
+                new File()
+                {
+                    Name = "File5.fl",
+                    MessageId = 1
+                },
+                new File()
+                {
+                    Name = "File6.fl",
+                    MessageId = 1
+                },
+                new File()
+                {
+                    Name = "File7.fl",
+                    MessageId = 2
+                }
+            };
+            foreach (var file in files)
+            {
+                _context.Files.Add(file);
+                _context.SaveChanges();
+            }
+
             SetDateFixes();
         }
 
@@ -325,14 +377,15 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task DeleteByIdAsync_ValidId_DeletesElementCascade()
+        public async Task DeleteByIdAsync_ValidId_DeletesElementCascadeWithFiles()
         {
             // Arrange
             SeedData();
             var id = 1;
             var expectedCount = _context.Projects.Count() - 1;
             var expectedTasksCount = 1;
-            var expectedMessagesCount = 0;
+            var expectedMessagesCount = 1;
+            var expectedFilesCount = 2;
 
             // Act
             await _service.DeleteByIdAsync(id);
@@ -341,10 +394,18 @@ namespace Tests.BLLTests
             var actualCount = _context.Projects.Count();
             var actualTasksCount = _context.Tasks.Count();
             var actualMessagesCount = _context.Messages.Count();
+            var actualFilesCount = _context.Files.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Projects.Any(t => t.Id == id), "Method deletes wrong element");
             Assert.AreEqual(expectedTasksCount, actualTasksCount, "Method does not delete all tasks cascadely");
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
+            Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
+            var deletedFilesIds = new int[] { 1, 2, 4, 5, 6 };
+            foreach (var fileId in deletedFilesIds)
+            {
+                _managerMock.Verify(t => t.DeleteFile($"{fileId}.fl", Business.Enums.EasyWorkFileTypes.File),
+                "Method does not remove the file from file system");
+            }
         }
 
         [Test]
