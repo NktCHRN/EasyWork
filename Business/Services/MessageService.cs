@@ -64,7 +64,7 @@ namespace Business.Services
 
         public IEnumerable<MessageModel> GetTaskMessages(int taskId)
         {
-            return _mapper.Map<IEnumerable<MessageModel>>(_context.Messages.Where(m => m.TaskId == taskId)).Reverse();
+            return _mapper.Map<IEnumerable<MessageModel>>(_context.Messages.Where(m => m.TaskId == taskId));
         }
 
         public bool IsValid(MessageModel model, out string? firstErrorMessage)

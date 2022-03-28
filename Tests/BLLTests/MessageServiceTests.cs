@@ -316,14 +316,15 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var taskId = 1;
-            var expectedCount = 3;
+            var expected = new int[] { 1, 3, 4 };
 
             // Act
             var actual = _service.GetTaskMessages(taskId);
 
             // Assert
-            Assert.AreEqual(expectedCount, actual.Count(), "Method returns wrong elements");
+            Assert.AreEqual(expected.Length, actual.Count(), "Method returns wrong elements");
             Assert.IsTrue(actual.All(m => m.TaskId == taskId), "Method returns wrong elements");
+            Assert.IsTrue(expected.SequenceEqual(actual.Select(m => m.Id)), "The order of the elements is wrong");
         }
 
         [Test]

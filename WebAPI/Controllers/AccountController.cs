@@ -35,8 +35,9 @@ namespace WebAPI.Controllers
             var user = await _userManager.FindByNameAsync(model.Email);
             if (await _userManager.CheckPasswordAsync(user, model.Password))
             {
+                user.LastSeen = DateTime.Now;
+                await _userManager.UpdateAsync(user);
                 var now = DateTime.UtcNow;
-                // создаем JWT-токен
                 var jwt = new JwtSecurityToken(
                         issuer: _configuration.GetSection("JwtBearer:Issuer").Value,
                         audience: _configuration.GetSection("JwtBearer:Audience").Value,
