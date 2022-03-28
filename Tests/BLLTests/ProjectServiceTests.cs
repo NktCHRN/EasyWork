@@ -531,14 +531,13 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            var expectedCount = 3;
+            var expected = 3;
 
             // Act
-            var actual = _service.GetAll();
+            var actual = _service.GetCount();
 
             // Assert
-            Assert.AreEqual(expectedCount, actual.Count(), "Method does not return all objects");
-            Assert.IsTrue(actual.All(p => p is not null), "Method returned null instead of some objects");
+            Assert.AreEqual(expected, actual, "Method returns wrong projects' count");
         }
 
         [Test]
@@ -547,7 +546,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var userId = 1;
-            IEnumerable<int> expectedProjectNumbers = new[] {3, 2, 1};
+            IEnumerable<int> expectedProjectNumbers = new[] {2, 1, 3};
 
             // Act
             var actual = _service.GetUserProjects(userId);

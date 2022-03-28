@@ -5,9 +5,9 @@ namespace Business.Interfaces
 {
     public interface IProjectService : ICRUD<ProjectModel>, IModelValidator<ProjectModel>
     {
-        IEnumerable<ProjectModel> GetAll();
+        int GetCount();
 
-        IEnumerable<ProjectModel> GetUserProjects(int userId); // (as a participant or owner); sorted by project Id
+        IEnumerable<ProjectModel> GetUserProjects(int userId); // (as a participant or owner); sorted by uop id reversed
 
         Task UpdateMainPictureByProjectIdAsync(int projectId, IFormFile image);
 

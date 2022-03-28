@@ -69,7 +69,7 @@ namespace Business.Services
             catch (Exception) { }
         }
 
-        public IEnumerable<ProjectModel> GetAll() => _mapper.Map<IEnumerable<ProjectModel>>(_context.Projects).Reverse();
+        public int GetCount() => _context.Projects.Count();
 
         public async Task<ProjectModel> GetByIdAsync(int id)
         {
@@ -85,13 +85,13 @@ namespace Business.Services
 
         public IEnumerable<ProjectModel> GetUserProjects(int userId)
         {
-            var projectsIds = _context.UsersOnProjects
+            var projectsIds = _context.UsersOnProjects.Reverse()
                 .Where(uop => uop.UserId == userId)
                 .Select(uop => uop.ProjectId);
-            var projects = _context.Projects
-                .Where(p => projectsIds
-                    .Contains(p.Id));
-            return _mapper.Map<IEnumerable<ProjectModel>>(projects).Reverse();
+            var projects = projectsIds
+                .Select(p => _context.Projects.
+                SingleOrDefault(proj => proj.Id == p));
+            return _mapper.Map<IEnumerable<ProjectModel>>(projects);
         }
 
         public bool IsValid(ProjectModel model, out string? firstErrorMessage)
