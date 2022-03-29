@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # User avatars and files
 Data/Files/
 Data/UserAvatars/
+
+# Actual appsettings
+WebAPI/appsettings.Development.json
