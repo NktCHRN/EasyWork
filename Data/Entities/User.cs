@@ -26,6 +26,9 @@ namespace Data.Entities
 
         public DateTime LastSeen { get; set; }
 
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
+
         public ICollection<Ban> Bans { get; set; } = new List<Ban>();
         public ICollection<Ban> GivenBans { get; set; } = new List<Ban>();
 

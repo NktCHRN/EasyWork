@@ -2,8 +2,8 @@
 {
     public record LoginResponseDTO
     {
-        public bool IsAuthSuccessful { get; set; }
-        public string? ErrorMessage { get; set; }
-        public string? Token { get; set; }
+        public bool IsAuthSuccessful { get; init; }
+        public string? ErrorMessage { get; init; }
+        public TokenDTO? Token { get; init; }
     }
 }

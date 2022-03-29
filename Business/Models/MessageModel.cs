@@ -10,7 +10,6 @@ namespace Business.Models
         [StringLength(2000, ErrorMessage = "Too long message. The maximum length is 2000 characters")]
         public string Text { get; set; } = null!;
 
-
         [Required]
         public bool IsRead { get; set; }
 

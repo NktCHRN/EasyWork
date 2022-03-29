@@ -3,6 +3,7 @@ using Business.Interfaces;
 using Business.Models;
 using Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using File = Data.Entities.File;
 
 namespace Business.Services
@@ -36,6 +37,19 @@ namespace Business.Services
                 throw new ArgumentNullException(nameof(file));
             if (!IsValid(model, out string? error))
                 throw new ArgumentException(error, nameof(model));
+            const ushort maxFiles = 10;
+            if (model.MessageId is not null)
+            {
+                var message = await _context.Messages.Include(m => m.Files).FirstAsync(m => m.Id == model.MessageId);
+                if (message.Files.Count >= maxFiles)
+                    throw new InvalidOperationException("Message can have not more than 10");
+            }
+            if (model.TaskId is not null)
+            {
+                var task = await _context.Tasks.Include(m => m.Files).FirstAsync(m => m.Id == model.TaskId);
+                if (task.Files.Count >= maxFiles)
+                    throw new InvalidOperationException("Message can have not more than 10");
+            }
             var mapped = _mapper.Map<File>(model);
             await _context.Files.AddAsync(mapped);
             await _context.SaveChangesAsync();
@@ -74,7 +88,7 @@ namespace Business.Services
             var result = IModelValidator<FileModel>.IsValidByDefault(model, out firstErrorMessage);
             if (!result)
                 return false;
-            if (model.TaskId is not null && model.MessageId is not null)
+            if (!(model.TaskId is null ^ model.MessageId is null))
             {
                 firstErrorMessage = "Only TaskId or MessageId should not be null";
                 return false;

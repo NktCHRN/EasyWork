@@ -1,10 +1,8 @@
-﻿using Data.Entities;
+﻿using Business.Interfaces;
+using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
@@ -15,12 +13,12 @@ namespace WebAPI.Controllers
     {
         private readonly UserManager<User> _userManager;
 
-        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
 
-        public AccountController(UserManager<User> userManager, IConfiguration configuration)
+        public AccountController(UserManager<User> userManager, ITokenService tokenService)
         {
             _userManager = userManager;
-            _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         [HttpPost]
@@ -39,34 +37,23 @@ namespace WebAPI.Controllers
                     ErrorMessage = "Wrong email or password"
                 });
             user.LastSeen = DateTime.Now;
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
             await _userManager.UpdateAsync(user);
             return Ok(new LoginResponseDTO()
             {
                 IsAuthSuccessful = true,
-                Token = await GetJwtToken(user)
+                Token = new TokenDTO()
+                {
+                    AccessToken = _tokenService.GenerateAccessToken(await GetClaimsAsync(user)),
+                    RefreshToken = refreshToken
+                }
             });
         }
 
-        private async Task<string> GetJwtToken(User user)
+        private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
         {
-            var now = DateTime.UtcNow;
-            var jwt = new JwtSecurityToken(
-                    issuer: _configuration.GetSection("JwtBearer:Issuer").Value,
-                    audience: _configuration.GetSection("JwtBearer:Audience").Value,
-                    notBefore: now,
-                    claims: (await GetClaimsAsync(user)),
-                    expires: now.Add(TimeSpan.FromMinutes(int.Parse(_configuration.GetSection("JwtBearer:Lifetime").Value))),
-                    signingCredentials: new SigningCredentials(
-                        new SymmetricSecurityKey(
-                            Encoding.ASCII.GetBytes(_configuration.GetSection("JwtBearer:Secret").Value)), 
-                        SecurityAlgorithms.HmacSha256));
-            return new JwtSecurityTokenHandler().WriteToken(jwt);
-        }
-
-        private async Task<IEnumerable<Claim>?> GetClaimsAsync(User? user)
-        {
-            if (user is not null)
-            {
                 var roles = await _userManager.GetRolesAsync(user);
                 var claims = new List<Claim>
                 {
@@ -77,8 +64,6 @@ namespace WebAPI.Controllers
                 foreach (var role in roles)
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 return claims;
-            }
-            return null;
         }
     }
 }

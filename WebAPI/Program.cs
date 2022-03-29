@@ -71,6 +71,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile));
 builder.Services.AddScoped<IFileManager, FileManager>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IBanService, BanService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IMessageService, MessageService>();

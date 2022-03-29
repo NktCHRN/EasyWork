@@ -52,6 +52,10 @@ namespace Tests.BLLTests
                 "Proin purus mauris, suscipit iaculis massa id, tincidunt lacinia augue. " +
                 "Etiam condimentum cursus finibus. Fusce vel magna nec magna scelerisque pretium. " +
                 "Praesent pellentesque vulputate felis, non vel. "
+            },
+            new FileModel()     // 4
+            {
+                Name = "TestFile.cs"
             }
         };
 
@@ -66,11 +70,7 @@ namespace Tests.BLLTests
             {
                 MessageId = 1,
                 Name = "TestFile.cs"
-            },
-            new FileModel()     // 2
-                {
-                Name = "TestFile.cs"
-                }
+            }
         };
 
         [SetUp]
@@ -112,6 +112,10 @@ namespace Tests.BLLTests
                 {
                     Name = "Task 3"
                 },
+                new Data.Entities.Task()    // id 4
+                {
+                    Name = "Task 4"
+                }
             };
             foreach (var task in tasks)
             {
@@ -135,6 +139,10 @@ namespace Tests.BLLTests
                 {
                     SenderId = 1,
                     Text = "This is message 4"
+                },
+                new Message()       // id 5
+                {
+                    Text = "This is message 5"
                 }
             };
             foreach (var message in messages)
@@ -186,6 +194,23 @@ namespace Tests.BLLTests
                 _context.Files.Add(file);
                 _context.SaveChanges();
             }
+            for (int i = 0; i < 10; i++)
+            {
+                var messageFile = new File()
+                {
+                    MessageId = 5,
+                    Name = $"LimMessageFile{i}.file"
+                };
+                _context.Files.Add(messageFile);
+                _context.SaveChanges();
+                var taskFile = new File()
+                {
+                    TaskId = 4,
+                    Name = $"LimTaskFile{i}.file"
+                };
+                _context.Files.Add(taskFile);
+                _context.SaveChanges();
+            }
         }
 
         [Test]
@@ -195,7 +220,7 @@ namespace Tests.BLLTests
             SeedData();
             var fileModel = _validFiles.First();
             var file = new Mock<IFormFile>().Object;
-            var expectedName = "8.cs";
+            var expectedName = "28.cs";
             var expectedCount = _context.Files.Count() + 1;
 
             // Act
@@ -221,9 +246,38 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void AddAsyncTest_TaskLimitExceeded_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var taskId = 4;
+            var fileModel = _invalidFiles.First();
+            fileModel.MessageId = null;
+            fileModel.TaskId = taskId;
+            var file = new Mock<IFormFile>().Object;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(fileModel, file));
+        }
+
+        [Test]
+        public void AddAsyncTest_MessageLimitExceeded_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var messageId = 5;
+            var fileModel = _invalidFiles.First();
+            fileModel.MessageId = messageId;
+            fileModel.TaskId = null;
+            var file = new Mock<IFormFile>().Object;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(fileModel, file));
+        }
+
+        [Test]
         [TestCase(0)]
         [TestCase(1)]
-        [TestCase(2)]
         public void IsValidTest_ValidFile_ReturnsTrue(int modelNumber)
         {
             // Arrange
@@ -242,6 +296,7 @@ namespace Tests.BLLTests
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
+        [TestCase(4)]
         public void IsValidTest_InvalidFile_ReturnsFalse(int modelNumber)
         {
             // Arrange
@@ -258,7 +313,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(10)]
+        [TestCase(555)]
         public void DeleteByIdAsyncTest_NotExistingId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
@@ -289,7 +344,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(10)]
+        [TestCase(777)]
         public void GetByIdAsync_NotExistingId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
