@@ -179,14 +179,16 @@ namespace Tests.BLLTests
         [TestCase(-1)]
         [TestCase(0)]
         [TestCase(7)]
-        public void GetByIdAsync_InvalidId_ThrowsInvalidOperationException(int id)
+        public async Task GetByIdAsync_InvalidId_ReturnsNull(int id)
         {
             // Arrange
             SeedData();
 
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.GetByIdAsync(id),
-                "Method does not throw an InvalidOperationException if id is invalid");
+            // Act
+            var returned = await _service.GetByIdAsync(id);
+
+            // Assert
+            Assert.IsNull(returned, "Method does not return null if id is invalid");
         }
 
         [Test]
@@ -202,7 +204,7 @@ namespace Tests.BLLTests
             var actual = await _service.GetByIdAsync(id);
 
             // Assert
-            Assert.AreEqual(id, actual.Id, "Method returns wrong element");
+            Assert.AreEqual(id, actual!.Id, "Method returns wrong element");
         }
 
         [Test]
@@ -342,7 +344,7 @@ namespace Tests.BLLTests
 
             // Assert
             Assert.IsNotNull(actual, "Method does not return a model");
-            Assert.AreEqual(expectedId, actual.Id, "Method does not return right model");
+            Assert.AreEqual(expectedId, actual!.Id, "Method does not return right model");
         }
 
         [Test]

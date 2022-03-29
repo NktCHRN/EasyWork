@@ -8,6 +8,6 @@ namespace Business.Interfaces
 
         Task<IEnumerable<TagModel>> GetTaskTagsAsync(int taskId);
 
-        Task<TagModel> FindByName(string name);
+        Task<TagModel?> FindByName(string name);
     }
 }

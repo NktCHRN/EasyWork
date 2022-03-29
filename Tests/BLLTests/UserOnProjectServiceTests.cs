@@ -313,14 +313,16 @@ namespace Tests.BLLTests
         [TestCase(7, 3)]
         [TestCase(2, 5)]
         [TestCase(3, 1)]
-        public void GetByIdAsync_InvalidId_ThrowsInvalidOperationException(int projectId, int userId)
+        public async Task GetByIdAsyncTest_InvalidData_ReturnsNull(int projectId, int userId)
         {
             // Arrange
             SeedData();
 
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.GetByIdAsync(projectId, userId),
-                "Method does not throw an InvalidOperationException if id is invalid");
+            // Act
+            var returned = await _service.GetByIdAsync(projectId, userId);
+
+            // Assert
+            Assert.IsNull(returned, "Method does not return null if id is invalid");
         }
 
         [Test]
@@ -336,7 +338,7 @@ namespace Tests.BLLTests
             var actual = await _service.GetByIdAsync(projectId, userId);
 
             // Assert
-            Assert.AreEqual(projectId, actual.ProjectId, "Method returns wrong element");
+            Assert.AreEqual(projectId, actual!.ProjectId, "Method returns wrong element");
             Assert.AreEqual(userId, actual.UserId, "Method returns wrong element");
         }
 
@@ -560,14 +562,15 @@ new UserOnProjectModelExtended()
         [TestCase(7, 3)]
         [TestCase(2, 5)]
         [TestCase(3, 1)]
-        public void GetRoleOnProjectAsyncTest_InvalidId_ThrowsInvalidOperationException(int projectId, int userId)
+        public async Task GetRoleOnProjectAsyncTest_InvalidId_ReturnsNull(int projectId, int userId)
         {
             // Arrange
             SeedData();
 
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteByIdAsync(projectId, userId),
-                "Method does not throw an InvalidOperationException if id is invalid");
+            // Act
+            var returned = await _service.GetRoleOnProjectAsync(projectId, userId);
+
+            Assert.IsNull(returned);
         }
 
         [Test]

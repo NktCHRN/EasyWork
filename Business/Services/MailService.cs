@@ -1,5 +1,4 @@
 ﻿using Business.Interfaces;
-using Business.Models;
 using Business.Other;
 using MailKit.Security;
 using Microsoft.Extensions.Options;

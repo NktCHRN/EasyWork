@@ -2,7 +2,7 @@
 {
     public interface ICRUD<TModel> where TModel : class
     {
-        Task<TModel> GetByIdAsync(int id);
+        Task<TModel?> GetByIdAsync(int id);
 
         Task AddAsync(TModel model);
 

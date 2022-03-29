@@ -44,14 +44,12 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TagModel> GetByIdAsync(int id)
+        public async Task<TagModel?> GetByIdAsync(int id)
         {
             var model = await _context.Tags
                 .Include(t => t.Tasks)
                 .SingleOrDefaultAsync(m => m.Id == id);
-            if (model is null)
-                throw new InvalidOperationException("Model with such an id was not found");
-            return _mapper.Map<TagModel>(model);
+            return _mapper.Map<TagModel?>(model);
         }
 
         public IEnumerable<TagModel> GetProjectTags(int projectId)
@@ -86,7 +84,7 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TagModel> FindByName(string name) => 
-            _mapper.Map<TagModel>(await _context.Tags.FirstOrDefaultAsync(t => t.Name == name));
+        public async Task<TagModel?> FindByName(string name) => 
+            _mapper.Map<TagModel?>(await _context.Tags.FirstOrDefaultAsync(t => t.Name == name));
     }
 }

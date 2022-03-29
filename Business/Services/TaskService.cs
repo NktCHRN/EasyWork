@@ -112,16 +112,14 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TaskModel> GetByIdAsync(int id)
+        public async Task<TaskModel?> GetByIdAsync(int id)
         {
             var model = await _context.Tasks
                 .Include(t => t.Messages)
                 .Include(t => t.Files)
                 .Include(t => t.Tags)
                 .SingleOrDefaultAsync(m => m.Id == id);
-            if (model is null)
-                throw new InvalidOperationException("Model with such an id was not found");
-            return _mapper.Map<TaskModel>(model);
+            return _mapper.Map<TaskModel?>(model);
         }
 
         public IEnumerable<TaskModel> GetUserTasks(int userId)

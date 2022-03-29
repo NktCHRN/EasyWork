@@ -71,16 +71,14 @@ namespace Business.Services
 
         public int GetCount() => _context.Projects.Count();
 
-        public async Task<ProjectModel> GetByIdAsync(int id)
+        public async Task<ProjectModel?> GetByIdAsync(int id)
         {
             var model = await _context.Projects
                 .Include(m => m.TeamMembers)
                 .Include(m => m.Tasks)
                 .Include(m => m.Releases)
                 .SingleOrDefaultAsync(m => m.Id == id);
-            if (model is null)
-                throw new InvalidOperationException("Model with such an id was not found");
-            return _mapper.Map<ProjectModel>(model);
+            return _mapper.Map<ProjectModel?>(model);
         }
 
         public IEnumerable<ProjectModel> GetUserProjects(int userId)

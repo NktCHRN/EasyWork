@@ -5,7 +5,7 @@ namespace Business.Interfaces
 {
     public interface IFileService : IModelValidator<FileModel>
     {
-        Task<FileModel> GetByIdAsync(int id);
+        Task<FileModel?> GetByIdAsync(int id);
 
         Task AddAsync(FileModel model, IFormFile file);
 

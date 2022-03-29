@@ -81,9 +81,9 @@ namespace Business.Services
         /// <param name="id"></param>
         /// <exception cref="InvalidOperationException">Thrown if model with such an id was not found</exception>
         /// <returns>A ban model with this id</returns>
-        public async Task<BanModel> GetByIdAsync(int id)
+        public async Task<BanModel?> GetByIdAsync(int id)
         {
-            return _mapper.Map<BanModel>(await GetNotMappedByIdAsync(id));
+            return _mapper.Map<BanModel?>(await _context.Bans.FindAsync(id));
         }
 
         /// <summary>

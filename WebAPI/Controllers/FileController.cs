@@ -37,21 +37,17 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
-            FileModel model;
-            try
-            {
-                model = await _service.GetByIdAsync(id);
-            }
-            catch (InvalidOperationException)
-            {
+            var model = await _service.GetByIdAsync(id);
+            if (model is null)
                 return NotFound();
-            }
 
             int taskId;
             if (model.MessageId is not null)
             {
-                    var message = await _messageService.GetByIdAsync(model.MessageId.GetValueOrDefault());
-                    taskId = message.TaskId;
+                var message = await _messageService.GetByIdAsync(model.MessageId.GetValueOrDefault());
+                if (message is null)
+                    return NotFound();
+                taskId = message.TaskId;
             }
             else if (model.TaskId is not null)
                 taskId = model.TaskId.GetValueOrDefault();
@@ -59,18 +55,13 @@ namespace WebAPI.Controllers
                 return Forbid();
 
             var task = await _taskService.GetByIdAsync(taskId);
+            if (task is null)
+                return NotFound();
             if (task.ExecutorId != User.GetId())
             {
-                try
-                {
                     var role = await _uopService.GetRoleOnProjectAsync(task.ProjectId, User.GetId().GetValueOrDefault());
-                    if (role < UserOnProjectRoles.Manager)
+                    if (role is null || role < UserOnProjectRoles.Manager)
                         return Forbid();
-                }
-                catch (InvalidOperationException)
-                {
-                    return Forbid();
-                }
             }
 
             var visualFileName = model.Name;

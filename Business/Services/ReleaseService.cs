@@ -44,7 +44,7 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ReleaseModel> GetByIdAsync(int id) => _mapper.Map<ReleaseModel>(await GetNotMappedByIdAsync(id));
+        public async Task<ReleaseModel?> GetByIdAsync(int id) => _mapper.Map<ReleaseModel?>(await _context.Releases.FindAsync(id));
 
         public IEnumerable<ReleaseModel> GetProjectReleases(int projectId)
         {

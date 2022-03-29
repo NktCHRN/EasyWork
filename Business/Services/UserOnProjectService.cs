@@ -72,8 +72,9 @@ namespace Business.Services
             return teamMembers.OrderByDescending(t => t.Role).ThenByDescending(t => t.TasksDone).ThenBy(t => t.UserId);
         }
 
-        public async Task<UserOnProjectModel> GetByIdAsync(int projectId, int userId) 
-            => _mapper.Map<UserOnProjectModel>(await GetNotMappedByIdAsync(projectId, userId));
+        public async Task<UserOnProjectModel?> GetByIdAsync(int projectId, int userId) 
+            => _mapper.Map<UserOnProjectModel?>(await _context.UsersOnProjects
+                .SingleOrDefaultAsync(uop => uop.ProjectId == projectId && uop.UserId == userId));
 
         public bool IsValid(UserOnProjectModel model, out string? firstErrorMessage)
         {
@@ -104,14 +105,11 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<UserOnProjectRoles> GetRoleOnProjectAsync(int projectId, int userId)
+        public async Task<UserOnProjectRoles?> GetRoleOnProjectAsync(int projectId, int userId)
         {
             var uop = await _context.UsersOnProjects
                 .SingleOrDefaultAsync(uop => uop.ProjectId == projectId && uop.UserId == userId);
-            if (uop is not null)
-                return uop.Role;
-
-            throw new InvalidOperationException("This user does not participate on project with such an id");
+            return uop?.Role;
         }
     }
 }

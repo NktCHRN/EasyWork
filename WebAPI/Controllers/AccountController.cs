@@ -128,7 +128,6 @@ namespace WebAPI.Controllers
                     {"email", user.Email }
                 };
                 var callback = QueryHelpers.AddQueryString(model.ClientURI, param);
-
                 link.Attributes.Add("href", callback);
                 await _mailService.SendAsync(new Business.Other.MailRequest()
                 {

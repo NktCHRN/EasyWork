@@ -68,9 +68,9 @@ namespace Business.Services
             catch (Exception) { }
         }
 
-        public async Task<FileModel> GetByIdAsync(int id)
+        public async Task<FileModel?> GetByIdAsync(int id)
         {
-            return _mapper.Map<FileModel>(await GetNotMappedByIdAsync(id));
+            return _mapper.Map<FileModel?>(await _context.Files.FindAsync(id));
         }
 
         public IEnumerable<FileModel> GetMessageFiles(int messageId)

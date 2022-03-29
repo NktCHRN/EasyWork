@@ -60,7 +60,10 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<MessageModel> GetByIdAsync(int id) => _mapper.Map<MessageModel>(await GetNotMappedByIdAsync(id));
+        public async Task<MessageModel?> GetByIdAsync(int id)
+        {
+            return _mapper.Map<MessageModel?>(await _context.Messages.Include(m => m.Files).SingleOrDefaultAsync(m => m.Id == id));
+        }
 
         public IEnumerable<MessageModel> GetTaskMessages(int taskId)
         {

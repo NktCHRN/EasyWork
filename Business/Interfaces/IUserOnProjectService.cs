@@ -7,7 +7,7 @@ namespace Business.Interfaces
 {
     public interface IUserOnProjectService : IModelValidator<UserOnProjectModel>
     {
-        Task<UserOnProjectModel> GetByIdAsync(int projectId, int userId);
+        Task<UserOnProjectModel?> GetByIdAsync(int projectId, int userId);
 
         Task AddAsync(UserOnProjectModel model);
 
@@ -17,6 +17,6 @@ namespace Business.Interfaces
 
         Task<IEnumerable<UserOnProjectModelExtended>> GetAllProjectUsersAsync(int projectId);  // participants + owner
 
-        Task<UserOnProjectRoles> GetRoleOnProjectAsync(int projectId, int userId);
+        Task<UserOnProjectRoles?> GetRoleOnProjectAsync(int projectId, int userId);
     }
 }
