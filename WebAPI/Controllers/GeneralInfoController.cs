@@ -21,7 +21,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        public GeneralInfoDTO GetAsync()
+        public GeneralInfoDTO Get()
         {
             return new GeneralInfoDTO()
             {

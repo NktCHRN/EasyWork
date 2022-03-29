@@ -3,13 +3,7 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Security.Claims;
 using WebAPI.DTOs;
-using WebAPI.Other;
-using System.Web;
-using Microsoft.AspNetCore.StaticFiles;
 
 namespace WebAPI.Controllers
 {

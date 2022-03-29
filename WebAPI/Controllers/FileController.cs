@@ -1,7 +1,6 @@
 ﻿using Business.Interfaces;
 using Business.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using WebAPI.Other;

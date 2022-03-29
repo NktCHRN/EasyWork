@@ -11,7 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 using System.Text;
+using WebAPI;
 using WebAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,7 +71,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
 
-builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile));
+builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile), typeof(AutoMapperWebAPIProfile));
 builder.Services.AddScoped<IFileManager, FileManager>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IBanService, BanService>();

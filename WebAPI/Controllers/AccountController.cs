@@ -1,4 +1,5 @@
-﻿using Business.Interfaces;
+﻿using AutoMapper;
+using Business.Interfaces;
 using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +16,30 @@ namespace WebAPI.Controllers
 
         private readonly ITokenService _tokenService;
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService)
+        private readonly IBanService _banService;
+
+        private readonly IMapper _mapper;
+
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
+            _mapper = mapper;
+            _banService = banService;
+        }
+
+        private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Email),
+                    new Claim(ClaimTypes.Email, user.Email)
+                };
+            foreach (var role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            return claims;
         }
 
         [HttpPost]
@@ -36,6 +57,13 @@ namespace WebAPI.Controllers
                 {
                     ErrorMessage = "Wrong email or password"
                 });
+            var bans = _banService.GetActiveUserBans(user.Id);
+            if (bans.Any())
+                return Unauthorized(new LoginResponseDTO()
+                {
+                    ErrorMessage = "You are banned from this website",
+                    ErrorDetails = _mapper.Map<IEnumerable<BannedUserDTO>>(bans)
+                });
             user.LastSeen = DateTime.Now;
             var refreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshToken = refreshToken;
@@ -52,18 +80,25 @@ namespace WebAPI.Controllers
             });
         }
 
-        private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterUserDTO model)
         {
-                var roles = await _userManager.GetRolesAsync(user);
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Email),
-                    new Claim(ClaimTypes.Email, user.Email)
-                };
-                foreach (var role in roles)
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                return claims;
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            if (model.Password != model.PasswordConfirm)
+                return BadRequest("Passwords are different");
+            var user = _mapper.Map<User>(model);
+            user.RegistrationDate = DateTime.Now;
+            user.UserName = model.Email;
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+            else
+            {
+                await _userManager.AddToRoleAsync(user, "User");
+                return StatusCode(201);
+            }
         }
     }
 }
