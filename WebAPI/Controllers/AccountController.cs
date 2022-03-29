@@ -33,29 +33,34 @@ namespace WebAPI.Controllers
                     ErrorMessage = "Invalid authentication request"
                 });
             var user = await _userManager.FindByNameAsync(model.Email);
-            if (await _userManager.CheckPasswordAsync(user, model.Password))
-            {
-                user.LastSeen = DateTime.Now;
-                await _userManager.UpdateAsync(user);
-                var now = DateTime.UtcNow;
-                var jwt = new JwtSecurityToken(
-                        issuer: _configuration.GetSection("JwtBearer:Issuer").Value,
-                        audience: _configuration.GetSection("JwtBearer:Audience").Value,
-                        notBefore: now,
-                        claims: (await GetClaimsAsync(user)),
-                        expires: now.Add(TimeSpan.FromMinutes(int.Parse(_configuration.GetSection("JwtBearer:Lifetime").Value))),
-                        signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration.GetSection("JwtBearer:Secret").Value)), SecurityAlgorithms.HmacSha256));
-                var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-                return Ok(new LoginResponseDTO()
+            if (!(await _userManager.CheckPasswordAsync(user, model.Password)))
+                return Unauthorized(new LoginResponseDTO()
                 {
-                    IsAuthSuccessful = true,
-                    Token = encodedJwt
+                    ErrorMessage = "Wrong email or password"
                 });
-            }
-            return Unauthorized(new LoginResponseDTO()
+            user.LastSeen = DateTime.Now;
+            await _userManager.UpdateAsync(user);
+            return Ok(new LoginResponseDTO()
             {
-                ErrorMessage = "Wrong email or password"
+                IsAuthSuccessful = true,
+                Token = await GetJwtToken(user)
             });
+        }
+
+        private async Task<string> GetJwtToken(User user)
+        {
+            var now = DateTime.UtcNow;
+            var jwt = new JwtSecurityToken(
+                    issuer: _configuration.GetSection("JwtBearer:Issuer").Value,
+                    audience: _configuration.GetSection("JwtBearer:Audience").Value,
+                    notBefore: now,
+                    claims: (await GetClaimsAsync(user)),
+                    expires: now.Add(TimeSpan.FromMinutes(int.Parse(_configuration.GetSection("JwtBearer:Lifetime").Value))),
+                    signingCredentials: new SigningCredentials(
+                        new SymmetricSecurityKey(
+                            Encoding.ASCII.GetBytes(_configuration.GetSection("JwtBearer:Secret").Value)), 
+                        SecurityAlgorithms.HmacSha256));
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
         private async Task<IEnumerable<Claim>?> GetClaimsAsync(User? user)
@@ -65,6 +70,7 @@ namespace WebAPI.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 var claims = new List<Claim>
                 {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.Email),
                     new Claim(ClaimTypes.Email, user.Email)
                 };

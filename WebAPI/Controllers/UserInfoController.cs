@@ -3,7 +3,9 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebAPI.DTOs;
+using WebAPI.Other;
 
 namespace WebAPI.Controllers
 {
@@ -11,13 +13,13 @@ namespace WebAPI.Controllers
     [ApiController]
     public class UserInfoController : ControllerBase
     {
-        private readonly UserManager<User> _Usermanager;
+        private readonly UserManager<User> _userManager;
 
         private readonly IFileManager _fileManager;
 
         public UserInfoController(UserManager<User> manager, IFileManager fileManager)
         {
-            _Usermanager = manager;
+            _userManager = manager;
             _fileManager = fileManager;
         }
 
@@ -25,7 +27,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-                var user = await _Usermanager.FindByEmailAsync(User.Identity!.Name);
+            var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
                 var name = user.FirstName;
                 if (user.LastName is not null)
                     name += " " + user.LastName;
