@@ -22,5 +22,8 @@ namespace WebAPI.DTOs
 
         [Required(AllowEmptyStrings = false)]
         public string PasswordConfirm { get; init; } = string.Empty;
+
+        [Required(AllowEmptyStrings = false)]
+        public string ClientURI { get; set; } = string.Empty;
     }
 }

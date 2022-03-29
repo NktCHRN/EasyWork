@@ -2,6 +2,8 @@ using Business;
 using Business.Identity;
 using Business.Interfaces;
 using Business.Managers;
+using Business.Models;
+using Business.Other;
 using Business.Services;
 using Data;
 using Data.Entities;
@@ -34,7 +36,8 @@ builder.Services.AddIdentityCore<User>(options =>
     .AddUserValidator<CustomPropertiesUserValidator>()
     .AddUserValidator<PhoneNumberUserValidator>()
     .AddRoles<IdentityRole<int>>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider); ;
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options => {
@@ -73,6 +76,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile), typeof(AutoMapperWebAPIProfile));
 builder.Services.AddScoped<IFileManager, FileManager>();
+builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IBanService, BanService>();
 builder.Services.AddScoped<IFileService, FileService>();
@@ -84,6 +88,8 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserAvatarService, UserAvatarService>();
 builder.Services.AddScoped<IUserOnProjectService, UserOnProjectService>();
 builder.Services.AddScoped<IUserStatsService, UserStatsService>();
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 var app = builder.Build();
 

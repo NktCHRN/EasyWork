@@ -37,12 +37,18 @@ namespace Business.Managers
         {
             if (name is null)
                 throw new ArgumentNullException(nameof(name), "File name cannot be null");
-            string path = GetSolutionPath() + "\\Data\\";
-            path += ewtype switch
+            string path = GetSolutionPath()!;
+            if (ewtype == EasyWorkFileTypes.EasyWorkProjectImage)
+                path += "\\WebAPI\\Images\\";
+            else
             {
-                EasyWorkFileTypes.UserAvatar => "UserAvatars\\",
-                _ => "Files\\",
-            };
+                path += "\\Data\\";
+                path += ewtype switch
+                {
+                    EasyWorkFileTypes.UserAvatar => "UserAvatars\\",
+                    _ => "Files\\",
+                };
+            }
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             return path + name;

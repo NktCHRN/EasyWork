@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using WebAPI.DTOs;
+using HtmlAgilityPack;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace WebAPI.Controllers
 {
@@ -20,12 +22,18 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService)
+        private readonly IFileManager _fileManager;
+
+        private readonly IMailService _mailService;
+
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _mapper = mapper;
             _banService = banService;
+            _fileManager = fileManager;
+            _mailService = mailService;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -56,6 +64,11 @@ namespace WebAPI.Controllers
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "Wrong email or password"
+                });
+            if (!user.EmailConfirmed)
+                return Unauthorized(new LoginResponseDTO()
+                {
+                    ErrorMessage = "Please, confirm your email first"
                 });
             var bans = _banService.GetActiveUserBans(user.Id);
             if (bans.Any())
@@ -91,14 +104,52 @@ namespace WebAPI.Controllers
             var user = _mapper.Map<User>(model);
             user.RegistrationDate = DateTime.Now;
             user.UserName = model.Email;
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser is not null 
+                && !existingUser.EmailConfirmed 
+                && existingUser.RegistrationDate.AddDays(1) < DateTime.Now)
+                await _userManager.DeleteAsync(existingUser);
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
             else
             {
                 await _userManager.AddToRoleAsync(user, "User");
+                string data = System.IO.File.ReadAllText(Path.Combine(_fileManager.GetSolutionPath()!, "WebAPI\\Mails\\ConfirmEmail.html"));
+                var doc = new HtmlDocument();
+                doc.LoadHtml(data);
+                var logo = doc.GetElementbyId("logo");
+                logo.Attributes.Add("src", $"data:image/png;base64, {Convert.ToBase64String(await _fileManager.GetFileContentAsync("logo.png", Business.Enums.EasyWorkFileTypes.EasyWorkProjectImage))}");
+                var link = doc.GetElementbyId("link");
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var param = new Dictionary<string, string?>
+                {
+                    {"token", token },
+                    {"email", user.Email }
+                };
+                var callback = QueryHelpers.AddQueryString(model.ClientURI, param);
+
+                link.Attributes.Add("href", callback);
+                await _mailService.SendAsync(new Business.Other.MailRequest()
+                {
+                    To = model.Email,
+                    Subject = "EasyWork: Confirm your email",
+                    Body = doc.DocumentNode.InnerHtml
+                });
                 return StatusCode(201);
             }
+        }
+
+        [HttpGet("EmailConfirmation")]
+        public async Task<IActionResult> EmailConfirmation([FromQuery] string email, [FromQuery] string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+                return BadRequest("Invalid Email Confirmation Request");
+            var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
+            if (!confirmResult.Succeeded)
+                return BadRequest("Invalid Email Confirmation Request");
+            return Ok();
         }
     }
 }
