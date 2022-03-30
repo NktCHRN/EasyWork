@@ -15,6 +15,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using WebAPI;
 using WebAPI.Data;
+using WebAPI.TokenProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,12 +31,16 @@ builder.Services.AddIdentityCore<User>(options =>
     options.User.RequireUniqueEmail = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireNonAlphanumeric = false;
+    options.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
+    options.Tokens.PasswordResetTokenProvider = "CustomPasswordReset";
 })
     .AddUserValidator<CustomPropertiesUserValidator>()
     .AddUserValidator<PhoneNumberUserValidator>()
     .AddRoles<IdentityRole<int>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider); ;
+    .AddDefaultTokenProviders()
+    .AddTokenProvider<CustomEmailConfirmationTokenProvider<User>>("CustomEmailConfirmation")
+    .AddTokenProvider<CustomPasswordResetTokenProvider<User>>("CustomPasswordReset");
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(options => {
@@ -88,6 +93,12 @@ builder.Services.AddScoped<IUserOnProjectService, UserOnProjectService>();
 builder.Services.AddScoped<IUserStatsService, UserStatsService>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.Configure<CustomEmailConfirmationTokenProviderOptions>(opt =>
+        opt.TokenLifespan = TimeSpan
+        .FromHours(int.Parse(builder.Configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value)));
+builder.Services.Configure<CustomPasswordResetTokenProviderOptions>(opt =>
+        opt.TokenLifespan = TimeSpan
+        .FromHours(int.Parse(builder.Configuration.GetSection("TokenProvidersSetting:PasswordResetLifetime").Value)));
 
 var app = builder.Build();
 

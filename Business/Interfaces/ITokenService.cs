@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Google.Apis.Auth;
+using System.Security.Claims;
 
 namespace Business.Interfaces
 {
@@ -7,5 +8,7 @@ namespace Business.Interfaces
         string GenerateAccessToken(IEnumerable<Claim> claims);
         public string GenerateRefreshToken();
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+
+        public Task<GoogleJsonWebSignature.Payload?> VerifyGoogleTokenAsync(string idToken);
     }
 }
