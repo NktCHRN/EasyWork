@@ -68,7 +68,7 @@ namespace Business.Managers
                     throw new ArgumentException("This extension is not allowed");
                 if (file.Length > 8000000)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
-                var data = Image.Identify(file.OpenReadStream());
+                var data = await Image.IdentifyAsync(file.OpenReadStream());
                 if (data is null)
                     throw new ArgumentException("Cannot read image data");
                 if (data.Width != data.Height)
