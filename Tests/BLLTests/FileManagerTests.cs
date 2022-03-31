@@ -57,7 +57,6 @@ namespace Tests.BLLTests
         [TestCase(".png", "image/png")]
         [TestCase("tif", "image/tiff")]
         [TestCase(".tiff", "image/tiff")]
-        [TestCase("svg", "image/svg+xml")]
         [TestCase("bmp", "image/bmp")]
         [TestCase("ico", "image/vnd.microsoft.icon")]
         [TestCase("gif", "image/gif")]
@@ -75,7 +74,6 @@ namespace Tests.BLLTests
         [TestCase("jpeg", "image/jpeg")]
         [TestCase("png", "image/png")]
         [TestCase("tif", "image/tiff")]
-        [TestCase("svg", "svg+xml")]
         [TestCase("bmp", "image/bmp")]
         [TestCase("ico", "image/vnd.microsoft.icon")]
         [TestCase("gif", "gif")]
@@ -147,9 +145,9 @@ namespace Tests.BLLTests
         public async Task AddFileAsyncTest_ValidUserAvatar_AddsFile()
         {
             // Arrange
-            var newFileName = "Temp.svg";
+            var newFileName = "Temp.jpg";
             var ewtype = EasyWorkFileTypes.UserAvatar;
-            var oldFileName = "image4.svg";
+            var oldFileName = "image1.jpg";
             var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
             long oldLength = new FileInfo(oldPath).Length;
             using var stream = new MemoryStream(File.ReadAllBytes(oldPath).ToArray());
@@ -172,15 +170,30 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task AddFileAsyncByteArrayTestB_ValidUserAvatar_AddsFile()
+        public void AddFileAsyncTest_NotSquareUserAvatar_ThrowsArgumentException()
         {
             // Arrange
-            var newFileName = "Temp.svg";
+            var newFileName = "Temp.jpg";
             var ewtype = EasyWorkFileTypes.UserAvatar;
-            var oldFileName = "image4.svg";
+            var oldFileName = "image4.jpg";
             var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
             long oldLength = new FileInfo(oldPath).Length;
             using var stream = new MemoryStream(File.ReadAllBytes(oldPath).ToArray());
+            var formFile = new FormFile(stream, 0, stream.Length, "streamFile", oldFileName);
+
+            // Act && Assert
+            Assert.ThrowsAsync<ArgumentException>(() => _manager.AddFileAsync(formFile, newFileName, ewtype));
+        }
+
+        [Test]
+        public async Task AddFileAsyncByteArrayTestB_ValidUserAvatar_AddsFile()
+        {
+            // Arrange
+            var newFileName = "Temp.png";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image3.png";
+            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            long oldLength = new FileInfo(oldPath).Length;
             var file = await File.ReadAllBytesAsync(oldPath);
 
             // Act
@@ -197,6 +210,90 @@ namespace Tests.BLLTests
             }
             Assert.IsTrue(exists, "Method does not copy a file to folder");
             Assert.AreEqual(oldLength, newLength, "Method damages the file");
+        }
+
+        [Test]
+        public async Task AddFileAsyncByteArrayTestB2_ValidUserAvatar_AddsFile()
+        {
+            // Arrange
+            var newFileName = "Temp.bmp";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image2.bmp";
+            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            long oldLength = new FileInfo(oldPath).Length;
+            var file = await File.ReadAllBytesAsync(oldPath);
+
+            // Act
+            await _manager.AddFileAsync(file, newFileName, ewtype);
+
+            // Assert
+            long newLength = 0;
+            string newPath = GetSolutionPath() + "\\Data\\UserAvatars\\" + newFileName;
+            var exists = File.Exists(newPath);
+            if (exists)
+            {
+                newLength = new FileInfo(newPath).Length;
+                File.Delete(newPath);
+            }
+            Assert.IsTrue(exists, "Method does not copy a file to folder");
+            Assert.AreEqual(oldLength, newLength, "Method damages the file");
+        }
+
+        [Test]
+        public async Task AddFileAsyncByteArrayTestB3_ValidUserAvatar_AddsFile()
+        {
+            // Arrange
+            var newFileName = "Temp.webp";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image5.webp";
+            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            long oldLength = new FileInfo(oldPath).Length;
+            var file = await File.ReadAllBytesAsync(oldPath);
+
+            // Act
+            await _manager.AddFileAsync(file, newFileName, ewtype);
+
+            // Assert
+            long newLength = 0;
+            string newPath = GetSolutionPath() + "\\Data\\UserAvatars\\" + newFileName;
+            var exists = File.Exists(newPath);
+            if (exists)
+            {
+                newLength = new FileInfo(newPath).Length;
+                File.Delete(newPath);
+            }
+            Assert.IsTrue(exists, "Method does not copy a file to folder");
+            Assert.AreEqual(oldLength, newLength, "Method damages the file");
+        }
+
+        [Test]
+        public void AddFileAsyncByteArrayTest_NotSquareUserAvatar_ThrowsArgumentException()
+        {
+            // Arrange
+            var newFileName = "Temp.jpg";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "image4.jpg";
+            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            long oldLength = new FileInfo(oldPath).Length;
+            var file = File.ReadAllBytes(oldPath);
+
+            // Act && Assert
+            Assert.ThrowsAsync<ArgumentException>(() => _manager.AddFileAsync(file, newFileName, ewtype));
+        }
+
+        [Test]
+        public void AddFileAsyncByteArrayTest_FakeFileType_ThrowsArgumentException()
+        {
+            // Arrange
+            var newFileName = "Temp.jpg";
+            var ewtype = EasyWorkFileTypes.UserAvatar;
+            var oldFileName = "file1.pdf";
+            var oldPath = GetSolutionPath() + "\\Tests\\TestFiles\\" + oldFileName;
+            long oldLength = new FileInfo(oldPath).Length;
+            var file = File.ReadAllBytes(oldPath);
+
+            // Act && Assert
+            Assert.ThrowsAsync<ArgumentException>(() => _manager.AddFileAsync(file, newFileName, ewtype));
         }
 
         [Test]

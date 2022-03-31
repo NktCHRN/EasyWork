@@ -1,6 +1,7 @@
 ﻿using Business.Enums;
 using Business.Interfaces;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp;
 
 namespace Business.Managers
 {
@@ -17,7 +18,6 @@ namespace Business.Managers
                     ("jpeg", "jpeg"),
                     ("jpg", "jpeg"),
                     ("png", "png"),
-                    ("svg", "svg+xml"),
                     ("tif", "tiff"),
                     ("tiff", "tiff"),
                     ("webp", "webp")
@@ -68,6 +68,11 @@ namespace Business.Managers
                     throw new ArgumentException("This extension is not allowed");
                 if (file.Length > 8000000)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
+                var data = Image.Identify(file.OpenReadStream());
+                if (data is null)
+                    throw new ArgumentException("Cannot read image data");
+                if (data.Width != data.Height)
+                    throw new ArgumentException("Image should be square");
             }
             var path = GetPathByEWType(name, ewtype);
             using var fileStream = new FileStream(path, FileMode.Create);
@@ -127,6 +132,11 @@ namespace Business.Managers
                     throw new ArgumentException("This extension is not allowed");
                 if (file.Length > 8000000)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
+                var data = Image.Identify(file);
+                if (data is null)
+                    throw new ArgumentException("Cannot read image data");
+                if (data.Width != data.Height)
+                    throw new ArgumentException("Image should be square");
             }
             var path = GetPathByEWType(name, ewtype);
             using var fileStream = new FileStream(path, FileMode.Create);
