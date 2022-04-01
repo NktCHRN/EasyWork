@@ -33,9 +33,16 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] string? search)
         {
-            var users = _userManager.Users.Where(u => u.EmailConfirmed);
+            var users = _userManager.Users.Where(u => u.EmailConfirmed).AsEnumerable();
+            if (search is not null)
+            {
+                search = search.ToLowerInvariant();
+                users = users.Where(u => u.Id.ToString() == search
+                || u.Email.ToLowerInvariant().Contains(search)
+                || search.Contains(u.FirstName.ToLowerInvariant()) || (u.LastName != null && (search.Contains(u.LastName.ToLowerInvariant()) || u.LastName.ToLowerInvariant().Contains(search))));
+            }
             var profiles = new List<UserProfileReducedDTO>();
             foreach (var user in users)
             {
@@ -143,5 +150,7 @@ namespace WebAPI.Controllers
             await _banService.DeleteActiveUserBansAsync(user.Id);
             return NoContent();
         }
+
+        // TODO: find (by id/email/fullname/phonenumber... in one method)
     }
 }
