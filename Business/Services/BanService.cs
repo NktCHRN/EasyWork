@@ -49,7 +49,9 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
-            await _context.Bans.AddAsync(_mapper.Map<Ban>(model));
+            var mapped = _mapper.Map<Ban>(model);
+            await _context.Bans.AddAsync(mapped);
+            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
         }
 
@@ -70,9 +72,9 @@ namespace Business.Services
         /// <param name="userId"></param>
         public async Task DeleteActiveUserBansAsync(int userId)
         {
-            var bans = GetNotMappedActiveUserBans(userId);
-            foreach (var ban in bans)
-                await DeleteNotMappedAsync(ban);
+            var bans = GetNotMappedActiveUserBans(userId).ToList();
+            for (int i = 0; i < bans.Count; i++)
+                await DeleteNotMappedAsync(bans.ElementAt(i));
         }
 
         /// <summary>
@@ -93,7 +95,7 @@ namespace Business.Services
         /// <returns>IEnumerable of all active ban models with given user id</returns>
         public IEnumerable<BanModel> GetActiveUserBans(int userId)
         {
-            return _mapper.Map<IEnumerable<BanModel>>(GetNotMappedActiveUserBans(userId));
+            return _mapper.Map<IEnumerable<BanModel>>(GetNotMappedActiveUserBans(userId)).Reverse();
         }
 
         /// <summary>
@@ -158,7 +160,7 @@ namespace Business.Services
         /// <returns>IEnumerable of all ban models with given admin id</returns>
         public IEnumerable<BanModel> GetAdminBans(int adminId)
         {
-            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.AdminId == adminId));
+            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.AdminId == adminId)).Reverse();
         }
 
         /// <summary>
@@ -168,7 +170,14 @@ namespace Business.Services
         /// <returns>IEnumerable of all ban models with given user id</returns>
         public IEnumerable<BanModel> GetUserBans(int userId)
         {
-            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.UserId == userId));
+            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.UserId == userId)).Reverse();
+        }
+
+        public bool IsBanned(int userId) => GetNotMappedActiveUserBans(userId).Any();
+
+        public IEnumerable<BanModel> GetLast(int quantity)
+        {
+            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.AsEnumerable().TakeLast(quantity)).Reverse();
         }
     }
 }

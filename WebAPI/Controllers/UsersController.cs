@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Business.Interfaces;
+using Business.Models;
 using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
@@ -17,14 +19,17 @@ namespace WebAPI.Controllers
 
         public readonly IUserStatsService _userStatsService;
 
+        public readonly IBanService _banService;
+
         private readonly IMapper _mapper;
 
-        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, UserManager<User> userManager, IMapper mapper)
+        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, UserManager<User> userManager, IMapper mapper, IBanService banService)
         {
             _userStatsService = userStatsService;
             _fileManager = fileManager;
             _userManager = userManager;
             _mapper = mapper;
+            _banService = banService;
         }
 
         [HttpGet]
@@ -77,6 +82,58 @@ namespace WebAPI.Controllers
                 TasksDone = stats.TasksDone,
                 TasksNotDone = stats.TasksNotDone
             });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}/bans")]
+        public async Task<IActionResult> GetUserBans(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user is null || !user.EmailConfirmed)
+                return NotFound();
+            var bans = _banService.GetUserBans(user.Id);
+            return Ok(await MapBansAsync(bans));
+        }
+
+        internal async Task<IEnumerable<BannedUserDTO>> MapBansAsync(IEnumerable<BanModel> bans)
+        {
+            var mappedBans = new List<BannedUserDTO>();
+            foreach (var ban in bans)
+            {
+                var mappedBan = _mapper.Map<BannedUserDTO>(ban);
+                var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
+                mappedBan = mappedBan with
+                {
+                    AdminEmail = admin.Email,
+                    AdminName = (admin.LastName is null) ? admin.FirstName : admin.FirstName + " " + admin.LastName,
+                };
+                mappedBans.Add(mappedBan);
+            }
+            return mappedBans;
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("{id}/activeBans")]
+        public async Task<IActionResult> GetActiveUserBans(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user is null || !user.EmailConfirmed)
+                return NotFound();
+            var bans = _banService.GetActiveUserBans(user.Id);
+            return Ok(await MapBansAsync(bans));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}/unban")]
+        public async Task<IActionResult> UnbanUser(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user is null || !user.EmailConfirmed)
+                return NotFound();
+            if (!_banService.IsBanned(id))
+                return NotFound("This user is not banned");
+            await _banService.DeleteActiveUserBansAsync(user.Id);
+            return NoContent();
         }
     }
 }

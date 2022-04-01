@@ -118,13 +118,21 @@ namespace Tests.BLLTests
                     DateFrom = DateTime.Now.AddMonths(-1),
                     DateTo = DateTime.Now.AddMonths(3)
                 },
-                new Ban()   // id 4
+                new Ban()   // id 5
                 {
                     AdminId = 5,
                     UserId = 2,
                     Hammer = "Lorem ipsum 3",
                     DateFrom = DateTime.Now.AddMonths(-3),
                     DateTo = DateTime.Now.AddMonths(-2)
+                },
+                new Ban()   // id 6
+                {
+                    AdminId = 5,
+                    UserId = 1,
+                    Hammer = "Lorem ipsum 3",
+                    DateFrom = DateTime.Now.AddMonths(-5),
+                    DateTo = DateTime.Now.AddMonths(-3)
                 }
             };
             foreach (var ban in bans)
@@ -132,6 +140,50 @@ namespace Tests.BLLTests
                 _context.Bans.Add(ban);
                 _context.SaveChanges();
             }
+        }
+
+        [Test]
+        [TestCase(2)]
+        public void IsBannedTest_ReturnsTrue(int userId)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var result = _service.IsBanned(userId);
+
+            // Assert
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        [TestCase(1)]
+        public void IsBannedTest_ReturnsFalse(int userId)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var result = _service.IsBanned(userId);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+
+        [Test]
+        [TestCase(3, 3)]
+        [TestCase(5, 5)]
+        [TestCase(10, 6)]
+        public void GetLastTest_ReturnsTopNBans(int n, int expectedCount)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var actualCount = _service.GetLast(n).Count();
+
+            // Assert
+            Assert.AreEqual(expectedCount, actualCount);
         }
 
         [Test]
@@ -162,12 +214,13 @@ namespace Tests.BLLTests
 
             // Assert
             Assert.AreEqual(expectedCount, actualCount, "Method does not adds an element");
+            Assert.AreNotEqual(_validBan.Id, 0, "Method does not set id to the model");
         }
 
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(6)]
+        [TestCase(7)]
         public void DeleteByIdAsync_InvalidId_ThrowsInvalidOperationException(int id)
         {
             // Arrange
@@ -217,7 +270,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(6)]
+        [TestCase(7)]
         public async Task GetByIdAsync_InvalidId_ReturnsNull(int id)
         {
             // Arrange
@@ -288,7 +341,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(6)]
+        [TestCase(7)]
         public void UpdateAsyncTest_NotExistingModel_ThrowsInvalidOperationException(int id)
         {
             // Arrange

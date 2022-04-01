@@ -33,7 +33,9 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
-            await _context.Tags.AddAsync(_mapper.Map<Tag>(model));
+            var mapped = _mapper.Map<Tag>(model);
+            await _context.Tags.AddAsync(mapped);
+            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
         }
 

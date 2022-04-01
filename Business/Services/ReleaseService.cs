@@ -33,8 +33,10 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
-            await _context.Releases.AddAsync(_mapper.Map<Release>(model));
-            await _context.SaveChangesAsync(); ;
+            var mapped = _mapper.Map<Release>(model);
+            await _context.Releases.AddAsync(mapped);
+            model.Id = mapped.Id;
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteByIdAsync(int id)

@@ -10,6 +10,10 @@ namespace Business.Interfaces
 
         IEnumerable<BanModel> GetAdminBans(int adminId);
 
+        IEnumerable<BanModel> GetLast(int quantity);
+
+        bool IsBanned(int userId);
+
         Task DeleteActiveUserBansAsync(int userId);
     }
 }

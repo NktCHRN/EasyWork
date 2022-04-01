@@ -9,6 +9,7 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Authorization;
 using WebAPI.Other;
+using Business.Models;
 
 namespace WebAPI.Controllers
 {
@@ -88,11 +89,13 @@ namespace WebAPI.Controllers
                 });
             var bans = _banService.GetActiveUserBans(user.Id);
             if (bans.Any())
+            {
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "You are banned from this website",
-                    ErrorDetails = _mapper.Map<IEnumerable<BannedUserDTO>>(bans)
+                    ErrorDetails = await MapBansAsync(bans)
                 });
+            }
             user.LastSeen = DateTime.Now;
             var refreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshToken = refreshToken;
@@ -107,6 +110,23 @@ namespace WebAPI.Controllers
                     RefreshToken = refreshToken
                 }
             });
+        }
+
+        internal async Task<IEnumerable<BannedUserDTO>> MapBansAsync(IEnumerable<BanModel> bans)
+        {
+            var mappedBans = new List<BannedUserDTO>();
+            foreach (var ban in bans)
+            {
+                var mappedBan = _mapper.Map<BannedUserDTO>(ban);
+                var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
+                mappedBan = mappedBan with
+                {
+                    AdminEmail = admin.Email,
+                    AdminName = (admin.LastName is null) ? admin.FirstName : admin.FirstName + " " + admin.LastName,
+                };
+                mappedBans.Add(mappedBan);
+            }
+            return mappedBans;
         }
 
         [HttpPost]
@@ -221,7 +241,7 @@ namespace WebAPI.Controllers
             if (!resetPasswordResult.Succeeded)
             {
                 var errors = resetPasswordResult.Errors.Select(e => e.Description);
-                return BadRequest(new { Errors = errors });
+                return BadRequest(errors);
             }
             return Ok();
         }
@@ -282,11 +302,13 @@ namespace WebAPI.Controllers
 
             var bans = _banService.GetActiveUserBans(user.Id);
             if (bans.Any())
+            {
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "You are banned from this website",
-                    ErrorDetails = _mapper.Map<IEnumerable<BannedUserDTO>>(bans)
+                    ErrorDetails = await MapBansAsync(bans)
                 });
+            }
 
             user.LastSeen = DateTime.Now;
             var refreshToken = _tokenService.GenerateRefreshToken();
@@ -345,13 +367,7 @@ namespace WebAPI.Controllers
             }
             catch (ArgumentException exc)
             {
-                return BadRequest(new
-                {
-                    errors = new
-                    {
-                        exc.Message
-                    }
-                });
+                return BadRequest(exc.Message);
             }
             return NoContent();
         }
@@ -370,13 +386,7 @@ namespace WebAPI.Controllers
             }
             catch (InvalidOperationException exc)
             {
-                return NotFound(new
-                {
-                    errors = new
-                    {
-                        exc.Message
-                    }
-                });
+                return NotFound(exc.Message);
             }
             return NoContent();
         }

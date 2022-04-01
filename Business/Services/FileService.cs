@@ -52,6 +52,7 @@ namespace Business.Services
             }
             var mapped = _mapper.Map<File>(model);
             await _context.Files.AddAsync(mapped);
+            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
             await _manager.AddFileAsync(file, mapped.Id.ToString() + Path.GetExtension(model.Name), Enums.EasyWorkFileTypes.File);
         }

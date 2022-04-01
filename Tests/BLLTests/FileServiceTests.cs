@@ -231,6 +231,7 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedCount, actualCount, "Method does not add a file model to DB");
             _managerMock.Verify(t => t.AddFileAsync(file, expectedName, Business.Enums.EasyWorkFileTypes.File),
                 "Method does not add file to file system");
+            Assert.AreNotEqual(fileModel.Id, 0, "Method does not set id to the model");
         }
 
         [Test]

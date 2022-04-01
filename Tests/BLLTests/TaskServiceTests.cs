@@ -513,6 +513,7 @@ namespace Tests.BLLTests
             var actual = _context.Tasks.Last();
             Assert.AreEqual(expectedCount, actualCount, "Method does not add a model to DB");
             Assert.AreEqual(expectedName, actual.Name, "Method does not add model with needed information");
+            Assert.AreNotEqual(model.Id, 0, "Method does not set id to the model");
         }
 
         [Test]

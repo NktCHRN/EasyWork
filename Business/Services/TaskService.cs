@@ -65,7 +65,9 @@ namespace Business.Services
                         throw new InvalidOperationException("You cannot exceed the \"Validate\" tasks limit");
                     break;
             }
-            await _context.Tasks.AddAsync(_mapper.Map<TaskEntity>(model));
+            var mapped = _mapper.Map<TaskEntity>(model);
+            await _context.Tasks.AddAsync(mapped);
+            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
         }
 
