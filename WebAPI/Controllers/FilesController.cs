@@ -1,5 +1,4 @@
 ﻿using Business.Interfaces;
-using Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -11,7 +10,7 @@ namespace WebAPI.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class FileController : ControllerBase
+    public class FilesController : ControllerBase
     {
         private readonly IFileService _service;
 
@@ -23,7 +22,7 @@ namespace WebAPI.Controllers
 
         private readonly IUserOnProjectService _uopService;
 
-        public FileController(IFileService service, IFileManager manager, IMessageService messageService, 
+        public FilesController(IFileService service, IFileManager manager, IMessageService messageService, 
             ITaskService taskService, IUserOnProjectService uopService)
         {
             _service = service;

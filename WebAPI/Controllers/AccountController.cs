@@ -7,8 +7,6 @@ using System.Security.Claims;
 using WebAPI.DTOs;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
-using Google.Apis.Auth;
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using WebAPI.Other;
 
@@ -34,9 +32,11 @@ namespace WebAPI.Controllers
 
         private readonly IUserAvatarService _userAvatarService;
 
+        public readonly IUserStatsService _userStatsService;
+
         private int EmailConfirmationLifeTime => int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService)
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -46,6 +46,7 @@ namespace WebAPI.Controllers
             _mailService = mailService;
             _configuration = configuration;
             _userAvatarService = userAvatarService;
+            _userStatsService = userStatsService;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -375,6 +376,31 @@ namespace WebAPI.Controllers
                 });
             }
             return NoContent();
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
+            var stats = _userStatsService.GetStatsById(user.Id);
+            string? avatarType = null;
+            byte[]? avatar = null;
+            if (user.AvatarFormat is not null)
+            {
+                avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
+                avatar = await _fileManager
+                    .GetFileContentAsync(user.Id + "." + user.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+            }
+            var model = _mapper.Map<UserCabinetProfileDTO>(user);
+            return Ok(model with
+            {
+                MIMEAvatarType = avatarType,
+                Avatar = avatar,
+                Projects = stats.Projects,
+                TasksDone = stats.TasksDone,
+                TasksNotDone = stats.TasksNotDone
+            });
         }
     }
 }

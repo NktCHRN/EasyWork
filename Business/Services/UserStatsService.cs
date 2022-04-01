@@ -16,7 +16,7 @@ namespace Business.Services
         public UserStats GetStatsById(int userId)
         {
             var userTasks = _context.Tasks.Where(t => t.ExecutorId == userId);
-            var tasksDoneCount = userTasks.Where(t => TaskService.IsDone(t.Status)).Count();
+            var tasksDoneCount = userTasks.AsEnumerable().Where(t => TaskService.IsDone(t.Status)).Count();
             return new UserStats()
             {
                 UserId = userId,
