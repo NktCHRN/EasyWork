@@ -6,7 +6,6 @@ namespace WebAPI.DTOs
     public record RegisterUserDTO
     {
         [Required(AllowEmptyStrings = false)]
-        [Column(TypeName = "nvarchar(50)")]
         [StringLength(50, ErrorMessage = "The maximum length of the first name is 50")]
         public string FirstName { get; init; } = string.Empty;
 

@@ -9,6 +9,8 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 using Google.Apis.Auth;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using WebAPI.Other;
 
 namespace WebAPI.Controllers
 {
@@ -294,6 +296,85 @@ namespace WebAPI.Controllers
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 }, IsAuthSuccessful = true });
+        }
+
+        [Authorize]
+        [HttpPut]
+        public async Task<IActionResult> Update(UpdateUserDTO model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
+            user = _mapper.Map(model, user);
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+            return NoContent();
+        }
+
+        [Authorize]
+        [Route("LastSeen")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateLastSeen()
+        {
+            var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
+            user.LastSeen = DateTime.Now;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+            return NoContent();
+        }
+
+        [Authorize]
+        [Route("Avatar")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateAvatar(IFormFile file)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            try
+            {
+                await _userAvatarService.UpdateAvatarAsync(userId.Value, file);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(new
+                {
+                    errors = new
+                    {
+                        exc.Message
+                    }
+                });
+            }
+            return NoContent();
+        }
+
+        [Authorize]
+        [Route("Avatar")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAvatar()
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            try
+            {
+                await _userAvatarService.DeleteAvatarByUserIdAsync(userId.Value);
+            }
+            catch (InvalidOperationException exc)
+            {
+                return NotFound(new
+                {
+                    errors = new
+                    {
+                        exc.Message
+                    }
+                });
+            }
+            return NoContent();
         }
     }
 }

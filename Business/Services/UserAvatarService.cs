@@ -30,7 +30,7 @@ namespace Business.Services
         {
             var user = await GetNotMappedByIdAsync(userId);
             if (string.IsNullOrEmpty(user.AvatarFormat))
-                throw new InvalidOperationException("The project does not have any main picture right now");
+                throw new InvalidOperationException("User does not have any avatar right now");
             try
             {
                 _manager.DeleteFile(user.Id.ToString() + '.' + user.AvatarFormat, Enums.EasyWorkFileTypes.UserAvatar);
@@ -51,8 +51,6 @@ namespace Business.Services
             if (!_manager.IsValidImageType(extension))
                 throw new ArgumentException("Not appropriate file type", nameof(image));
             var newFileName = userId + extension;
-            try
-            {
                 await _manager.AddFileAsync(image, newFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 if (oldFileName != newFileName)
                 {
@@ -62,8 +60,6 @@ namespace Business.Services
                     if (!string.IsNullOrEmpty(oldFileName))
                         _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 }
-            }
-            catch (Exception) { }
         }
 
         public async Task UpdateAvatarAsync(int userId, byte[] image, string imageType)
@@ -77,8 +73,6 @@ namespace Business.Services
             if (!imageType.StartsWith("."))
                 imageType = "." + imageType;
             var newFileName = userId + imageType;
-            try
-            {
                 await _manager.AddFileAsync(image, newFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 if (oldFileName != newFileName)
                 {
@@ -88,8 +82,6 @@ namespace Business.Services
                     if (!string.IsNullOrEmpty(oldFileName))
                         _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 }
-            }
-            catch (Exception) { }
         }
     }
 }
