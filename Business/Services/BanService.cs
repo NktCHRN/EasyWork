@@ -51,8 +51,8 @@ namespace Business.Services
                 throw new ArgumentException(error, nameof(model));
             var mapped = _mapper.Map<Ban>(model);
             await _context.Bans.AddAsync(mapped);
-            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
+            model.Id = mapped.Id;
         }
 
         /// <summary>

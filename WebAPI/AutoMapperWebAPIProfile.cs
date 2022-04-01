@@ -13,8 +13,11 @@ namespace WebAPI
                 .ForSourceMember(s => s.Password, opt => opt.DoNotValidate())
                 .ForSourceMember(s => s.PasswordConfirm, opt => opt.DoNotValidate());
             CreateMap<BanModel, BannedUserDTO>()
-                .ForMember(u => u.AdminName, m => m.Ignore())
-                .ForMember(u => u.AdminEmail, m => m.Ignore());
+                .ForMember(u => u.Admin, m => m.Ignore());
+            CreateMap<BanModel, BanDTO>()
+                .ForMember(u => u.Admin, m => m.Ignore())
+                .ForMember(u => u.User, m => m.Ignore());
+            CreateMap<AddBanDTO, BanModel>();
             CreateMap<UpdateUserDTO, User>();
             CreateMap<User, UserCabinetProfileDTO>()
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())

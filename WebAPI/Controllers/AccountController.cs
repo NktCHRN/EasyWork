@@ -119,11 +119,19 @@ namespace WebAPI.Controllers
             {
                 var mappedBan = _mapper.Map<BannedUserDTO>(ban);
                 var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
-                mappedBan = mappedBan with
+                if (admin is not null)
                 {
-                    AdminEmail = admin.Email,
-                    AdminName = (admin.LastName is null) ? admin.FirstName : admin.FirstName + " " + admin.LastName,
-                };
+                    var adminModel = new UserMiniDTO()
+                    {
+                        Id = admin.Id,
+                        Email = admin.Email,
+                        FullName = (admin.LastName is null) ? admin.FirstName : admin.FirstName + " " + admin.LastName,
+                    };
+                    mappedBan = mappedBan with
+                    {
+                        Admin = adminModel
+                    };
+                }
                 mappedBans.Add(mappedBan);
             }
             return mappedBans;

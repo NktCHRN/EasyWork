@@ -40,8 +40,8 @@ namespace Business.Services
                 throw new ArgumentException(error, nameof(model));
             var mapped = _mapper.Map<Message>(model);
             await _context.Messages.AddAsync(mapped);
-            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
+            model.Id = mapped.Id;
         }
 
         public async Task DeleteByIdAsync(int id)

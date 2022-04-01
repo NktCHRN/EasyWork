@@ -67,8 +67,8 @@ namespace Business.Services
             }
             var mapped = _mapper.Map<TaskEntity>(model);
             await _context.Tasks.AddAsync(mapped);
-            model.Id = mapped.Id;
             await _context.SaveChangesAsync();
+            model.Id = mapped.Id;
         }
 
         public async Task AddTagToTaskAsync(int taskId, int tagId)
