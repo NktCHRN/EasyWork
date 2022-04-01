@@ -164,7 +164,7 @@ namespace Tests.BLLTests
                     SenderId = 3,
                     Text = "This is message 5",
                     TaskId = 2,
-                    IsRead = true
+                    IsRead = false
                 }
             };
             foreach (var message in messages)

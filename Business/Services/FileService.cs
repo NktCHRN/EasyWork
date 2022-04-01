@@ -42,13 +42,13 @@ namespace Business.Services
             {
                 var message = await _context.Messages.Include(m => m.Files).FirstAsync(m => m.Id == model.MessageId);
                 if (message.Files.Count >= maxFiles)
-                    throw new InvalidOperationException("Message can have not more than 10");
+                    throw new InvalidOperationException("Message can have not more than 10 files");
             }
             if (model.TaskId is not null)
             {
                 var task = await _context.Tasks.Include(m => m.Files).FirstAsync(m => m.Id == model.TaskId);
                 if (task.Files.Count >= maxFiles)
-                    throw new InvalidOperationException("Message can have not more than 10");
+                    throw new InvalidOperationException("Task can have not more than 10 files");
             }
             var mapped = _mapper.Map<File>(model);
             await _context.Files.AddAsync(mapped);

@@ -34,9 +34,11 @@ namespace WebAPI.Controllers
 
         public readonly IUserStatsService _userStatsService;
 
+        public readonly IMessageService _messageService;
+
         private int EmailConfirmationLifeTime => int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService)
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IMessageService messageService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -47,6 +49,7 @@ namespace WebAPI.Controllers
             _configuration = configuration;
             _userAvatarService = userAvatarService;
             _userStatsService = userStatsService;
+            _messageService = messageService;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -401,6 +404,17 @@ namespace WebAPI.Controllers
                 TasksDone = stats.TasksDone,
                 TasksNotDone = stats.TasksNotDone
             });
+        }
+
+        [Authorize]
+        [Route("Notifications")]
+        [HttpGet]
+        public IActionResult GetNotifications()
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            return Ok(_messageService.GetNotReadMessagesForUser(userId.Value));
         }
     }
 }

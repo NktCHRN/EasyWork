@@ -111,7 +111,7 @@ namespace Business.Services
         public IEnumerable<MessageModel> GetNotReadMessagesForUser(int userId)
         {
             var tasksIds = _context.Tasks.Where(t => t.ExecutorId == userId).Select(t => t.Id);
-            var messages = _context.Messages.Where(m => tasksIds.Contains(m.TaskId) && m.SenderId != userId);
+            var messages = _context.Messages.Where(m => tasksIds.Contains(m.TaskId) && m.SenderId != userId && !m.IsRead);
             return _mapper.Map<IEnumerable<MessageModel>>(messages).Reverse();
         }
     }
