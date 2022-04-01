@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Business.Interfaces;
 using Data.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
@@ -31,7 +30,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var users = _userManager.Users;
+            var users = _userManager.Users.Where(u => u.EmailConfirmed);
             var profiles = new List<UserProfileReducedDTO>();
             foreach (var user in users)
             {
@@ -58,7 +57,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user is null)
+            if (user is null || !user.EmailConfirmed)
                 return NotFound();
             var profile = _mapper.Map<UserProfileDTO>(user);
             var stats = _userStatsService.GetStatsById(user.Id);
