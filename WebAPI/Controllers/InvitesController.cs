@@ -4,6 +4,8 @@ using Business.Models;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs;
 using WebAPI.Other;
 
@@ -49,6 +51,10 @@ namespace WebAPI.Controllers
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return BadRequest("You are already added to this project");
             }
             return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{userId}", _mapper.Map<UserOnProjectDTO>(uop));
             // recheck this route!!!
