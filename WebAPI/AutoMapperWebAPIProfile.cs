@@ -41,6 +41,8 @@ namespace WebAPI
                         string.IsNullOrEmpty(usr.LastName) ? usr.FirstName : usr.FirstName + " " + usr.LastName))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
                 .ForMember(u => u.Avatar, m => m.Ignore());
+            CreateMap<UserOnProjectModel, UserOnProjectDTO>()
+                .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
         }
     }
 }
