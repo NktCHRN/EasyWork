@@ -112,5 +112,19 @@ namespace Business.Services
             _context.Projects.Update(existingModel);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<ProjectModel?> GetProjectByActiveInviteCodeAsync(Guid inviteCode)
+        {
+            return _mapper.Map<ProjectModel?>(await _context.Projects
+                .FirstOrDefaultAsync(p => p.InviteCode == inviteCode && p.IsInviteCodeActive));
+        }
+
+        public async Task<ProjectModel?> GetProjectByActiveInviteCodeAsync(string? inviteCode)
+        {
+            var parsed = Guid.TryParse(inviteCode, out Guid result);
+            if (!parsed)
+                return null;
+            return await GetProjectByActiveInviteCodeAsync(result);
+        }
     }
 }

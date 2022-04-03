@@ -150,7 +150,5 @@ namespace WebAPI.Controllers
             await _banService.DeleteActiveUserBansAsync(user.Id);
             return NoContent();
         }
-
-        // TODO: find (by id/email/fullname/phonenumber... in one method)
     }
 }

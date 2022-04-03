@@ -190,7 +190,7 @@ namespace Tests.BLLTests
                     TaskId = 3
                 },
             };
-            foreach(var message in messages)
+            foreach (var message in messages)
             {
                 _context.Messages.Add(message);
                 _context.SaveChanges();
@@ -270,7 +270,7 @@ namespace Tests.BLLTests
                     Name = "Testing",
                 }
             };
-            foreach(var tag in tags)
+            foreach (var tag in tags)
             {
                 _context.Tags.Add(tag);
                 _context.SaveChanges();
@@ -352,13 +352,13 @@ namespace Tests.BLLTests
         private readonly ProjectModel _validForUpdateProject = new()        // id 1
         {
             Id = 1,
-                Name = "Updated project sample 1",
-                Description = "This is updated project one description...",
-                MaxInProgress = 7,
-                MaxToDo = 7,
-                MaxValidate = 7,
-                InviteCode = Guid.NewGuid(),
-                IsInviteCodeActive = true,
+            Name = "Updated project sample 1",
+            Description = "This is updated project one description...",
+            MaxInProgress = 7,
+            MaxToDo = 7,
+            MaxValidate = 7,
+            InviteCode = Guid.NewGuid(),
+            IsInviteCodeActive = true,
             // Do not forget to fix start date
         };
 
@@ -586,7 +586,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var userId = 1;
-            IEnumerable<int> expectedProjectNumbers = new[] {2, 1, 3};
+            IEnumerable<int> expectedProjectNumbers = new[] { 2, 1, 3 };
 
             // Act
             var actual = _service.GetUserProjects(userId);
@@ -596,6 +596,95 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedProjectNumbers.Count(), actualProjectNumbers.Count(), "The quantities of elements are not equal. " +
                 "Wrong elements returned");
             Assert.IsTrue(expectedProjectNumbers.SequenceEqual(actualProjectNumbers), "Elements are wrong or not sorted correctly");
+        }
+
+        [Test]
+        public async Task GetProjectByActiveInviteCodeAsyncTest_ReturnsProject()
+        {
+            // Arrange
+            SeedData();
+            var guid = (await _context.Projects.FirstAsync())!.InviteCode!.Value;
+            var expectedId = 1;
+
+            // Act
+            var actualId = (await _service.GetProjectByActiveInviteCodeAsync(guid))!.Id;
+
+            // Assert
+            Assert.AreEqual(expectedId, actualId);
+        }
+
+        IEnumerable<Guid> Guids
+            {
+            get {
+                SeedData();
+                return new Guid[]
+                {
+                    new Guid(),
+                    _context.Projects.Find(2)!.InviteCode!.Value
+                };
+            }
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        public async Task GetProjectByActiveInviteCodeAsyncTest_ReturnsNull(int index)
+        {
+            // Arrange
+            var guid = Guids.ElementAt(index);
+
+            // Act
+            var result = await _service.GetProjectByActiveInviteCodeAsync(guid);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [Test]
+        public async Task GetProjectByActiveInviteCodeAsyncStringTest_ReturnsProject()
+        {
+            // Arrange
+            SeedData();
+            var expectedId = 3;
+            var guid = (await _context.Projects.FindAsync(3))!.InviteCode!.Value.ToString();
+
+            // Act
+            var actualId = (await _service.GetProjectByActiveInviteCodeAsync(guid))!.Id;
+
+            // Assert
+            Assert.AreEqual(expectedId, actualId);
+        }
+
+        IEnumerable<string> GuidStrings
+        {
+            get
+            {
+                SeedData();
+                return new String[]
+                {
+                    new Guid().ToString(),
+                    _context.Projects.Find(2)!.InviteCode!.Value.ToString(),
+                    "",
+                    "string123"
+                };
+            }
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public async Task GetProjectByActiveInviteCodeAsyncStringTest_ReturnsNull(int index)
+        {
+            // Arrange
+            var guid = GuidStrings.ElementAt(index);
+
+            // Act
+            var result = await _service.GetProjectByActiveInviteCodeAsync(guid);
+
+            // Assert
+            Assert.IsNull(result);
         }
     }
 }
