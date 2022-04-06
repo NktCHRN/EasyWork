@@ -18,5 +18,7 @@ namespace Business.Interfaces
         Task<IEnumerable<UserOnProjectModelExtended>> GetAllProjectUsersAsync(int projectId);  // participants + owner
 
         Task<UserOnProjectRoles?> GetRoleOnProjectAsync(int projectId, int userId);
+
+        Task<bool> IsOnProjectAsync(int projectId, int userId);
     }
 }

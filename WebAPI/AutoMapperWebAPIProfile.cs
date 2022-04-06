@@ -43,6 +43,12 @@ namespace WebAPI
                 .ForMember(u => u.Avatar, m => m.Ignore());
             CreateMap<UserOnProjectModel, UserOnProjectDTO>()
                 .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
+            CreateMap<ProjectModel, ProjectReducedDTO>();
+            CreateMap<ProjectModel, ProjectDTO>();
+            CreateMap<UpdateProjectDTO, ProjectModel>();
+            CreateMap<ReleaseModel, ReleaseDTO>();
+            CreateMap<AddReleaseDTO, ReleaseModel>();
+            CreateMap<TagModel, TagDTO>();
         }
     }
 }

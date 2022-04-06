@@ -7,9 +7,9 @@ namespace Data.Entities
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false)]
         [Column(TypeName = "nvarchar(20)")]
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = string.Empty;
 
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
     }

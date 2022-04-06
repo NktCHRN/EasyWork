@@ -6,9 +6,9 @@ namespace Business.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false)]
         [StringLength(20)]
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = string.Empty;
 
         public ICollection<int> TasksIds { get; set; } = new List<int>();
     }

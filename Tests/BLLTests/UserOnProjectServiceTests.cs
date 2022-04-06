@@ -589,5 +589,39 @@ new UserOnProjectModelExtended()
             // Assert
             Assert.AreEqual(expected, actual, "Method returnes wrong role");
         }
+
+        [Test]
+        [TestCase(1, 2)]
+        [TestCase(1, 4)]
+        [TestCase(3, 5)]
+        public async Task IsOnProjectAsyncTest_ReturnsTrue(int projectId, int userId)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var result = await _service.IsOnProjectAsync(projectId, userId);
+
+            // Assert
+            Assert.IsTrue(result);
+        }
+
+        [Test]
+        [TestCase(-1, 1)]
+        [TestCase(0, 1)]
+        [TestCase(7, 3)]
+        [TestCase(2, 5)]
+        [TestCase(3, 1)]
+        public async Task IsOnProjectAsyncTest_ReturnsFalse(int projectId, int userId)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var result = await _service.IsOnProjectAsync(projectId, userId);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
     }
 }

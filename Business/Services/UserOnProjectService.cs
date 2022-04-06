@@ -111,5 +111,10 @@ namespace Business.Services
                 .SingleOrDefaultAsync(uop => uop.ProjectId == projectId && uop.UserId == userId);
             return uop?.Role;
         }
+
+        public async Task<bool> IsOnProjectAsync(int projectId, int userId)
+        {
+            return await GetRoleOnProjectAsync(projectId, userId) is not null;
+        }
     }
 }
