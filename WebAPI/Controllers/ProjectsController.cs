@@ -609,8 +609,7 @@ namespace WebAPI.Controllers
             var project = await _projectService.GetByIdAsync(id);
             if (project is null)
                 return NotFound();
-            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
                 return Forbid();
             var isValidStatus = Enum.TryParse(dto.Status, out TaskStatuses status);
             if (!isValidStatus || status == TaskStatuses.Archived)
