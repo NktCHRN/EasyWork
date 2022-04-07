@@ -49,6 +49,8 @@ namespace WebAPI
             CreateMap<ReleaseModel, ReleaseDTO>();
             CreateMap<AddReleaseDTO, ReleaseModel>();
             CreateMap<TagModel, TagDTO>();
+            CreateMap<TaskModel, TaskReducedDTO>()
+                .ForMember(t => t.Executor, m => m.Ignore());
         }
     }
 }

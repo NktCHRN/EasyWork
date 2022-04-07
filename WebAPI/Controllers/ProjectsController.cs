@@ -29,8 +29,10 @@ namespace WebAPI.Controllers
 
         private readonly ITagService _tagService;
 
+        private readonly ITaskService _taskService;
+
         private readonly IMapper _mapper;
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager)
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
         {
             _projectService = projectService;
             _mapper = mapper;
@@ -39,6 +41,7 @@ namespace WebAPI.Controllers
             _tagService = tagService;
             _userManager = userManager;
             _fileManager = fileManager;
+            _taskService = taskService;
         }
 
         [HttpGet]
@@ -408,6 +411,174 @@ namespace WebAPI.Controllers
                 return BadRequest(exc.Message);
             }
             return NoContent();
+        }
+
+        [HttpGet("{id}/tasks")]
+        public async Task<IActionResult> GetTasks(int id, [FromQuery] int? tagId)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            var tasks = new List<IEnumerable<TaskModel>>();
+            var mappedTasks = new List<List<TaskReducedDTO>>();
+            for (short i = 0; i < 4; i++)
+                tasks.Add(_taskService.GetProjectTasksByStatusAndTag(id, (TaskStatuses)i, tagId));
+            foreach (var tasksElement in tasks)
+            {
+                mappedTasks.Add(new List<TaskReducedDTO>());
+                foreach (var task in tasksElement)
+                {
+                    var mappedTask = _mapper.Map<TaskReducedDTO>(task);
+                    UserMiniWithAvatarDTO? executor = null;
+                    if (task.ExecutorId is not null)
+                    {
+                        var userModel = await _userManager.FindByIdAsync(task.ExecutorId.ToString());
+                        executor = new UserMiniWithAvatarDTO()
+                        {
+                            Id = task.ExecutorId.Value
+                        };
+                        if (userModel is not null)
+                        {
+                            string? avatarType = null;
+                            byte[]? avatar = null;
+                            if (userModel.AvatarFormat is not null)
+                            {
+                                avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                                avatar = await _fileManager
+                                    .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                            }
+                            executor = executor with
+                            {
+                                FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                                MIMEAvatarType = avatarType,
+                                Avatar = avatar
+                            };
+                        }
+                    }
+                    mappedTasks.Last().Add(mappedTask with
+                    {
+                        Executor = executor
+                    });
+                }
+            }
+            var result = new TasksDTO()
+            {
+                ToDo = mappedTasks.ElementAt(0),
+                InProgress = mappedTasks.ElementAt(1),
+                Validate = mappedTasks.ElementAt(2),
+                Done = mappedTasks.ElementAt(3)
+            };
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/archive")]
+        public async Task<IActionResult> GetArchivedTasks(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            var tasks = _taskService.GetProjectTasksByStatusAndTag(id, TaskStatuses.Archived);
+            var mappedTasks = new List<TaskReducedDTO>();
+            foreach (var task in tasks)
+            {
+                var mappedTask = _mapper.Map<TaskReducedDTO>(task);
+                UserMiniWithAvatarDTO? executor = null;
+                if (task.ExecutorId is not null)
+                {
+                    var userModel = await _userManager.FindByIdAsync(task.ExecutorId.ToString());
+                    executor = new UserMiniWithAvatarDTO()
+                    {
+                        Id = task.ExecutorId.Value
+                    };
+                    if (userModel is not null)
+                    {
+                        string? avatarType = null;
+                        byte[]? avatar = null;
+                        if (userModel.AvatarFormat is not null)
+                        {
+                            avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                            avatar = await _fileManager
+                                .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                        }
+                        executor = executor with
+                        {
+                            FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                            MIMEAvatarType = avatarType,
+                            Avatar = avatar
+                        };
+                    }
+                }
+                mappedTasks.Add(mappedTask with
+                {
+                    Executor = executor
+                });
+            }
+            return Ok(mappedTasks);
+        }
+
+        [HttpGet("{id}/gantt")]
+        public async Task<IActionResult> GetGanttChart(int id, [FromQuery]DateTime from, [FromQuery]DateTime to)
+        {
+            if (from >= to)
+                return BadRequest("\"From\" should be earlier than \"to\"");
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            var tasks = _taskService.GetProjectTasksByDate(id, from, to);
+            var mappedTasks = new List<GanttTaskDTO>();
+            foreach (var task in tasks)
+            {
+                var startDate = (task.StartDate >= from) ? task.StartDate : from;
+                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : to;
+                var endDate = (task.EndDate is not null && task.EndDate <= to) ? task.EndDate.Value : to;
+                UserMiniReducedDTO? executor = null;
+                if (task.ExecutorId is not null)
+                {
+                    var userModel = await _userManager.FindByIdAsync(task.ExecutorId.ToString());
+                    executor = new UserMiniReducedDTO()
+                    {
+                        Id = task.ExecutorId.Value
+                    };
+                    if (userModel is not null)
+                    {
+                        executor = executor with
+                        {
+                            FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName
+                        };
+                    }
+                }
+                mappedTasks.Add(new GanttTaskDTO()
+                {
+                    Id = task.Id,
+                    Name = task.Name,
+                    GanttStartDate = startDate,
+                    GanttDeadline = deadline,
+                    GanttEndDate = endDate,
+                    Executor = executor
+                });
+            }
+            var result = new GanttDTO()
+            {
+                StartDate = from,
+                EndDate = to,
+                Tasks = mappedTasks
+            };
+            return Ok(result);
         }
     }
 }

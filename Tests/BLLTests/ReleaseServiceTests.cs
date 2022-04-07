@@ -373,25 +373,5 @@ namespace Tests.BLLTests
             Assert.IsTrue(expectedReleasesIds.SequenceEqual(actualReleasesIds), 
                 "Method returnes wrong elements or the order is wrong");
         }
-
-        [Test]
-        public void GetProjectReleasesByDateTest_ReturnsRealProjectReleases()
-        {
-            // Arrange
-            SeedData(false);
-            var projectId = 1;
-            var from = new DateTime(2022, 1, 1);
-            var to = new DateTime(2022, 1, 20);
-            IEnumerable<int> expectedReleasesIds = new[] { 4, 1 };
-
-            // Act
-            var actualReleases = _service.GetProjectReleasesByDate(projectId, from, to);
-
-            // Assert
-            Assert.AreEqual(expectedReleasesIds.Count(), actualReleases.Count(), "Method returnes wrong elements");
-            var actualReleasesIds = actualReleases.Select(r => r.Id);
-            Assert.IsTrue(expectedReleasesIds.SequenceEqual(actualReleasesIds),
-                "Method returnes wrong elements or the order is wrong");
-        }
     }
 }

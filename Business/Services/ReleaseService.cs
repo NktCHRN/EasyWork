@@ -81,12 +81,5 @@ namespace Business.Services
             _context.Releases.Update(existingModel);
             await _context.SaveChangesAsync();
         }
-
-        public IEnumerable<ReleaseModel> GetProjectReleasesByDate(int projectId, DateTime from, DateTime to)
-        {
-            return _mapper.Map<IEnumerable<ReleaseModel>>(_context.Releases
-                    .Where(r => r.ProjectId == projectId && r.Date > from && r.Date < to))
-                .Reverse();
-        }
     }
 }

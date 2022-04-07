@@ -7,9 +7,9 @@ namespace Business.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false)]
         [StringLength(150)]
-        public string Name { get; set; } = null!;
+        public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
