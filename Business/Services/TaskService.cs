@@ -86,6 +86,8 @@ namespace Business.Services
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
+            if (model.Status != TaskStatuses.Archived)
+                throw new InvalidOperationException("Archive a task first");
             var files = model.Files.ToList();
             foreach (var file in files)
             {

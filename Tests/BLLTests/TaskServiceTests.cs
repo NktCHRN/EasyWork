@@ -467,11 +467,27 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        [TestCase(1)]
+        public void DeleteByIdAsync_NotArchivedTask_ThrowsInvalidOperationException(int id)
+        {
+            // Arrange
+            SeedData();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteByIdAsync(id),
+                "Method does not throw an InvalidOperationException if the task is not archived");
+        }
+
+        [Test]
         public async Task DeleteByIdAsync_ValidId_DeletesElementCascadely()
         {
             // Arrange
             SeedData();
             var id = 1;
+            var task = await _context.Tasks.SingleAsync(t => t.Id == id);
+            task.Status = TaskStatuses.Archived;
+            _context.Tasks.Update(task);
+            await _context.SaveChangesAsync();
             var expectedCount = _context.Tasks.Count() - 1;
             var expectedTagsCount = 4;          // no changes
             var expectedMessagesCount = 1;
