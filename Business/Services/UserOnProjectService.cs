@@ -50,12 +50,13 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<UserOnProjectModelExtended>> GetAllProjectUsersAsync(int projectId)
+        public IEnumerable<UserOnProjectModelExtended> GetProjectUsers(int projectId)
         {
-            var projectTasks = _context.Tasks.Where(t => t.ProjectId == projectId);
+            var projectTasks = _context.Tasks.Where(t => t.ProjectId == projectId).AsEnumerable();
 
-            var teamMembers = await _context.UsersOnProjects
+            var teamMembers = _context.UsersOnProjects
                 .Include(uop => uop.User)
+                .AsEnumerable()
                 .Where(uop => uop.ProjectId == projectId)
                 .Select(uop => new UserOnProjectModelExtended()
                 {
@@ -67,7 +68,7 @@ namespace Business.Services
                     TasksNotDone = projectTasks
                     .Where(t => t.ExecutorId == uop.UserId && !TaskService.IsDone(t.Status))
                     .Count()
-                }).ToListAsync();
+                }).ToList();
 
             return teamMembers.OrderByDescending(t => t.Role).ThenByDescending(t => t.TasksDone).ThenBy(t => t.UserId);
         }
@@ -100,6 +101,11 @@ namespace Business.Services
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
             var existingModel = await GetNotMappedByIdAsync(model.ProjectId, model.UserId);
+            if (existingModel.Role == UserOnProjectRoles.Owner &&
+                !_context.UsersOnProjects.Any(uop => uop.ProjectId == existingModel.ProjectId
+                && uop.Role == UserOnProjectRoles.Owner
+                && uop.UserId != existingModel.UserId))
+                throw new InvalidOperationException("Add a new co-owner first");
             existingModel = _mapper.Map(model, existingModel);
             _context.UsersOnProjects.Update(existingModel);
             await _context.SaveChangesAsync();

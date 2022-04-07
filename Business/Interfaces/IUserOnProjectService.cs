@@ -15,7 +15,7 @@ namespace Business.Interfaces
 
         Task DeleteByIdAsync(int projectId, int userId);
 
-        Task<IEnumerable<UserOnProjectModelExtended>> GetAllProjectUsersAsync(int projectId);  // participants + owner
+        IEnumerable<UserOnProjectModelExtended> GetProjectUsers(int projectId);  // participants + owner
 
         Task<UserOnProjectRoles?> GetRoleOnProjectAsync(int projectId, int userId);
 

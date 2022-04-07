@@ -2,7 +2,6 @@
 using Business.Interfaces;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
 using WebAPI.Other;
@@ -14,16 +13,13 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ReleasesController : ControllerBase
     {
-        private readonly IProjectService _projectService;
-
         private readonly IUserOnProjectService _userOnProjectService;
 
         private readonly IReleaseService _releaseService;
 
         private readonly IMapper _mapper;
-        public ReleasesController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService)
+        public ReleasesController(IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService)
         {
-            _projectService = projectService;
             _mapper = mapper;
             _userOnProjectService = userOnProjectService;
             _releaseService = releaseService;

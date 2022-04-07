@@ -4,7 +4,9 @@ using Business.Models;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs;
 using WebAPI.Other;
 
@@ -15,6 +17,10 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ProjectsController : ControllerBase
     {
+        private readonly UserManager<User> _userManager;
+
+        private readonly IFileManager _fileManager;
+
         private readonly IProjectService _projectService;
 
         private readonly IUserOnProjectService _userOnProjectService;
@@ -24,13 +30,15 @@ namespace WebAPI.Controllers
         private readonly ITagService _tagService;
 
         private readonly IMapper _mapper;
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService, ITagService tagService)
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager)
         {
             _projectService = projectService;
             _mapper = mapper;
             _userOnProjectService = userOnProjectService;
             _releaseService = releaseService;
             _tagService = tagService;
+            _userManager = userManager;
+            _fileManager = fileManager;
         }
 
         [HttpGet]
@@ -229,6 +237,175 @@ namespace WebAPI.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
+            }
+            return NoContent();
+        }
+
+        [HttpGet("{id}/users")]
+        public async Task<IActionResult> GetProjectUsers(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            var users = _userOnProjectService.GetProjectUsers(id);
+            var usersMapped = new List<UserOnProjectExtendedDTO>();
+            foreach (var user in users)
+            {
+                var userModel = await _userManager.FindByIdAsync(user.UserId.ToString());
+                var userDTO = new UserMiniWithAvatarDTO()
+                {
+                    Id = user.UserId
+                };
+                if (userModel is not null)
+                {
+                    string? avatarType = null;
+                    byte[]? avatar = null;
+                    if (userModel.AvatarFormat is not null)
+                    {
+                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                        avatar = await _fileManager
+                            .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                    }
+                    userDTO = userDTO with
+                    {
+                        FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                        MIMEAvatarType = avatarType,
+                        Avatar = avatar
+                    };
+                }
+                usersMapped.Add(new UserOnProjectExtendedDTO()
+                {
+                    TasksDone = user.TasksDone,
+                    TasksNotDone = user.TasksNotDone,
+                    Role = user.Role.ToString(),
+                    User = userDTO
+                });
+            }
+            return Ok(usersMapped);
+        }
+
+        [HttpDelete("{id}/users/{userId}")]
+        public async Task<IActionResult> DeleteProjectUser(int id, int userId)
+        {
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            if (userId == myId)
+                return BadRequest("You cannot delete yourself from the project. Use leave instead");
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, myId.Value);
+            var toDeleteRole = await _userOnProjectService.GetRoleOnProjectAsync(id, userId);
+            if (toDeleteRole is null)
+                return NotFound();
+            if (role is null || role < UserOnProjectRoles.Manager 
+                || (role == UserOnProjectRoles.Manager && toDeleteRole >= UserOnProjectRoles.Manager))
+                return Forbid();
+            try
+            {
+                await _userOnProjectService.DeleteByIdAsync(id, userId);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/leave")]
+        public async Task<IActionResult> LeaveProject(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return NotFound();
+            try
+            {
+                await _userOnProjectService.DeleteByIdAsync(id, userId.Value);
+            }
+            catch (InvalidOperationException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            return NoContent();
+        }
+
+        [HttpPost("{id}/users")]
+        public async Task<IActionResult> AddUser(int id, [FromBody] AddUserOnProjectDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            var myRole = await _userOnProjectService.GetRoleOnProjectAsync(id, myId.Value);
+            var isValidRole = Enum.TryParse(dto.Role, out UserOnProjectRoles toAddRole);
+            if (!isValidRole)
+                return BadRequest("Invalid role");
+            if (myRole is null || myRole < UserOnProjectRoles.Manager
+                || (myRole == UserOnProjectRoles.Manager && toAddRole >= UserOnProjectRoles.Manager))
+                return Forbid();
+            var model = new UserOnProjectModel()
+            {
+                ProjectId = id,
+                UserId = dto.UserId,
+                Role = toAddRole
+            };
+            try
+            {
+                await _userOnProjectService.AddAsync(model);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            catch (DbUpdateException)
+            {
+                return BadRequest("This user is already on the project");
+            }
+            catch (InvalidOperationException)
+            {
+                return BadRequest("This user is already on the project");
+            }
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users", _mapper.Map<UserOnProjectDTO>(model));
+        }
+
+        [HttpPut("{id}/users/{userId}")]
+        public async Task<IActionResult> UpdateUser(int id, int userId, UpdateUserOnProjectDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            var myRole = await _userOnProjectService.GetRoleOnProjectAsync(id, myId.Value);
+            var isValidRole = Enum.TryParse(dto.Role, out UserOnProjectRoles toUpdateRole);
+            if (!isValidRole)
+                return BadRequest("Invalid role");
+            var model = await _userOnProjectService.GetByIdAsync(id, userId);
+            if (model is null)
+                return NotFound();
+            if (myRole is null || myRole < UserOnProjectRoles.Owner)
+                return Forbid();
+            model.Role = toUpdateRole;
+            try
+            {
+                await _userOnProjectService.UpdateAsync(model);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            catch (InvalidOperationException exc)
+            {
+                return BadRequest(exc.Message);
             }
             return NoContent();
         }

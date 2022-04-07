@@ -541,7 +541,7 @@ new UserOnProjectModelExtended()
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        public async Task GetTaskTagsAsyncTest_ReturnsRealTaskTags(int index)
+        public void GetTaskTagsTest_ReturnsRealTaskTags(int index)
         {
             // Arrange
             SeedData();
@@ -549,7 +549,7 @@ new UserOnProjectModelExtended()
             var expected = _expectedGetAllProjectUsersAsync.ElementAt(index);
 
             // Act
-            var actual = await _service.GetAllProjectUsersAsync(projectId);
+            var actual = _service.GetProjectUsers(projectId);
 
             // Assert
             Assert.AreEqual(expected.Count(), actual.Count(), "Method returnes wrong elements");
