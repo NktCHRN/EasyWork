@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using WebAPI.Other;
-using Data.Entities;
 
 namespace WebAPI.Controllers
 {
@@ -58,9 +57,8 @@ namespace WebAPI.Controllers
                 return NotFound();
             if (task.ExecutorId != User.GetId())
             {
-                    var role = await _uopService.GetRoleOnProjectAsync(task.ProjectId, User.GetId().GetValueOrDefault());
-                    if (role is null || role < UserOnProjectRoles.Manager)
-                        return Forbid();
+                if (!await _uopService.IsOnProjectAsync(task.ProjectId, User.GetId().GetValueOrDefault()))
+                    return Forbid();
             }
 
             var visualFileName = model.Name;
