@@ -628,6 +628,10 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
+            catch (InvalidOperationException exc)
+            {
+                return BadRequest(exc.Message);
+            }
             return Created($"{this.GetApiUrl()}Tasks/{model.Id}", _mapper.Map<TaskDTO>(model));
         }
     }
