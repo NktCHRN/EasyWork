@@ -9,5 +9,7 @@ namespace Business.Interfaces
         Task<IEnumerable<TagModel>> GetTaskTagsAsync(int taskId);
 
         Task<TagModel?> FindByName(string name);
+
+        Task DeleteFromProjectByIdAsync(int id, int projectId);
     }
 }

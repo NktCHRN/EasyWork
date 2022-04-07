@@ -22,7 +22,9 @@ namespace Business.Services
 
         private async Task<Tag> GetNotMappedByIdAsync(int id)
         {
-            var model = await _context.Tags.FindAsync(id);
+            var model = await _context.Tags
+                .Include(t => t.Tasks)
+                .SingleOrDefaultAsync(m => m.Id == id);
             if (model is null)
                 throw new InvalidOperationException("Model with such an id was not found");
             return model;
@@ -88,5 +90,23 @@ namespace Business.Services
 
         public async Task<TagModel?> FindByName(string name) => 
             _mapper.Map<TagModel?>(await _context.Tags.FirstOrDefaultAsync(t => t.Name == name));
+
+        public async Task DeleteFromProjectByIdAsync(int id, int projectId)
+        {
+            var model = await GetNotMappedByIdAsync(id);
+            var projectTasks = model.Tasks.Where(t => t.ProjectId == projectId).ToList();
+            if (!projectTasks.Any())
+                throw new InvalidOperationException("This tag does not belongs to the project");
+            foreach (var task in projectTasks)
+            {
+                model.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+            }
+            if (!model.Tasks.Any())
+            {
+                _context.Tags.Remove(model);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

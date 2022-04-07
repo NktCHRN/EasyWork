@@ -66,7 +66,11 @@ namespace Tests.BLLTests
                 new Project()       // id 2
                 {
                     Name = "Project 2"
-                }
+                },
+                new Project()       // id e
+                {
+                    Name = "Project 3"
+                },
             };
             foreach (var project in projects)
             {
@@ -127,6 +131,25 @@ namespace Tests.BLLTests
                     Tags = new List<Tag>()
                     {
                         _context.Tags.Single(t => t.Id == 1),
+                        _context.Tags.Single(t => t.Id == 4)
+                    }
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Temp task",
+                    ProjectId = 3,
+                    Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 2)
+                    }
+                },
+                new Data.Entities.Task()
+                {
+                    Name = "Temp task 2",
+                    ProjectId = 3,
+                    Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 2),
                         _context.Tags.Single(t => t.Id == 4)
                     }
                 }
@@ -359,6 +382,46 @@ namespace Tests.BLLTests
 
             // Assert
             Assert.IsNull(actual, "Method does not return null");
+        }
+
+        [Test]
+        public async Task DeleteFromProjectByIdAsyncTest_DeletesTag()
+        {
+            // Arrange
+            SeedData();
+            int tagId = 1;
+            int projectId = 1;
+            var expectedCount = _context.Tags.Count() - 1;
+
+            // Act
+            await _service.DeleteFromProjectByIdAsync(tagId, projectId);
+
+            // Assert
+            var actualCount = _context.Tags.Count();
+            Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
+            Assert.IsFalse(_context.Tags.Any(m => m.Id == tagId), "Method deletes wrong element");
+        }
+
+        [Test]
+        public async Task DeleteFromProjectByIdAsyncTest_DeletesTagOnlyFromProject ()
+        {
+            // Arrange
+            SeedData();
+            int tagId = 2;
+            int projectId = 3;
+            var expectedCount = _context.Tags.Count();          // should not change
+            var expectedTagTasksCount = (await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId))
+                .Tasks.Count - 2;
+
+            // Act
+            await _service.DeleteFromProjectByIdAsync(tagId, projectId);
+
+            // Assert
+            var actualCount = _context.Tags.Count();
+            var actualTagTasksCount = (await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId))
+                .Tasks.Count;
+            Assert.AreEqual(expectedCount, actualCount);
+            Assert.AreEqual(expectedTagTasksCount, actualTagTasksCount);
         }
     }
 }

@@ -68,5 +68,28 @@ namespace WebAPI.Controllers
             }
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var release = await _releaseService.GetByIdAsync(id);
+            if (release is null)
+                return NotFound();
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(release.ProjectId, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            try
+            {
+                await _releaseService.DeleteByIdAsync(id);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }

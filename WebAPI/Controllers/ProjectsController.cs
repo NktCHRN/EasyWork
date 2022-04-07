@@ -101,7 +101,7 @@ namespace WebAPI.Controllers
                 return Forbid();
             var project = await _projectService.GetByIdAsync(id);
             if (project is null)
-                return BadRequest();
+                return NotFound();
             if (role == UserOnProjectRoles.Manager && (project.Name != dto.Name || project.Description != dto.Description))
                 return Forbid();
             project = _mapper.Map(dto, project);
@@ -112,6 +112,29 @@ namespace WebAPI.Controllers
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Owner)
+                return Forbid();
+            try
+            {
+                await _projectService.DeleteByIdAsync(id);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
             }
             return NoContent();
         }
@@ -185,6 +208,29 @@ namespace WebAPI.Controllers
             if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
                 return Forbid();
             return Ok(_mapper.Map<IEnumerable<TagDTO>>(_tagService.GetProjectTags(id)));
+        }
+
+        [HttpDelete("{id}/tags/{tagId}")]
+        public async Task<IActionResult> DeleteTagFromProject(int id, int tagId)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            try
+            {
+                await _tagService.DeleteFromProjectByIdAsync(tagId, id);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }
