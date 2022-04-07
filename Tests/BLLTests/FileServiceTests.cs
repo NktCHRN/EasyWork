@@ -31,21 +31,10 @@ namespace Tests.BLLTests
         {
             new FileModel()  // 0
             {
-                TaskId = 1,
-                MessageId = 1,
-                Name = "TestFile.cs"
-            },
-            new FileModel()  // 1
-            {
                 TaskId = -1,
                 Name = "TestFile.cs"
             },
-            new FileModel()  // 2
-            {
-                MessageId = -1,
-                Name = "TestFile.cs"
-            },
-            new FileModel() // 3
+            new FileModel() // 1
             {
                 TaskId = 1,
                 Name = "Too long name! dolor sit amet, consectetur adipiscing elit. " +
@@ -53,7 +42,7 @@ namespace Tests.BLLTests
                 "Etiam condimentum cursus finibus. Fusce vel magna nec magna scelerisque pretium. " +
                 "Praesent pellentesque vulputate felis, non vel. "
             },
-            new FileModel()     // 4
+            new FileModel()     // 2
             {
                 Name = "TestFile.cs"
             }
@@ -64,11 +53,6 @@ namespace Tests.BLLTests
             new FileModel()     // 0
             {
                 TaskId = 1,
-                Name = "TestFile.cs"
-            },
-            new FileModel()     // 1
-            {
-                MessageId = 1,
                 Name = "TestFile.cs"
             }
         };
@@ -160,7 +144,7 @@ namespace Tests.BLLTests
             },
             new File()  // id 2
             {
-                MessageId = 1,
+                TaskId = 1,
                 Name = "TestFile2.pdf"
             },
             new File()  // id 3
@@ -170,7 +154,7 @@ namespace Tests.BLLTests
             },
             new File()  // id 4
             {
-                MessageId = 1,
+                TaskId = 1,
                 Name = "TestFile4.docx"
             },
             new File()  // id 5
@@ -180,7 +164,7 @@ namespace Tests.BLLTests
             },
             new File()  // id 6
             {
-                MessageId = 2,
+                TaskId = 2,
                 Name = "TestFile6.rtf"
             },
             new File()  // id 7
@@ -194,23 +178,6 @@ namespace Tests.BLLTests
                 _context.Files.Add(file);
                 _context.SaveChanges();
             }
-            for (int i = 0; i < 10; i++)
-            {
-                var messageFile = new File()
-                {
-                    MessageId = 5,
-                    Name = $"LimMessageFile{i}.file"
-                };
-                _context.Files.Add(messageFile);
-                _context.SaveChanges();
-                var taskFile = new File()
-                {
-                    TaskId = 4,
-                    Name = $"LimTaskFile{i}.file"
-                };
-                _context.Files.Add(taskFile);
-                _context.SaveChanges();
-            }
         }
 
         [Test]
@@ -220,7 +187,7 @@ namespace Tests.BLLTests
             SeedData();
             var fileModel = _validFiles.First();
             var file = new Mock<IFormFile>().Object;
-            var expectedName = "28.cs";
+            var expectedName = "8.cs";
             var expectedCount = _context.Files.Count() + 1;
 
             // Act
@@ -252,8 +219,16 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var taskId = 4;
+            for (int i = 0; i < 10; i++)
+            {
+                _context.Files.Add(new File()
+                {
+                    TaskId = taskId,
+                    Name = $"{i+8}.file"
+                });
+                _context.SaveChanges();
+            }
             var fileModel = _invalidFiles.First();
-            fileModel.MessageId = null;
             fileModel.TaskId = taskId;
             var file = new Mock<IFormFile>().Object;
 
@@ -262,23 +237,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void AddAsyncTest_MessageLimitExceeded_ThrowsInvalidOperationException()
-        {
-            // Arrange
-            SeedData();
-            var messageId = 5;
-            var fileModel = _invalidFiles.First();
-            fileModel.MessageId = messageId;
-            fileModel.TaskId = null;
-            var file = new Mock<IFormFile>().Object;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(fileModel, file));
-        }
-
-        [Test]
         [TestCase(0)]
-        [TestCase(1)]
         public void IsValidTest_ValidFile_ReturnsTrue(int modelNumber)
         {
             // Arrange
@@ -296,8 +255,6 @@ namespace Tests.BLLTests
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(4)]
         public void IsValidTest_InvalidFile_ReturnsFalse(int modelNumber)
         {
             // Arrange
@@ -373,28 +330,12 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetMessageFilesTest_ReturnsRightFiles()
-        {
-            // Arrange
-            SeedData();
-            var messageId = 2;
-            var expectedCount = 1;
-
-            // Act
-            var actual = _service.GetMessageFiles(messageId);
-
-            // Assert
-            Assert.AreEqual(expectedCount, actual.Count(), "Method returns wrong elements");
-            Assert.IsTrue(actual.All(f => f.MessageId == messageId), "Method returns wrong elements");
-        }
-
-        [Test]
         public void GetTaskFilesTest_ReturnsRightFiles()
         {
             // Arrange
             SeedData();
             var taskId = 1;
-            var expectedCount = 3;
+            var expectedCount = 5;
 
             // Act
             var actual = _service.GetTaskFiles(taskId);

@@ -22,8 +22,6 @@ namespace Tests.BLLTests
 
         private IMessageService _service = null!;
 
-        private Mock<IFileManager> _managerMock = new();
-
         private readonly IEnumerable<MessageModel> _invalidMessages = new MessageModel[]
         {
             new MessageModel()  // 0
@@ -93,10 +91,9 @@ namespace Tests.BLLTests
         [SetUp]
         public void Setup()
         {
-            _managerMock = new Mock<IFileManager>();
             _context = new ApplicationDbContext(UnitTestHelper.GetUnitTestDbOptions());
             SeedRequiredData();
-            _service = new MessageService(_context, _mapper, _managerMock.Object);
+            _service = new MessageService(_context, _mapper);
         }
 
         private void SeedRequiredData()
@@ -171,30 +168,6 @@ namespace Tests.BLLTests
             {
                 message.Date = DateTime.Now;
                 _context.Messages.Add(message);
-                _context.SaveChanges();
-            }
-
-            var files = new File[]
-            {
-                new File()  // id 1
-            {
-                MessageId = 1,
-                Name = "TestFile1.cs"
-            },
-            new File()  // id 2
-            {
-                MessageId = 1,
-                Name = "TestFile2.pdf"
-            },
-            new File()
-            {
-                MessageId = 5,
-                Name = "TestFile3.docx"
-            }
-            };
-            foreach (var file in files)
-            {
-                _context.Files.Add(file);
                 _context.SaveChanges();
             }
         }
@@ -309,7 +282,6 @@ namespace Tests.BLLTests
 
             // Assert
             Assert.AreEqual(id, actual!.Id, "Method returns wrong element");
-            Assert.AreNotEqual(null, actual!.FilesIds, "Method does not load message file ids");
         }
 
         [Test]
@@ -352,20 +324,14 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var expectedCount = _context.Messages.Count() - 1;
-            var deletedFiles = _context.Files.Where(f => f.MessageId == id).Count();
-            var expectedFilesCount = _context.Files.Count() - deletedFiles;
 
             // Act
             await _service.DeleteByIdAsync(id);
 
             // Assert
             var actualCount = _context.Messages.Count();
-            var actualFilesCount = _context.Files.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Messages.Any(m => m.Id == id), "Method deletes wrong element");
-            Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
-            _managerMock.Verify(t => t.DeleteFile(It.IsAny<string>(), Business.Enums.EasyWorkFileTypes.File), 
-                Times.Exactly(deletedFiles), "Method does not remove the file from file system");
         }
 
         [Test]

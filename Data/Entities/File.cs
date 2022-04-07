@@ -11,10 +11,8 @@ namespace Data.Entities
         [Column(TypeName = "nvarchar(256)")]
         public string Name { get; set; } = null!;
 
-        public int? TaskId { get; set; }
+        [Required]
+        public int TaskId { get; set; }
         public Task? Task { get; set; }
-
-        public int? MessageId { get; set; }
-        public Message? Message { get; set; }
     }
 }

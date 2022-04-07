@@ -87,9 +87,6 @@ namespace Business.Services
         {
             var model = await GetNotMappedByIdAsync(id);
             var files = model.Files.ToList();
-            var messages = _context.Messages.Include(m => m.Files).Where(m => m.TaskId == id);
-            foreach (var message in messages)
-                files.AddRange(message.Files);
             foreach (var file in files)
             {
                 _context.Files.Remove(file);

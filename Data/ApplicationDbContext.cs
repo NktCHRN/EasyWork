@@ -36,11 +36,6 @@ namespace Data
             .HasKey(u => new { u.UserId, u.ProjectId });
 
             builder.Entity<Entities.File>()
-            .HasOne(f => f.Message)
-            .WithMany(m => m.Files)
-            .OnDelete(DeleteBehavior.NoAction);
-
-            builder.Entity<Entities.File>()
             .HasOne(f => f.Task)
             .WithMany(t => t.Files)
             .OnDelete(DeleteBehavior.NoAction);

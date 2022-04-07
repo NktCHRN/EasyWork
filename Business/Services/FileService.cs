@@ -38,18 +38,9 @@ namespace Business.Services
             if (!IsValid(model, out string? error))
                 throw new ArgumentException(error, nameof(model));
             const ushort maxFiles = 10;
-            if (model.MessageId is not null)
-            {
-                var message = await _context.Messages.Include(m => m.Files).FirstAsync(m => m.Id == model.MessageId);
-                if (message.Files.Count >= maxFiles)
-                    throw new InvalidOperationException("Message can have not more than 10 files");
-            }
-            if (model.TaskId is not null)
-            {
                 var task = await _context.Tasks.Include(m => m.Files).FirstAsync(m => m.Id == model.TaskId);
                 if (task.Files.Count >= maxFiles)
                     throw new InvalidOperationException("Task can have not more than 10 files");
-            }
             var mapped = _mapper.Map<File>(model);
             await _context.Files.AddAsync(mapped);
             await _context.SaveChangesAsync();
@@ -74,11 +65,6 @@ namespace Business.Services
             return _mapper.Map<FileModel?>(await _context.Files.FindAsync(id));
         }
 
-        public IEnumerable<FileModel> GetMessageFiles(int messageId)
-        {
-            return _mapper.Map<IEnumerable<FileModel>>(_context.Files.Where(f => f.MessageId == messageId));
-        }
-
         public IEnumerable<FileModel> GetTaskFiles(int taskId)
         {
             return _mapper.Map<IEnumerable<FileModel>>(_context.Files.Where(f => f.TaskId == taskId));
@@ -89,17 +75,7 @@ namespace Business.Services
             var result = IModelValidator<FileModel>.IsValidByDefault(model, out firstErrorMessage);
             if (!result)
                 return false;
-            if (!(model.TaskId is null ^ model.MessageId is null))
-            {
-                firstErrorMessage = "Only TaskId or MessageId should not be null";
-                return false;
-            }
-            if (model.MessageId is not null && !_context.Messages.Any(m => m.Id == model.MessageId))
-            {
-                    firstErrorMessage = "Message with such an id was not found";
-                    return false;
-            }
-            if (model.TaskId is not null && !_context.Tasks.Any(t => t.Id == model.TaskId))
+            if (!_context.Tasks.Any(t => t.Id == model.TaskId))
             {
                     firstErrorMessage = "Task with such an id was not found";
                     return false;

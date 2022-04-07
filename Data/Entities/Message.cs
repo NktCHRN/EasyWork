@@ -27,8 +27,5 @@ namespace Data.Entities
         public int SenderId { get; set; }
         [ForeignKey("SenderId")]
         public User? Sender { get; set; }
-
-
-        public ICollection<File> Files { get; set; } = new List<File>();
     }
 }

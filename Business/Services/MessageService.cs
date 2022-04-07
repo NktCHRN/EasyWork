@@ -14,18 +14,15 @@ namespace Business.Services
 
         private readonly IMapper _mapper;
 
-        private readonly IFileManager _manager;
-
-        public MessageService(ApplicationDbContext context, IMapper mapper, IFileManager manager)
+        public MessageService(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _manager = manager;
         }
 
         private async Task<Message> GetNotMappedByIdAsync(int id)
         {
-            var model = await _context.Messages.Include(m => m.Files).SingleOrDefaultAsync(m => m.Id == id);
+            var model = await _context.Messages.SingleOrDefaultAsync(m => m.Id == id);
             if (model is null)
                 throw new InvalidOperationException("Model with such an id was not found");
             return model;
@@ -47,24 +44,13 @@ namespace Business.Services
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
-            var files = model.Files.ToList();
-            foreach (var file in files)
-            {
-                _context.Files.Remove(file);
-                await _context.SaveChangesAsync();
-                try
-                {
-                    _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
-                }
-                catch (Exception) { }
-            }
             _context.Messages.Remove(model);
             await _context.SaveChangesAsync();
         }
 
         public async Task<MessageModel?> GetByIdAsync(int id)
         {
-            return _mapper.Map<MessageModel?>(await _context.Messages.Include(m => m.Files).SingleOrDefaultAsync(m => m.Id == id));
+            return _mapper.Map<MessageModel?>(await _context.Messages.SingleOrDefaultAsync(m => m.Id == id));
         }
 
         public IEnumerable<MessageModel> GetTaskMessages(int taskId)

@@ -296,22 +296,22 @@ namespace Tests.BLLTests
                 new File()
                 {
                     Name = "File4.fl",
-                    MessageId = 1
+                    TaskId = 1
                 },
                 new File()
                 {
                     Name = "File5.fl",
-                    MessageId = 1
+                    TaskId = 1
                 },
                 new File()
                 {
                     Name = "File6.fl",
-                    MessageId = 1
+                    TaskId = 1
                 },
                 new File()
                 {
                     Name = "File7.fl",
-                    MessageId = 2
+                    TaskId = 2
                 }
             };
             foreach (var file in files)
@@ -385,7 +385,7 @@ namespace Tests.BLLTests
             var expectedCount = _context.Projects.Count() - 1;
             var expectedTasksCount = 1;
             var expectedMessagesCount = 1;
-            var expectedFilesCount = 2;
+            var expectedFilesCount = 1;
 
             // Act
             await _service.DeleteByIdAsync(id);

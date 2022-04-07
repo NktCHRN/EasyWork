@@ -11,8 +11,6 @@ namespace Business
             CreateMap<Ban, BanModel>().ReverseMap();
             CreateMap<Data.Entities.File, FileModel>().ReverseMap();
             CreateMap<Message, MessageModel>()
-                .ForMember(e => e.FilesIds, 
-                m => m.MapFrom(mm => mm.Files.Select(f => f.Id)))
                 .ReverseMap();
             CreateMap<Project, ProjectModel>()
                 .ForMember(e => e.TeamMembersIds,

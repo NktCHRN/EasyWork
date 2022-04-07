@@ -51,12 +51,7 @@ namespace Business.Services
             var tasks = _context.Tasks.Include(t => t.Files).Where(t => t.ProjectId == id);
             var files = new List<Data.Entities.File>();
             foreach (var task in tasks)
-            {
                 files.AddRange(task.Files);
-                var messages = _context.Messages.Include(m => m.Files).Where(m => m.TaskId == task.Id);
-                foreach (var message in messages)
-                    files.AddRange(message.Files);
-            }
             foreach (var file in files)
             {
                 _context.Files.Remove(file);

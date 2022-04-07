@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220407184358_AlterTable_Messages")]
+    partial class AlterTable_Files
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,7 +53,7 @@ namespace Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Bans", (string)null);
+                    b.ToTable("Bans");
                 });
 
             modelBuilder.Entity("Data.Entities.File", b =>
@@ -73,7 +75,7 @@ namespace Data.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("Files", (string)null);
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("Data.Entities.Message", b =>
@@ -109,7 +111,7 @@ namespace Data.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Data.Entities.Project", b =>
@@ -147,7 +149,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Data.Entities.Release", b =>
@@ -175,7 +177,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Releases", (string)null);
+                    b.ToTable("Releases");
                 });
 
             modelBuilder.Entity("Data.Entities.Tag", b =>
@@ -192,7 +194,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Data.Entities.Task", b =>
@@ -237,7 +239,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Tasks", (string)null);
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("Data.Entities.User", b =>
@@ -348,7 +350,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("UsersOnProjects", (string)null);
+                    b.ToTable("UsersOnProjects");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
@@ -496,7 +498,7 @@ namespace Data.Migrations
 
                     b.HasIndex("TasksId");
 
-                    b.ToTable("TagTask", (string)null);
+                    b.ToTable("TagTask");
                 });
 
             modelBuilder.Entity("Data.Entities.Ban", b =>

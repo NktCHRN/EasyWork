@@ -10,8 +10,7 @@ namespace Business.Models
         [StringLength(256, ErrorMessage = "The file name is too long")]
         public string Name { get; set; } = null!;
 
-        public int? TaskId { get; set; }
-
-        public int? MessageId { get; set; }
+        [Required]
+        public int TaskId { get; set; }
     }
 }

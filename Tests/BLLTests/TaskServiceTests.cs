@@ -322,12 +322,12 @@ namespace Tests.BLLTests
                 },
                 new File()
                 {
-                    MessageId = 1,
+                    TaskId = 1,
                     Name = "file2.file"
                 },
                 new File()
                 {
-                    MessageId = 3,
+                    TaskId = 3,
                     Name = "file1.file"
                 },
             };

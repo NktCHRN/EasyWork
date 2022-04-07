@@ -15,18 +15,15 @@ namespace WebAPI.Controllers
 
         private readonly IFileManager _manager;
 
-        private readonly IMessageService _messageService;
-
         private readonly ITaskService _taskService;
 
         private readonly IUserOnProjectService _uopService;
 
-        public FilesController(IFileService service, IFileManager manager, IMessageService messageService, 
+        public FilesController(IFileService service, IFileManager manager,
             ITaskService taskService, IUserOnProjectService uopService)
         {
             _service = service;
             _manager = manager;
-            _messageService = messageService;
             _taskService = taskService;
             _uopService = uopService;
         }
@@ -39,20 +36,7 @@ namespace WebAPI.Controllers
             if (model is null)
                 return NotFound();
 
-            int taskId;
-            if (model.MessageId is not null)
-            {
-                var message = await _messageService.GetByIdAsync(model.MessageId.GetValueOrDefault());
-                if (message is null)
-                    return NotFound();
-                taskId = message.TaskId;
-            }
-            else if (model.TaskId is not null)
-                taskId = model.TaskId.GetValueOrDefault();
-            else
-                return Forbid();
-
-            var task = await _taskService.GetByIdAsync(taskId);
+            var task = await _taskService.GetByIdAsync(model.TaskId);
             if (task is null)
                 return NotFound();
             if (task.ExecutorId != User.GetId())
@@ -63,7 +47,7 @@ namespace WebAPI.Controllers
 
             var visualFileName = model.Name;
             var realFileName = model.Id + Path.GetExtension(visualFileName);
-            var isSuccessful = (new FileExtensionContentTypeProvider()).TryGetContentType(visualFileName, out string? temp);
+            var isSuccessful = new FileExtensionContentTypeProvider().TryGetContentType(visualFileName, out string? temp);
             string contentType;
             if (isSuccessful)
                 contentType = temp!.ToString();
