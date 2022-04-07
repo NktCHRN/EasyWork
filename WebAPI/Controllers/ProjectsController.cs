@@ -292,6 +292,23 @@ namespace WebAPI.Controllers
             return Ok(usersMapped);
         }
 
+        [HttpGet("{id}/users/{userId}")]
+        public async Task<IActionResult> GetProjectUser(int id, int userId)
+        {
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, myId.Value))
+                return Forbid();
+            var uop = await _userOnProjectService.GetByIdAsync(id, userId);
+            if (uop is null)
+                return NotFound();
+            return Ok(_mapper.Map<UserOnProjectDTO>(uop));
+        }
+
         [HttpDelete("{id}/users/{userId}")]
         public async Task<IActionResult> DeleteProjectUser(int id, int userId)
         {
@@ -377,7 +394,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest("This user is already on the project");
             }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users", _mapper.Map<UserOnProjectDTO>(model));
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{dto.UserId}", _mapper.Map<UserOnProjectDTO>(model));
         }
 
         [HttpPut("{id}/users/{userId}")]
@@ -579,6 +596,40 @@ namespace WebAPI.Controllers
                 Tasks = mappedTasks
             };
             return Ok(result);
+        }
+
+        [HttpPost("{id}/tasks")]
+        public async Task<IActionResult> AddTask(int id, [FromBody] AddTaskDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            var isValidStatus = Enum.TryParse(dto.Status, out TaskStatuses status);
+            if (!isValidStatus || status == TaskStatuses.Archived)
+                return BadRequest("Invalid or not suitable task status");
+            var model = new TaskModel()
+            {
+                Name = dto.Name,
+                Status = status,
+                ProjectId = id
+            };
+            try
+            {
+                await _taskService.AddAsync(model);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            return Created($"{this.GetApiUrl()}Tasks/{model.Id}", _mapper.Map<TaskDTO>(model));
         }
     }
 }

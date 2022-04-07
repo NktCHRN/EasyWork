@@ -37,7 +37,7 @@ namespace WebAPI
                 .ForMember(u => u.LastSeen,
                     m => m.MapFrom<DateTime?>(usr => (usr.LastSeen == DateTime.MinValue) ? null : usr.LastSeen))
                 .ForMember(u => u.FullName,
-                    m => m.MapFrom<string>(usr => 
+                    m => m.MapFrom(usr => 
                         string.IsNullOrEmpty(usr.LastName) ? usr.FirstName : usr.FirstName + " " + usr.LastName))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
                 .ForMember(u => u.Avatar, m => m.Ignore());
@@ -51,6 +51,10 @@ namespace WebAPI
             CreateMap<TagModel, TagDTO>();
             CreateMap<TaskModel, TaskReducedDTO>()
                 .ForMember(t => t.Executor, m => m.Ignore());
+            CreateMap<TaskModel, TaskDTO>()
+                .ForMember(t => t.Executor, m => m.Ignore())
+                .ForMember(t => t.Status, m => m.MapFrom(tsk => tsk.Status.ToString()))
+                .ForMember(t => t.Priority, m => m.MapFrom(tsk => (tsk.Priority == null) ? null : tsk.Priority.Value.ToString()));
         }
     }
 }

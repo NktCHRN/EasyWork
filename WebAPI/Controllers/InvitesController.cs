@@ -56,7 +56,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest("You are already added to this project");
             }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users", _mapper.Map<UserOnProjectDTO>(uop));
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{uop.UserId}", _mapper.Map<UserOnProjectDTO>(uop));
         }
     }
 }
