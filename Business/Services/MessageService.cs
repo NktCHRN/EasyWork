@@ -31,7 +31,6 @@ namespace Business.Services
         public async Task AddAsync(MessageModel model)
         {
             model.Date = DateTime.Now;
-            model.IsEdited = false;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
@@ -78,7 +77,6 @@ namespace Business.Services
 
         public async Task UpdateAsync(MessageModel model)
         {
-            model.IsEdited = true;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));

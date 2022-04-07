@@ -6,15 +6,12 @@ namespace Business.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(AllowEmptyStrings = false)]
         [StringLength(2000, ErrorMessage = "Too long message. The maximum length is 2000 characters")]
-        public string Text { get; set; } = null!;
+        public string Text { get; set; } = string.Empty;
 
         [Required]
         public bool IsRead { get; set; }
-
-        [Required]
-        public bool IsEdited { get; set; }
 
         [Required]
         public DateTime Date { get; set; }

@@ -7,11 +7,8 @@ namespace Data.Entities
     {
         public int Id { get; set; }
 
-        [Required]
-        public string Text { get; set; } = null!;
-
-        [Required]
-        public bool IsEdited { get; set; }
+        [Required(AllowEmptyStrings = false)]
+        public string Text { get; set; } = string.Empty;
 
         [Required]
         public bool IsRead { get; set; }

@@ -28,14 +28,12 @@ namespace Tests.BLLTests
             {
                 Text = "This is a invalid message 1 text.",
                 SenderId = 1,
-                IsEdited = false,
                 TaskId = -1
             },
             new MessageModel()  // 1
             {
                 Text = "This is a invalid message 2 text.",
                 SenderId = -1,
-                IsEdited = false,
                 TaskId = 1
             },
             new MessageModel()  // 2
@@ -65,7 +63,6 @@ namespace Tests.BLLTests
                 "Suspendisse efficitur justo magna, sed iaculis metus bibendum sed. " +
                 "Quisque tortor ex, semper sit amet rutrum nulla. ",
                 SenderId = 1,
-                IsEdited = false,
                 TaskId = 1
             }
         };
@@ -76,14 +73,12 @@ namespace Tests.BLLTests
             {
                 Text = "This is a valid message 1 text.",
                 SenderId = 1,
-                IsEdited = false,
                 TaskId = 1
             },
             new MessageModel()
             {
                 Text = "This is a valid message 2 (return message) text.",
                 SenderId = 1,
-                IsEdited = false,
                 TaskId = 1
             }
         };
@@ -133,7 +128,6 @@ namespace Tests.BLLTests
                     SenderId = 2,
                     Text = "This is message 1",
                     TaskId = 1,
-                    IsEdited = true,
                     IsRead = true,
                 },
                 new Message()     // id 2
@@ -154,7 +148,6 @@ namespace Tests.BLLTests
                     SenderId = 2,
                     Text = "This is message 4",
                     TaskId = 1,
-                    IsEdited = true,
                 },
                 new Message()     // id 5
                 {
@@ -180,7 +173,6 @@ namespace Tests.BLLTests
                     SenderId = 1,   // changed
                     Text = "This is message 1 edited",
                     TaskId = 1,
-                    IsEdited = true
                 },
             new MessageModel()     // id 1, ind 1
                 {
@@ -188,7 +180,6 @@ namespace Tests.BLLTests
                     SenderId = 2,
                     Text = "This is message 1 edited",
                     TaskId = 2,     // changed
-                    IsEdited = true
                 },
             new MessageModel()     // id 1, ind 2
                 {
@@ -196,7 +187,6 @@ namespace Tests.BLLTests
                     SenderId = 2,
                     Text = "This is message 1 edited",
                     TaskId = 1,
-                    IsEdited = true,
                     Date = DateTime.MaxValue    // changed
                 },
             new MessageModel()     // id 5, ind 3
@@ -215,7 +205,6 @@ namespace Tests.BLLTests
             SenderId = 2,
             Text = "This is message 1 edited (valid)",
             TaskId = 1,
-            IsEdited = true,
             IsRead = true
         };
 
