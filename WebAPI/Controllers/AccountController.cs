@@ -254,6 +254,8 @@ namespace WebAPI.Controllers
                 var errors = resetPasswordResult.Errors.Select(e => e.Description);
                 return BadRequest(errors);
             }
+            user.RefreshToken = null;
+            await _userManager.UpdateAsync(user);
             return Ok();
         }
 

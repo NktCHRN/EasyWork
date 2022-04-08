@@ -138,6 +138,6 @@ var seeder = new DataSeeder()
     UserManager = serviceScope.ServiceProvider.GetService<UserManager<User>>()!
 };
 await seeder.SeedRoles();
-await seeder.SeedUsers();
+await seeder.SeedUsers();           // delete on production !!!
 
 app.Run();
