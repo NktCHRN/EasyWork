@@ -23,21 +23,21 @@ namespace WebAPI.Controllers
 
         private readonly ITaskService _taskService;
 
-        private readonly IUserAvatarService _userAvatarService;
-
         private readonly IFileService _fileService;
+
+        private readonly IFileManager _fileManager;
 
         private readonly IMapper _mapper;
 
-        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IUserAvatarService userAvatarService, IFileService fileService)
+        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
             _tagService = tagService;
             _taskService = taskService;
             _mapper = mapper;
-            _userAvatarService = userAvatarService;
             _fileService = fileService;
+            _fileManager = fileManager;
         }
 
         // GET api/<TasksController>/5
@@ -55,10 +55,30 @@ namespace WebAPI.Controllers
             var result = _mapper.Map<TaskDTO>(model);
             if (model.ExecutorId is not null)
             {
+                var userModel = await _userManager.FindByIdAsync(model.ExecutorId.ToString());
+                var executor = new UserMiniWithAvatarDTO()
+                {
+                    Id = model.ExecutorId.Value
+                };
+                if (userModel is not null)
+                {
+                    string? avatarType = null;
+                    string? avatarURL = null;
+                    if (userModel.AvatarFormat is not null)
+                    {
+                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
+                    }
+                    executor = executor with
+                    {
+                        FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                        MIMEAvatarType = avatarType,
+                        AvatarURL = avatarURL
+                    };
+                }
                 result = result with
                 {
-                    Executor = _mapper.Map<UserMiniWithAvatarDTO?>(
-                        await _userAvatarService.GetDossierByIdAsync(model.ExecutorId.Value))
+                    Executor = executor
                 };
             }
             return Ok(result);

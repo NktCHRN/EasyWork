@@ -411,18 +411,17 @@ namespace WebAPI.Controllers
             var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
             var stats = _userStatsService.GetStatsById(user.Id);
             string? avatarType = null;
-            byte[]? avatar = null;
+            string? avatarURL = null;
             if (user.AvatarFormat is not null)
             {
                 avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
-                avatar = await _fileManager
-                    .GetFileContentAsync(user.Id + "." + user.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
             }
             var model = _mapper.Map<UserCabinetProfileDTO>(user);
             return Ok(model with
             {
                 MIMEAvatarType = avatarType,
-                Avatar = avatar,
+                AvatarURL = avatarURL,
                 Projects = stats.Projects,
                 TasksDone = stats.TasksDone,
                 TasksNotDone = stats.TasksNotDone

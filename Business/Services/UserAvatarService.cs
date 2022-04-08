@@ -84,31 +84,5 @@ namespace Business.Services
                         _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 }
         }
-
-        public async Task<UserDossier?> GetDossierByIdAsync(int id)
-        {
-            var userModel = await _context.Users.FindAsync(id);
-            if (userModel is null)
-                return null;
-            var dossier = new UserDossier()
-            {
-                Id = id
-            };
-                string? avatarType = null;
-                byte[]? avatar = null;
-                if (userModel.AvatarFormat is not null)
-                {
-                    avatarType = _manager.GetImageMIMEType(userModel.AvatarFormat);
-                    avatar = await _manager
-                        .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
-                }
-                dossier = dossier with
-                {
-                    FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
-                    MIMEAvatarType = avatarType,
-                    Avatar = avatar
-                };
-            return dossier;
-        }
     }
 }

@@ -66,7 +66,7 @@ namespace Business.Managers
                 var realType = Path.GetExtension(file.FileName);
                 if (!IsValidImageType(type) || !IsValidImageType(realType))
                     throw new ArgumentException("This extension is not allowed");
-                if (file.Length > 8000000)
+                if (file.Length > 8388608)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
                 var data = await Image.IdentifyAsync(file.OpenReadStream());
                 if (data is null)

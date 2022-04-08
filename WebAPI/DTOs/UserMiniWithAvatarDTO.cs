@@ -6,7 +6,7 @@
 
         public string FullName { get; init; } = string.Empty;
 
-        public byte[]? Avatar { get; init; }
+        public string? AvatarURL { get; init; }
 
         public string? MIMEAvatarType { get; init; }
     }

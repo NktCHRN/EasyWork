@@ -266,18 +266,17 @@ namespace WebAPI.Controllers
                 if (userModel is not null)
                 {
                     string? avatarType = null;
-                    byte[]? avatar = null;
+                    string? avatarURL = null;
                     if (userModel.AvatarFormat is not null)
                     {
                         avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                        avatar = await _fileManager
-                            .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
                     }
                     userDTO = userDTO with
                     {
                         FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
                         MIMEAvatarType = avatarType,
-                        Avatar = avatar
+                        AvatarURL = avatarURL
                     };
                 }
                 usersMapped.Add(new UserOnProjectExtendedDTO()
@@ -461,18 +460,17 @@ namespace WebAPI.Controllers
                         if (userModel is not null)
                         {
                             string? avatarType = null;
-                            byte[]? avatar = null;
+                            string? avatarURL = null;
                             if (userModel.AvatarFormat is not null)
                             {
                                 avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                                avatar = await _fileManager
-                                    .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                                avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
                             }
                             executor = executor with
                             {
                                 FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
                                 MIMEAvatarType = avatarType,
-                                Avatar = avatar
+                                AvatarURL = avatarURL
                             };
                         }
                     }
@@ -519,18 +517,17 @@ namespace WebAPI.Controllers
                     if (userModel is not null)
                     {
                         string? avatarType = null;
-                        byte[]? avatar = null;
+                        string? avatarURL = null;
                         if (userModel.AvatarFormat is not null)
                         {
                             avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                            avatar = await _fileManager
-                                .GetFileContentAsync(userModel.Id + "." + userModel.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                            avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar"; ;
                         }
                         executor = executor with
                         {
                             FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
                             MIMEAvatarType = avatarType,
-                            Avatar = avatar
+                            AvatarURL = avatarURL
                         };
                     }
                 }

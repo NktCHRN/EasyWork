@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
+using WebAPI.Other;
 
 namespace WebAPI.Controllers
 {
@@ -30,18 +31,17 @@ namespace WebAPI.Controllers
                 if (user.LastName is not null)
                     name += " " + user.LastName;
                 string? avatarType = null;
-                byte[]? avatar = null;
+                string? avatarURL = null;
                 if (user.AvatarFormat is not null)
                 {
                     avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
-                    avatar = await _fileManager
-                        .GetFileContentAsync(user.Id + "." + user.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                    avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
                 }    
                 return Ok(new UserReducedDTO()
                 {
                     FullName = name,
                     MIMEAvatarType = avatarType,
-                    Avatar = avatar
+                    AvatarURL = avatarURL
                 });
         }
     }

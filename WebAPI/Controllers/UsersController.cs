@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
+using WebAPI.Other;
 
 namespace WebAPI.Controllers
 {
@@ -33,7 +34,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? search)
+        public IActionResult Get([FromQuery] string? search)
         {
             var users = _userManager.Users.Where(u => u.EmailConfirmed).AsEnumerable();
             if (search is not null)
@@ -47,18 +48,17 @@ namespace WebAPI.Controllers
             foreach (var user in users)
             {
                 string? avatarType = null;
-                byte[]? avatar = null;
+                string? avatarURL = null;
                 if (user.AvatarFormat is not null)
                 {
                     avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
-                    avatar = await _fileManager
-                        .GetFileContentAsync(user.Id + "." + user.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                    avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
                 }
                 var profile = _mapper.Map<UserProfileReducedDTO>(user);
                 profile = profile with
                 {
                     MIMEAvatarType = avatarType,
-                    Avatar = avatar
+                    AvatarURL = avatarURL
                 };
                 profiles.Add(profile);
             }
@@ -74,21 +74,30 @@ namespace WebAPI.Controllers
             var profile = _mapper.Map<UserProfileDTO>(user);
             var stats = _userStatsService.GetStatsById(user.Id);
             string? avatarType = null;
-            byte[]? avatar = null;
+            string? avatarURL = null;
             if (user.AvatarFormat is not null)
             {
                 avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
-                avatar = await _fileManager
-                    .GetFileContentAsync(user.Id + "." + user.AvatarFormat, Business.Enums.EasyWorkFileTypes.UserAvatar);
+                avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
             }
             return Ok(profile with
             {
                 MIMEAvatarType = avatarType,
-                Avatar = avatar,
+                AvatarURL = avatarURL,
                 Projects = stats.Projects,
                 TasksDone = stats.TasksDone,
                 TasksNotDone = stats.TasksNotDone
             });
+        }
+
+        [HttpGet("{id}/Avatar")]
+        public async Task<IActionResult> GetUserAvatar(int id)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user is null || user.AvatarFormat is null)
+                return NotFound();
+            return File(_fileManager.GetFileStream($"{user.Id}.{user.AvatarFormat}", Business.Enums.EasyWorkFileTypes.UserAvatar), 
+                _fileManager.GetImageMIMEType(user.AvatarFormat)!);
         }
 
         [Authorize(Roles = "Admin")]

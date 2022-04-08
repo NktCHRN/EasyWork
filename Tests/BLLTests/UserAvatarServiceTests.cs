@@ -238,44 +238,5 @@ namespace Tests.BLLTests
             _managerMock.Verify(t => t.DeleteFile("3.bmp", Business.Enums.EasyWorkFileTypes.UserAvatar),
                 "Method does not remove the file from the file system");
         }
-
-        [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(6)]
-        public async Task GetDossierByIdAsync_ReturnsNull(int id)
-        {
-            // Act
-            var result = await _service.GetDossierByIdAsync(id);
-
-            // Assert
-            Assert.IsNull(result);
-        }
-
-        [Test]
-        public async Task GetDossierByIdAsync_ReturnsRightDossier()
-        {
-            // Arrange
-            var id = 1;
-            var format = "jpg";
-            var user = await _context.Users.SingleAsync(u => u.Id == id);
-            user.AvatarFormat = format;
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-            var expectedFormat = "image/jpeg";
-            var expectedFullName = $"{user.FirstName} {user.LastName}";
-            _managerMock.Setup(m => m.GetImageMIMEType(format)).Returns(expectedFormat);
-
-            // Act
-            var actual = await _service.GetDossierByIdAsync(id);
-
-            // Assert
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(id, actual!.Id);
-            Assert.AreEqual(expectedFullName, actual.FullName);
-            Assert.AreEqual(expectedFormat, actual.MIMEAvatarType);
-            _managerMock.Verify(t => t.GetFileContentAsync("1.jpg", Business.Enums.EasyWorkFileTypes.UserAvatar),
-    "Method does not remove the file from the file system");
-        }
     }
 }

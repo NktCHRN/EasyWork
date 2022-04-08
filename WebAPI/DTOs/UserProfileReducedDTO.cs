@@ -10,7 +10,7 @@
 
         public DateTime? LastSeen { get; init; }
 
-        public byte[]? Avatar { get; init; }
+        public string? AvatarURL { get; init; }
 
         public string? MIMEAvatarType { get; init; }
     }

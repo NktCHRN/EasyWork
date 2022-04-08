@@ -25,7 +25,7 @@ namespace WebAPI
                 .ForMember(u => u.Projects, m => m.Ignore())
                 .ForMember(u => u.TasksDone, m => m.Ignore())
                 .ForMember(u => u.TasksNotDone, m => m.Ignore())
-                .ForMember(u => u.Avatar, m => m.Ignore());
+                .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<User, UserProfileDTO>()
                 .ForMember(u => u.LastSeen,
                     m => m.MapFrom<DateTime?>(usr => (usr.LastSeen == DateTime.MinValue) ? null : usr.LastSeen))
@@ -33,7 +33,7 @@ namespace WebAPI
                 .ForMember(u => u.Projects, m => m.Ignore())
                 .ForMember(u => u.TasksDone, m => m.Ignore())
                 .ForMember(u => u.TasksNotDone, m => m.Ignore())
-                .ForMember(u => u.Avatar, m => m.Ignore());
+                .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<User, UserProfileReducedDTO>()
                 .ForMember(u => u.LastSeen,
                     m => m.MapFrom<DateTime?>(usr => (usr.LastSeen == DateTime.MinValue) ? null : usr.LastSeen))
@@ -41,7 +41,7 @@ namespace WebAPI
                     m => m.MapFrom(usr => 
                         string.IsNullOrEmpty(usr.LastName) ? usr.FirstName : usr.FirstName + " " + usr.LastName))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
-                .ForMember(u => u.Avatar, m => m.Ignore());
+                .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<UserOnProjectModel, UserOnProjectDTO>()
                 .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
             CreateMap<ProjectModel, ProjectReducedDTO>();
@@ -60,7 +60,6 @@ namespace WebAPI
                 .ForSourceMember(t => t.Status, m => m.DoNotValidate())
                 .ForSourceMember(t => t.Priority, m => m.DoNotValidate());
             ValueTransformers.Add<byte[]?>(val => (val == null || val.Length == 0) ? null : val);
-            CreateMap<UserDossier?, UserMiniWithAvatarDTO?>();
             CreateMap<FileModelExtended, FileModelDTO>();
         }
     }
