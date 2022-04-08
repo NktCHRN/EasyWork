@@ -119,6 +119,8 @@ namespace Business.Managers
 
         public async Task<byte[]> GetFileContentAsync(string name, EasyWorkFileTypes ewtype) => await File.ReadAllBytesAsync(GetPathByEWType(name, ewtype));
 
+        public async Task<long> GetFileSizeAsync(string name, EasyWorkFileTypes ewtype) => (await File.ReadAllBytesAsync(GetPathByEWType(name, ewtype))).LongLength;
+
         public async Task AddFileAsync(byte[] file, string name, EasyWorkFileTypes ewtype)
         {
             if (file is null)

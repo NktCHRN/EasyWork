@@ -125,5 +125,84 @@ namespace WebAPI.Controllers
             }
             return NoContent();
         }
+
+        [HttpGet("{id}/tags")]
+        public async Task<IActionResult> GetTaskTags(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var result = await _tagService.GetTaskTagsAsync(id);
+            return Ok(_mapper.Map<IEnumerable<TagDTO>>(result));
+        }
+
+        [HttpPost("{id}/tags")]
+        public async Task<IActionResult> AddTag(int id, [FromBody] AddTagDTO dto)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var foundTag = await _tagService.FindByName(dto.Name);
+            int tagId;
+            if (foundTag is null)
+            {
+                try
+                {
+                    var tag = new Business.Models.TagModel
+                    {
+                        Name = dto.Name
+                    };
+                    await _tagService.AddAsync(tag);
+                    tagId = tag.Id;
+                }
+                catch (ArgumentException exc)
+                {
+                    return BadRequest(exc.Message);
+                }
+            }
+            else
+                tagId = foundTag.Id;
+            try
+            {
+                await _taskService.AddTagToTaskAsync(id, tagId);
+            }
+            catch (InvalidOperationException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            return StatusCode(201);
+        }
+
+        [HttpDelete("{id}/tags/{tagId}")]
+        public async Task<IActionResult> DeleteTag(int id, int tagId)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            try
+            {
+                await _taskService.DeleteTagFromTaskAsync(id, tagId);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }

@@ -345,7 +345,7 @@ namespace Tests.BLLTests
             // Arrange
             SeedData();
             var taskId = 1;
-            IEnumerable<int> expectedTagsIds = new[] { 1, 3 };
+            IEnumerable<int> expectedTagsIds = new[] { 3, 1 };
 
             // Act
             var actualTags = await _service.GetTaskTagsAsync(taskId);

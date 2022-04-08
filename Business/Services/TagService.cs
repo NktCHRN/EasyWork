@@ -68,7 +68,7 @@ namespace Business.Services
             var task = await _context.Tasks
                 .Include(t => t.Tags)
                 .SingleOrDefaultAsync(t => t.Id == taskId);
-            return (task is null) ? new List<TagModel>() : _mapper.Map<IEnumerable<TagModel>>(task.Tags);
+            return (task is null) ? new List<TagModel>() : _mapper.Map<IEnumerable<TagModel>>(task.Tags).Reverse();
         }
 
         public bool IsValid(TagModel model, out string? firstErrorMessage)

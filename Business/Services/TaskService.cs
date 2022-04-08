@@ -111,6 +111,12 @@ namespace Business.Services
                 throw new InvalidOperationException("Tag with such an id does not belong to the task");
             task.Tags.Remove(tag);
             await _context.SaveChangesAsync();
+            var tagExtended = await _context.Tags.Include(t => t.Tasks).SingleOrDefaultAsync(t => t.Id == tagId);
+            if (tagExtended is not null && !tagExtended.Tasks.Any())
+            {
+                _context.Tags.Remove(tagExtended);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<TaskModel?> GetByIdAsync(int id)

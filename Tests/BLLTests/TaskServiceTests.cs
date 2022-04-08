@@ -172,6 +172,10 @@ namespace Tests.BLLTests
                 new Tag()       // id 4
                 {
                     Name = "Hotfix",
+                },
+                new Tag()       // id 5
+                {
+                    Name = "Business"
                 }
             };
             foreach (var tag in tags)
@@ -237,7 +241,8 @@ namespace Tests.BLLTests
                 ExecutorId = 5,
                     Tags = new List<Tag>()
                     {
-                        _context.Tags.Single(t => t.Id == 4)
+                        _context.Tags.Single(t => t.Id == 4),
+                        _context.Tags.Single(t => t.Id == 5),
                     }
                 },
                 new TaskEntity()            // id 4
@@ -280,7 +285,11 @@ namespace Tests.BLLTests
                     Name = "Task 5",
                     ProjectId = 1,
                     Status = TaskStatuses.Archived,
-                    EndDate = DateTime.MinValue.AddMonths(1)
+                    EndDate = DateTime.MinValue.AddMonths(1),
+                    Tags = new List<Tag>()
+                    {
+                        _context.Tags.Single(t => t.Id == 3)
+                    }
                 }
             };
             foreach (var task in tasks)
@@ -489,7 +498,7 @@ namespace Tests.BLLTests
             _context.Tasks.Update(task);
             await _context.SaveChangesAsync();
             var expectedCount = _context.Tasks.Count() - 1;
-            var expectedTagsCount = 4;          // no changes
+            var expectedTagsCount = 5;          // no changes
             var expectedMessagesCount = 1;
             var expectedFilesCount = 1;
 
@@ -742,7 +751,7 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(5)]
+        [TestCase(6)]
         public void AddTagToTaskAsyncTest_InvalidTagId_ThrowsInvalidOperationException(int tagId)
         {
             // Arrange
@@ -856,7 +865,7 @@ namespace Tests.BLLTests
             var taskId = 1;
             var tagId = 3;
             var expectedTaskTagsCount = 1;
-            var expectedTagTasksCount = 0;
+            var expectedTagTasksCount = 1;
 
             // Act
             await _service.DeleteTagFromTaskAsync(taskId, tagId);
@@ -866,6 +875,25 @@ namespace Tests.BLLTests
             var tag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
             Assert.AreEqual(expectedTaskTagsCount, task.Tags.Count, "Method does not delete a tag from a task");
             Assert.AreEqual(expectedTagTasksCount, tag.Tasks.Count, "Method does not delete a task from a tag");
+        }
+
+        [Test]
+        public async Task DeleteTagFromTaskAsyncTest_ValidData_FullyDeletesTag()
+        {
+            // Arrange
+            SeedData();
+            var taskId = 3;
+            var tagId = 5;
+            var expectedTaskTagsCount = 1;
+
+            // Act
+            await _service.DeleteTagFromTaskAsync(taskId, tagId);
+
+            // Assert
+            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
+            var tag = await _context.Tags.SingleOrDefaultAsync(t => t.Id == tagId);
+            Assert.AreEqual(expectedTaskTagsCount, task.Tags.Count, "Method does not delete a tag from a task");
+            Assert.IsNull(tag);
         }
 
         [Test]
