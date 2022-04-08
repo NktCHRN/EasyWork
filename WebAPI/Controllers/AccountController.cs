@@ -29,6 +29,8 @@ namespace WebAPI.Controllers
 
         private readonly IMailService _mailService;
 
+        private readonly ITaskService _taskService;
+
         private readonly IConfiguration _configuration;
 
         private readonly IUserAvatarService _userAvatarService;
@@ -39,7 +41,7 @@ namespace WebAPI.Controllers
 
         private int EmailConfirmationLifeTime => int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IMessageService messageService)
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IMessageService messageService, ITaskService taskService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -51,6 +53,7 @@ namespace WebAPI.Controllers
             _userAvatarService = userAvatarService;
             _userStatsService = userStatsService;
             _messageService = messageService;
+            _taskService = taskService;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -427,12 +430,37 @@ namespace WebAPI.Controllers
         [Authorize]
         [Route("Notifications")]
         [HttpGet]
-        public IActionResult GetNotifications()
+        public async Task<IActionResult> GetNotifications()
         {
             var userId = User.GetId();
             if (userId is null)
                 return Unauthorized();
-            return Ok(_messageService.GetNotReadMessagesForUser(userId.Value));
+            var result = _messageService.GetNotReadMessagesForUser(userId.Value);
+            var resultMapped = new List<MessageReducedDTO>();
+            foreach (var message in result)
+            {
+                string taskName = string.Empty;
+                string userFullName = string.Empty;
+                var task = await _taskService.GetByIdAsync(message.TaskId);
+                if (task is not null)
+                    taskName = task.Name;
+                var user = await _userManager.FindByIdAsync(message.SenderId.ToString());
+                if (user is not null)
+                {
+                    userFullName = user.FirstName;
+                    if (user.LastName is not null)
+                        userFullName += " " + user.LastName;
+                }
+                resultMapped.Add(new MessageReducedDTO()
+                {
+                    Id = message.Id,
+                    Text = message.Text,
+                    TaskId = message.TaskId,
+                    TaskName = taskName,
+                    SenderFullName = userFullName
+                });
+            }
+            return Ok(resultMapped);
         }
     }
 }
