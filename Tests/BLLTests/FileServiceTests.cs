@@ -330,19 +330,22 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetTaskFilesTest_ReturnsRightFiles()
+        public async Task GetTaskFilesTest_ReturnsRightFiles()
         {
             // Arrange
             SeedData();
+            long size = 111;
+            _managerMock.Setup(m => m.GetFileSizeAsync(It.IsAny<string>(), Business.Enums.EasyWorkFileTypes.File)).ReturnsAsync(size);
             var taskId = 1;
             var expectedCount = 5;
 
             // Act
-            var actual = _service.GetTaskFiles(taskId);
+            var actual = await _service.GetTaskFilesAsync(taskId);
 
             // Assert
             Assert.AreEqual(expectedCount, actual.Count(), "Method returns wrong elements");
             Assert.IsTrue(actual.All(f => f.TaskId == taskId), "Method returns wrong elements");
+            Assert.IsTrue(actual.All(f => f.Size == size), "Method returns wrong elements");
         }
     }
 }

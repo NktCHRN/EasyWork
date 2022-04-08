@@ -7,7 +7,9 @@ using Business.Services;
 using Data;
 using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -99,6 +101,19 @@ builder.Services.Configure<CustomEmailConfirmationTokenProviderOptions>(opt =>
 builder.Services.Configure<CustomPasswordResetTokenProviderOptions>(opt =>
         opt.TokenLifespan = TimeSpan
         .FromHours(int.Parse(builder.Configuration.GetSection("TokenProvidersSetting:PasswordResetLifetime").Value)));
+const long maxFileSize = 10000000000;                       // 10 GB
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = maxFileSize;
+});
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = maxFileSize;
+});
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = maxFileSize;
+});
 
 var app = builder.Build();
 

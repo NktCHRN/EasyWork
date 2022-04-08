@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Business.Interfaces;
+using Business.Models;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -24,9 +25,11 @@ namespace WebAPI.Controllers
 
         private readonly IUserAvatarService _userAvatarService;
 
+        private readonly IFileService _fileService;
+
         private readonly IMapper _mapper;
 
-        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IUserAvatarService userAvatarService)
+        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IUserAvatarService userAvatarService, IFileService fileService)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
@@ -34,6 +37,7 @@ namespace WebAPI.Controllers
             _taskService = taskService;
             _mapper = mapper;
             _userAvatarService = userAvatarService;
+            _fileService = fileService;
         }
 
         // GET api/<TasksController>/5
@@ -203,6 +207,60 @@ namespace WebAPI.Controllers
                 return NotFound();
             }
             return NoContent();
+        }
+
+        [HttpGet("{id}/files")]
+        public async Task<IActionResult> GetTaskFileModels(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var files = await _fileService.GetTaskFilesAsync(id);
+            return Ok(_mapper.Map<IEnumerable<FileModelDTO>>(files));
+        }
+
+        [HttpPost("{id}/files")]
+        public async Task<IActionResult> AddFile(int id, IFormFile file)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var fileModel = new FileModel
+            {
+                Name = file.FileName,
+                TaskId = id
+            };
+            try
+            {
+                await _fileService.AddAsync(fileModel, file);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            catch (InvalidOperationException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            var dto = new FileModelDTO()
+            {
+                Id = fileModel.Id,
+                Name = fileModel.Name,
+                Size = file.Length
+            };
+            return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", dto);
         }
     }
 }

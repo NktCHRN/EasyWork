@@ -24,5 +24,7 @@ namespace Business.Interfaces
         FileStream GetFileStream(string name, EasyWorkFileTypes ewtype);
 
         public Task<byte[]> GetFileContentAsync(string name, EasyWorkFileTypes ewtype);
+
+        public Task<long> GetFileSizeAsync(string name, EasyWorkFileTypes ewtype);
     }
 }

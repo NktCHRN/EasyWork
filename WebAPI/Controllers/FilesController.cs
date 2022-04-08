@@ -39,11 +39,8 @@ namespace WebAPI.Controllers
             var task = await _taskService.GetByIdAsync(model.TaskId);
             if (task is null)
                 return NotFound();
-            if (task.ExecutorId != User.GetId())
-            {
-                if (!await _uopService.IsOnProjectAsync(task.ProjectId, User.GetId().GetValueOrDefault()))
+            if (!await _uopService.IsOnProjectAsync(task.ProjectId, User.GetId().GetValueOrDefault()))
                     return Forbid();
-            }
 
             var visualFileName = model.Name;
             var realFileName = model.Id + Path.GetExtension(visualFileName);
@@ -54,6 +51,30 @@ namespace WebAPI.Controllers
             else
                 contentType = "application/octet-stream";
             return File(await _manager.GetFileContentAsync(realFileName, Business.Enums.EasyWorkFileTypes.File), contentType, visualFileName);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var model = await _service.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+
+            var task = await _taskService.GetByIdAsync(model.TaskId);
+            if (task is null)
+                return NotFound();
+            if (!await _uopService.IsOnProjectAsync(task.ProjectId, User.GetId().GetValueOrDefault()))
+                return Forbid();
+
+            try
+            {
+                await _service.DeleteByIdAsync(id);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }

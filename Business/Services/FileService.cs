@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Business.Interfaces;
 using Business.Models;
+using Business.Other;
 using Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -65,9 +66,12 @@ namespace Business.Services
             return _mapper.Map<FileModel?>(await _context.Files.FindAsync(id));
         }
 
-        public IEnumerable<FileModel> GetTaskFiles(int taskId)
+        public async Task<IEnumerable<FileModelExtended>> GetTaskFilesAsync(int taskId)
         {
-            return _mapper.Map<IEnumerable<FileModel>>(_context.Files.Where(f => f.TaskId == taskId));
+            var files = _mapper.Map<IEnumerable<FileModelExtended>>(_context.Files.Where(f => f.TaskId == taskId));
+            foreach (var file in files)
+                file.Size = await _manager.GetFileSizeAsync(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+            return files;
         }
 
         public bool IsValid(FileModel model, out string? firstErrorMessage)

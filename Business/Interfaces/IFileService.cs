@@ -1,4 +1,5 @@
 ﻿using Business.Models;
+using Business.Other;
 using Microsoft.AspNetCore.Http;
 
 namespace Business.Interfaces
@@ -11,6 +12,6 @@ namespace Business.Interfaces
 
         Task DeleteByIdAsync(int id);
 
-        IEnumerable<FileModel> GetTaskFiles(int taskId);
+        Task<IEnumerable<FileModelExtended>> GetTaskFilesAsync(int taskId);
     }
 }

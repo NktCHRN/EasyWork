@@ -61,6 +61,7 @@ namespace WebAPI
                 .ForSourceMember(t => t.Priority, m => m.DoNotValidate());
             ValueTransformers.Add<byte[]?>(val => (val == null || val.Length == 0) ? null : val);
             CreateMap<UserDossier?, UserMiniWithAvatarDTO?>();
+            CreateMap<FileModelExtended, FileModelDTO>();
         }
     }
 }

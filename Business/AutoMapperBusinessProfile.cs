@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Business.Models;
+using Business.Other;
 using Data.Entities;
 
 namespace Business
@@ -34,6 +35,8 @@ namespace Business
                 m => m.MapFrom(tagm => tagm.Tasks.Select(t => t.Id)))
                 .ReverseMap();
             CreateMap<UserOnProject, UserOnProjectModel>().ReverseMap();
+            CreateMap<Data.Entities.File, FileModelExtended>()
+                .ForMember(f => f.Size, m => m.Ignore());
         }
     }
 }
