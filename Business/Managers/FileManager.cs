@@ -132,7 +132,7 @@ namespace Business.Managers
                 var type = Path.GetExtension(name);
                 if (!IsValidImageType(type))
                     throw new ArgumentException("This extension is not allowed");
-                if (file.Length > 8000000)
+                if (file.Length > 8388608)              // 8 MB
                     throw new ArgumentException("The max length of the avatar is 8 MB");
                 var data = Image.Identify(file);
                 if (data is null)
