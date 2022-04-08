@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Business.Models;
+using Business.Other;
 using Data.Entities;
 using WebAPI.DTOs;
 
@@ -55,6 +56,11 @@ namespace WebAPI
                 .ForMember(t => t.Executor, m => m.Ignore())
                 .ForMember(t => t.Status, m => m.MapFrom(tsk => tsk.Status.ToString()))
                 .ForMember(t => t.Priority, m => m.MapFrom(tsk => (tsk.Priority == null) ? null : tsk.Priority.Value.ToString()));
+            CreateMap<UpdateTaskDTO, TaskModel>()
+                .ForSourceMember(t => t.Status, m => m.DoNotValidate())
+                .ForSourceMember(t => t.Priority, m => m.DoNotValidate());
+            ValueTransformers.Add<byte[]?>(val => (val == null || val.Length == 0) ? null : val);
+            CreateMap<UserDossier?, UserMiniWithAvatarDTO?>();
         }
     }
 }

@@ -147,9 +147,10 @@ namespace Business.Services
                 firstErrorMessage = "The project with such an id was not found";
                 return false;
             }
-            if (model.ExecutorId is not null && !_context.Users.Any(p => p.Id == model.ExecutorId))
+            if (model.ExecutorId is not null 
+                && !_context.UsersOnProjects.Any(uop => uop.UserId == model.ExecutorId && uop.ProjectId == model.ProjectId))
             {
-                firstErrorMessage = "The user with such an id (ExecutorId) was not found";
+                firstErrorMessage = "The user with such an id (ExecutorId) was not found or does not work on this project";
                 return false;
             }
             return true;
