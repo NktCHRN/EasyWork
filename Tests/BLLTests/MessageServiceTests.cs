@@ -127,15 +127,13 @@ namespace Tests.BLLTests
                 {
                     SenderId = 2,
                     Text = "This is message 1",
-                    TaskId = 1,
-                    IsRead = true,
+                    TaskId = 1
                 },
                 new Message()     // id 2
                 {
                     SenderId = 1,
                     Text = "This is message 2",
-                    TaskId = 2,
-                    IsRead = true,
+                    TaskId = 2
                 },
                 new Message()     // id 3
                 {
@@ -153,8 +151,7 @@ namespace Tests.BLLTests
                 {
                     SenderId = 3,
                     Text = "This is message 5",
-                    TaskId = 2,
-                    IsRead = false
+                    TaskId = 2
                 }
             };
             foreach (var message in messages)
@@ -188,15 +185,7 @@ namespace Tests.BLLTests
                     Text = "This is message 1 edited",
                     TaskId = 1,
                     Date = DateTime.MaxValue    // changed
-                },
-            new MessageModel()     // id 5, ind 3
-                {
-                Id = 5,
-                                        SenderId = 1,
-                    Text = "This is message 5",
-                    TaskId = 2,
-                    IsRead = false      // changed
-                },
+                }
         };
 
         private readonly MessageModel _validForUpdateMessage = new()
@@ -204,8 +193,7 @@ namespace Tests.BLLTests
             Id = 1,
             SenderId = 2,
             Text = "This is message 1 edited (valid)",
-            TaskId = 1,
-            IsRead = true
+            TaskId = 1
         };
 
         [Test]
@@ -369,7 +357,6 @@ namespace Tests.BLLTests
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        [TestCase(3)]
         public void UpdateAsyncTest_InvalidForUpdateOnlyModel_ThrowsArgumentException(int index)
         {
             // Arrange
@@ -397,22 +384,6 @@ namespace Tests.BLLTests
             // Assert
             var actual = await _context.Messages.FindAsync(model.Id);
             Assert.AreEqual(expectedText, actual!.Text, "Method does not update model");
-        }
-
-        [Test]
-        public void GetNotReadMessagesForUserTest_ReturnsRightNotifications()
-        {
-            // Arrange
-            SeedData();
-            var userId = 1;
-            var expectedMessageIds = new[] { 5 };
-
-            // Act
-            var actualMessageIds = _service.GetNotReadMessagesForUser(userId).Select(m => m.Id);
-
-            // Assert
-            Assert.AreEqual(expectedMessageIds.Length, actualMessageIds.Count(), "Method returned wrong elements");
-            Assert.IsTrue(expectedMessageIds.SequenceEqual(actualMessageIds), "Method returned wrong elements");
         }
     }
 }

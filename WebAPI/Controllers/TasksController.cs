@@ -27,9 +27,11 @@ namespace WebAPI.Controllers
 
         private readonly IFileManager _fileManager;
 
+        private readonly IMessageService _messageService;
+
         private readonly IMapper _mapper;
 
-        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager)
+        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
@@ -38,6 +40,17 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _fileService = fileService;
             _fileManager = fileManager;
+            _messageService = messageService;
+        }
+
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var tasks = _taskService.GetUserTasks(userId.Value);
+            return Ok(_mapper.Map<IEnumerable<UserTaskDTO>>(tasks));
         }
 
         // GET api/<TasksController>/5
@@ -285,6 +298,108 @@ namespace WebAPI.Controllers
                 Size = file.Length
             };
             return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", dto);
+        }
+
+        [HttpGet("{id}/messages")]
+        public async Task<IActionResult> GetTaskMessages(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var messages = _messageService.GetTaskMessages(id);
+            var mappedMessages = new List<MessageDTO>();
+            foreach (var message in messages)
+            {
+                var mappedMessage = _mapper.Map<MessageDTO>(message);
+                var userModel = await _userManager.FindByIdAsync(message.SenderId.ToString());
+                var sender = new UserMiniWithAvatarDTO()
+                {
+                    Id = message.SenderId
+                };
+                if (userModel is not null)
+                {
+                    string? avatarType = null;
+                    string? avatarURL = null;
+                    if (userModel.AvatarFormat is not null)
+                    {
+                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
+                    }
+                    sender = sender with
+                    {
+                        FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                        MIMEAvatarType = avatarType,
+                        AvatarURL = avatarURL
+                    };
+                }
+                mappedMessages.Add(mappedMessage with
+                {
+                    Sender = sender
+                });
+            }
+            return Ok(mappedMessages);
+        }
+
+        [HttpPost("{id}/messages")]
+        public async Task<IActionResult> AddMessage(int id, [FromBody] AddMessageDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var message = new MessageModel()
+            {
+                Text = dto.Text,
+                SenderId = userId.Value,
+                Date = DateTime.Now,
+                TaskId = id
+            };
+            try
+            {
+                await _messageService.AddAsync(message);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            var result = _mapper.Map<MessageDTO>(message);
+            var userModel = await _userManager.FindByIdAsync(message.SenderId.ToString());
+            var sender = new UserMiniWithAvatarDTO()
+            {
+                Id = message.SenderId
+            };
+            if (userModel is not null)
+            {
+                string? avatarType = null;
+                string? avatarURL = null;
+                if (userModel.AvatarFormat is not null)
+                {
+                    avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                    avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
+                }
+                sender = sender with
+                {
+                    FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                    MIMEAvatarType = avatarType,
+                    AvatarURL = avatarURL
+                };
+            }
+            result = result with
+            {
+                Sender = sender
+            };
+            return Created($"{this.GetApiUrl()}Messages/{message.Id}", result);
         }
     }
 }

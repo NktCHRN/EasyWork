@@ -12,13 +12,11 @@ namespace WebAPI.DTOs
 
         public DateTime? Deadline { get; set; }
 
-        public DateTime? EndDate { get; set; }      // should be null on creation
-
         [Required(AllowEmptyStrings = false)]
         public string Status { get; set; } = string.Empty;
 
         public string? Priority { get; set; }
 
-        public int? ExecutorId { get; set; }        // may be or not be null on creation
+        public int? ExecutorId { get; set; }
     }
 }

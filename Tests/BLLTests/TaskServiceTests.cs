@@ -384,12 +384,12 @@ namespace Tests.BLLTests
             Id = 1,
             Name = "Task 1 edited",
             StartDate = new DateTime(2022, 2, 3),
-            Status = TaskStatuses.ToDo,
+            Status = TaskStatuses.Complete,
             Deadline = new DateTime(2022, 2, 10),
             EndDate = new DateTime(2022, 3, 5),
             Description = "This is new description of the task 1",
             Priority = TaskPriorities.High,
-            ProjectId = 1,              // changed
+            ProjectId = 1,
             ExecutorId = 5
         };
 
@@ -694,6 +694,26 @@ namespace Tests.BLLTests
             var actualTagsCount = actual.Tags.Count;
             Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
             Assert.AreEqual(expectedTagsCount, actualTagsCount, "Method changed tags");
+            Assert.IsNotNull(actual.EndDate);
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_FromCompleteToLower_UpdatesModelAndSetNullToEndDate()
+        {
+            // Arrange
+            SeedData();
+            var id = 5;
+            var model = _mapper.Map<TaskModel>(await _context.Tasks.SingleAsync(t => t.Id == id));
+            model.Status = TaskStatuses.ToDo;
+            var expectedName = model.Name;
+            
+            // Act
+            await _service.UpdateAsync(model);
+
+            // Assert
+            var actual = await _context.Tasks.Include(t => t.Tags).SingleAsync(r => r.Id == model.Id);
+            Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
+            Assert.IsNull(actual.EndDate);
         }
 
         [Test]

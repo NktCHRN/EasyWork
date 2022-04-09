@@ -31,7 +31,6 @@ namespace Business.Services
         public async Task AddAsync(MessageModel model)
         {
             model.Date = DateTime.Now;
-            model.IsRead = false;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
@@ -88,18 +87,9 @@ namespace Business.Services
                 throw new ArgumentException("Sender cannot be changed", nameof(model));
             if (model.Date != existingModel.Date)
                 throw new ArgumentException("Date cannot be changed", nameof(model));
-            if (!model.IsRead && existingModel.IsRead)
-                throw new ArgumentException("The \"read\" status cannot be returned to false", nameof(model));
             existingModel = _mapper.Map(model, existingModel);
             _context.Messages.Update(existingModel);
             await _context.SaveChangesAsync();
-        }
-
-        public IEnumerable<MessageModel> GetNotReadMessagesForUser(int userId)
-        {
-            var tasksIds = _context.Tasks.Where(t => t.ExecutorId == userId).Select(t => t.Id);
-            var messages = _context.Messages.Where(m => tasksIds.Contains(m.TaskId) && m.SenderId != userId && !m.IsRead);
-            return _mapper.Map<IEnumerable<MessageModel>>(messages).Reverse();
         }
     }
 }

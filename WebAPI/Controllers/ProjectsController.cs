@@ -557,8 +557,8 @@ namespace WebAPI.Controllers
             foreach (var task in tasks)
             {
                 var startDate = (task.StartDate >= from) ? task.StartDate : from;
-                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : to;
                 var endDate = (task.EndDate is not null && task.EndDate <= to) ? task.EndDate.Value : to;
+                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : endDate;
                 UserMiniReducedDTO? executor = null;
                 if (task.ExecutorId is not null)
                 {

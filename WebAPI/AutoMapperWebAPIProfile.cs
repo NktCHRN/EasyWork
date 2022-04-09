@@ -56,11 +56,15 @@ namespace WebAPI
                 .ForMember(t => t.Executor, m => m.Ignore())
                 .ForMember(t => t.Status, m => m.MapFrom(tsk => tsk.Status.ToString()))
                 .ForMember(t => t.Priority, m => m.MapFrom(tsk => (tsk.Priority == null) ? null : tsk.Priority.Value.ToString()));
+            CreateMap<TaskModel, UserTaskDTO>()
+                .ForMember(t => t.Status, m => m.MapFrom(tsk => tsk.Status.ToString()));
             CreateMap<UpdateTaskDTO, TaskModel>()
                 .ForSourceMember(t => t.Status, m => m.DoNotValidate())
                 .ForSourceMember(t => t.Priority, m => m.DoNotValidate());
             ValueTransformers.Add<byte[]?>(val => (val == null || val.Length == 0) ? null : val);
             CreateMap<FileModelExtended, FileModelDTO>();
+            CreateMap<MessageModel, MessageDTO>()
+                .ForMember(m => m.Sender, u => u.Ignore());
         }
     }
 }

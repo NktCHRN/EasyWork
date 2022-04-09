@@ -11,9 +11,6 @@ namespace Business.Models
         public string Text { get; set; } = string.Empty;
 
         [Required]
-        public bool IsRead { get; set; }
-
-        [Required]
         public DateTime Date { get; set; }
 
         [Required]
