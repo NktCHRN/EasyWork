@@ -204,7 +204,11 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
-            return StatusCode(201);
+            return Created($"{this.GetApiUrl()}Tasks/{id}/Tags", new TagDTO()
+            {
+                Id = tagId,
+                Name = dto.Name
+            });
         }
 
         [HttpDelete("{id}/tags/{tagId}")]
