@@ -1,0 +1,6 @@
+image1.jpg: https://www.pexels.com/photo/lake-and-mountain-417074/
+image2.bmp: https://3axis.co/download/ro6yqkq7/
+image3.png: http://pngimg.com/uploads/free/free_PNG90748.png
+image4.jpg: https://upload.wikimedia.org/wikipedia/commons/a/ac/Alpine_Landscape.jpg
+image5.webp: https://upload.wikimedia.org/wikipedia/commons/a/a1/Johnrogershousemay2020.webp?uselang=ru
+image6.jpg: https://upload.wikimedia.org/wikipedia/commons/f/ff/Pizigani_1367_Chart_10MB.jpg

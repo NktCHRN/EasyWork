@@ -361,3 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# User avatars and files
+Data/Files/
+Data/UserAvatars/
+
+# Actual appsettings
+WebAPI/appsettings.Development.json
