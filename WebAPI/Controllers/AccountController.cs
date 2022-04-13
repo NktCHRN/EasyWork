@@ -181,6 +181,39 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpPost("EmailConfirmationMessageResend")]
+        public async Task<IActionResult> ResendConfirmationMessage([FromBody] ResendEmailConfirmationDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var user = await _userManager.FindByNameAsync(dto.Email);
+            if (user is null)
+                return NotFound();
+            if (user.EmailConfirmed)
+                return BadRequest("You have already confirmed your email");
+            string data = System.IO.File.ReadAllText(Path.Combine(_fileManager.GetSolutionPath()!, "WebAPI\\Mails\\ConfirmEmail.html"));
+            var doc = new HtmlDocument();
+            doc.LoadHtml(data);
+            var logo = doc.GetElementbyId("logo");
+            logo.Attributes.Add("src", $"data:image/png;base64, {Convert.ToBase64String(await _fileManager.GetFileContentAsync("logo.png", Business.Enums.EasyWorkFileTypes.EasyWorkProjectImage))}");
+            var link = doc.GetElementbyId("link");
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var param = new Dictionary<string, string?>
+                {
+                    {"token", token },
+                    {"email", user.Email }
+                };
+            var callback = QueryHelpers.AddQueryString(dto.ClientURI, param);
+            link.Attributes.Add("href", callback);
+            await _mailService.SendAsync(new Business.Other.MailRequest()
+            {
+                To = dto.Email,
+                Subject = "EasyWork: Confirm your email",
+                Body = doc.DocumentNode.InnerHtml
+            });
+            return NoContent();
+        }
+
         [HttpGet("EmailConfirmation")]
         public async Task<IActionResult> EmailConfirmation([FromQuery] string email, [FromQuery] string token)
         {
