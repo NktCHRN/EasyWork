@@ -189,10 +189,14 @@ namespace Business.Services
 
         public IEnumerable<TaskModel> GetProjectTasksByStatusAndTag(int projectId, TaskStatuses status, int? tagId = null)
         {
+            var tasksExtended = _context.Tasks
+                .Include(t => t.Messages)
+                .Include(t => t.Files)
+                .Include(t => t.Tags);
             if (tagId is null)
-                return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks.Where(t => t.ProjectId == projectId && t.Status == status))
+                return _mapper.Map<IEnumerable<TaskModel>>(tasksExtended.Where(t => t.ProjectId == projectId && t.Status == status))
                     .Reverse();
-            var result = _context.Tasks
+            var result = tasksExtended
                 .Include(t => t.Tags)
                 .Where(t => t.ProjectId == projectId && t.Status == status && t.Tags.Any(t => t.Id == tagId));
             return _mapper.Map<IEnumerable<TaskModel>>(result).Reverse();
