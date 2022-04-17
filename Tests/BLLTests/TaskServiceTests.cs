@@ -971,14 +971,36 @@ namespace Tests.BLLTests
             };
             _context.Tasks.Add(tempTask);
             _context.SaveChanges();
+            var expectedMsgCount = 2;
+            var expectedFilesCount = 1;
+            for (int i = 0; i < expectedMsgCount; i++)
+            {
+                var msg = new Message()
+                {
+                    Text = $"Message {i + 1}",
+                    TaskId = 8
+                };
+                _context.Messages.Add(msg);
+                _context.SaveChanges();
+            }
+            var file = new File()
+            {
+                Name = "File 1",
+                TaskId = 8
+            };
+            _context.Files.Add(file);
+            _context.SaveChanges();
             var expectedIds = new int[] { 8, 1 };
 
             // Act
-            var actualIds = _service.GetProjectTasksByStatusAndTag(projectId, status, tagId).Select(t => t.Id);
+            var actual = _service.GetProjectTasksByStatusAndTag(projectId, status, tagId);
+            var actualIds = actual.Select(t => t.Id);
 
             // Assert
             Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
             Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
+            Assert.AreEqual(expectedMsgCount, actual.First().MessagesIds.Count);
+            Assert.AreEqual(expectedFilesCount, actual.First().FilesIds.Count);
         }
     }
 }

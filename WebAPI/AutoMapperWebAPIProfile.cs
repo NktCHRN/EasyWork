@@ -51,7 +51,9 @@ namespace WebAPI
             CreateMap<AddReleaseDTO, ReleaseModel>();
             CreateMap<TagModel, TagDTO>();
             CreateMap<TaskModel, TaskReducedDTO>()
-                .ForMember(t => t.Executor, m => m.Ignore());
+                .ForMember(t => t.Executor, m => m.Ignore())
+                .ForMember(t => t.MessagesCount, m => m.MapFrom(tsk => tsk.MessagesIds.Count))
+                .ForMember(t => t.FilesCount, m => m.MapFrom(tsk => tsk.FilesIds.Count));
             CreateMap<TaskModel, TaskDTO>()
                 .ForMember(t => t.Executor, m => m.Ignore())
                 .ForMember(t => t.Status, m => m.MapFrom(tsk => tsk.Status.ToString()))
