@@ -377,6 +377,8 @@ namespace WebAPI.Controllers
                 return BadRequest();
             var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
             user = _mapper.Map(model, user);
+            user.FirstName = user.FirstName.Trim();
+            user.LastName = user.LastName?.Trim();
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
