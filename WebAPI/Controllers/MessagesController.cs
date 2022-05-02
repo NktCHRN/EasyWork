@@ -66,7 +66,7 @@ namespace WebAPI.Controllers
                 }
                 sender = sender with
                 {
-                    FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                    FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
                     MIMEAvatarType = avatarType,
                     AvatarURL = avatarURL
                 };

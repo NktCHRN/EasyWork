@@ -125,7 +125,7 @@ namespace WebAPI.Controllers
                     {
                         Id = admin.Id,
                         Email = admin.Email,
-                        FullName = (admin.LastName is null) ? admin.FirstName : admin.FirstName + " " + admin.LastName,
+                        FullName = $"{admin.FirstName} {admin.LastName}".TrimEnd(),
                     };
                     mappedBan = mappedBan with
                     {
@@ -146,6 +146,8 @@ namespace WebAPI.Controllers
             var user = _mapper.Map<User>(model);
             user.RegistrationDate = DateTime.Now;
             user.UserName = model.Email;
+            user.FirstName = user.FirstName.Trim();
+            user.LastName = user.LastName?.Trim();
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser is not null 
                 && !existingUser.EmailConfirmed 

@@ -57,7 +57,7 @@ namespace WebAPI.Controllers
                 {
                     Id = user.Id,
                     Email = user.Email,
-                    FullName = (user.LastName is null) ? user.FirstName : user.FirstName + " " + user.LastName,
+                    FullName = $"{user.FirstName} {user.LastName}".TrimEnd(),
                 };
             }
             return userModel;

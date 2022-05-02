@@ -38,8 +38,7 @@ namespace WebAPI
                 .ForMember(u => u.LastSeen,
                     m => m.MapFrom<DateTime?>(usr => (usr.LastSeen == DateTime.MinValue) ? null : usr.LastSeen))
                 .ForMember(u => u.FullName,
-                    m => m.MapFrom(usr => 
-                        string.IsNullOrEmpty(usr.LastName) ? usr.FirstName : usr.FirstName + " " + usr.LastName))
+                    m => m.MapFrom(usr => $"{usr.FirstName} {usr.LastName}".TrimEnd()))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<UserOnProjectModel, UserOnProjectDTO>()

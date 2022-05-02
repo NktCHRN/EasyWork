@@ -42,7 +42,9 @@ namespace WebAPI.Controllers
                 search = search.ToLowerInvariant();
                 users = users.Where(u => u.Id.ToString() == search
                 || u.Email.ToLowerInvariant().Contains(search)
-                || search.Contains(u.FirstName.ToLowerInvariant()) || (u.LastName != null && (search.Contains(u.LastName.ToLowerInvariant()) || u.LastName.ToLowerInvariant().Contains(search))));
+                || search.Contains(u.FirstName.ToLowerInvariant()) 
+                || (u.LastName != null && (search.Contains(u.LastName.ToLowerInvariant()) 
+                    || u.LastName.ToLowerInvariant().Contains(search))));
             }
             var profiles = new List<UserProfileReducedDTO>();
             foreach (var user in users)
@@ -124,7 +126,7 @@ namespace WebAPI.Controllers
                     {
                         Id = admin.Id,
                         Email = admin.Email,
-                        FullName = (admin.LastName is null) ? admin.FirstName : admin.FirstName + " " + admin.LastName,
+                        FullName = $"{admin.FirstName} {admin.LastName}".TrimEnd(),
                     };
                     mappedBan = mappedBan with
                     {
