@@ -146,8 +146,6 @@ namespace WebAPI.Controllers
             var user = _mapper.Map<User>(model);
             user.RegistrationDate = DateTime.Now;
             user.UserName = model.Email;
-            user.FirstName = user.FirstName.Trim();
-            user.LastName = user.LastName?.Trim();
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser is not null 
                 && !existingUser.EmailConfirmed 
@@ -377,8 +375,6 @@ namespace WebAPI.Controllers
                 return BadRequest();
             var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
             user = _mapper.Map(model, user);
-            user.FirstName = user.FirstName.Trim();
-            user.LastName = user.LastName?.Trim();
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
