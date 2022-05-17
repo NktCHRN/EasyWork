@@ -78,7 +78,7 @@ namespace WebAPI.Controllers
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                StartDate = DateTime.Now,
+                StartDate = DateTime.UtcNow,
                 InviteCode = Guid.NewGuid()
             };
             try
@@ -196,7 +196,7 @@ namespace WebAPI.Controllers
             if (role is null || role < UserOnProjectRoles.Manager)
                 return Forbid();
             var release = _mapper.Map<ReleaseModel>(dto);
-            release.Date = DateTime.Now;
+            release.Date = DateTime.UtcNow;
             release.ProjectId = id;
             try
             {

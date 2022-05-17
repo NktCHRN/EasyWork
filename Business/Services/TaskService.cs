@@ -37,7 +37,7 @@ namespace Business.Services
         public async Task AddAsync(TaskModel model)
         {
             if (model.StartDate == default)
-                model.StartDate = DateTime.Now;
+                model.StartDate = DateTime.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
@@ -171,7 +171,7 @@ namespace Business.Services
             if (model.ProjectId != existingModel.ProjectId)
                 throw new ArgumentException("Project id cannot be changed", nameof(model));
             if (model.Status == TaskStatuses.Complete && existingModel.Status < TaskStatuses.Complete)
-                model.EndDate = DateTime.Now;
+                model.EndDate = DateTime.UtcNow;
             else if (model.Status < TaskStatuses.Complete)
                 model.EndDate = null;
             existingModel = _mapper.Map(model, existingModel);

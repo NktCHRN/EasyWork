@@ -29,7 +29,7 @@ namespace Business.Services
 
         public async Task AddAsync(ReleaseModel model)
         {
-            model.Date = DateTime.Now;
+            model.Date = DateTime.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
