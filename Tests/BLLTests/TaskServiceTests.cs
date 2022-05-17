@@ -1126,6 +1126,28 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void AddExecutorToTaskAsyncTest_TooManyExecutors_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var task = new TaskEntity
+            {
+                Name = "Add Executor Test Task",
+                Executors = new List<User>(),
+                ProjectId = 1
+            };
+            for (int i = 0; i < 10; i++)
+                task.Executors.Add(new User() { FirstName=$"User{i+1}"});
+            _context.Tasks.Add(task);
+            _context.SaveChanges();
+            var newUserId = 2;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddExecutorToTaskAsync(task.Id, newUserId),
+                "Method does not throw InvalidOperationException if the task already has too many executors");
+        }
+
+        [Test]
         public async Task AddExecutorToTaskAsyncTest_ValidData_AddsUserToTask()
         {
             // Arrange

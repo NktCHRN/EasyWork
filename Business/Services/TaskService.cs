@@ -209,6 +209,8 @@ namespace Business.Services
             return (task is null) ? new List<User>() : task.Executors;
         }
 
+        const int _maxExecutorsCount = 10;
+
         public async Task AddExecutorToTaskAsync(int taskId, int userId)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -220,6 +222,8 @@ namespace Business.Services
             if (!_context.UsersOnProjects.Any(uop => uop.UserId == userId && uop.ProjectId == task.ProjectId))
                 throw new ArgumentException("The user with such an id (ExecutorId) does not work on this project",
                     nameof(userId));
+            if (task.Executors.Count >= _maxExecutorsCount)
+                throw new InvalidOperationException($"Too many executors. Maximum: {_maxExecutorsCount}");
             task.Executors.Add(user);
             await _context.SaveChangesAsync();
         }
