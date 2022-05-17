@@ -52,7 +52,9 @@ namespace Business.Services
 
         public IEnumerable<UserOnProjectModelExtended> GetProjectUsers(int projectId)
         {
-            var projectTasks = _context.Tasks.Where(t => t.ProjectId == projectId).AsEnumerable();
+            var projectTasks = _context.Tasks
+                .Include(t => t.Executors)
+                .Where(t => t.ProjectId == projectId).AsEnumerable();
 
             var teamMembers = _context.UsersOnProjects
                 .Include(uop => uop.User)
@@ -63,10 +65,10 @@ namespace Business.Services
                     UserId = uop.UserId,
                     Role = uop.Role,
                     TasksDone = projectTasks
-                    .Where(t => t.ExecutorId == uop.UserId && TaskService.IsDone(t.Status))
+                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && TaskService.IsDone(t.Status))
                     .Count(),
                     TasksNotDone = projectTasks
-                    .Where(t => t.ExecutorId == uop.UserId && !TaskService.IsDone(t.Status))
+                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && !TaskService.IsDone(t.Status))
                     .Count()
                 }).ToList();
 

@@ -108,7 +108,6 @@ namespace Tests.BLLTests
                 new Data.Entities.Task() // id 2
                 {
                     Name = "Task 2",
-                    ExecutorId = 1
                 },
                 new Data.Entities.Task() // id 3
                 {

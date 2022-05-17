@@ -28,13 +28,13 @@ namespace Business.Models
         [Required]
         public int ProjectId { get; set; }
 
-        public int? ExecutorId { get; set; }        // may be or not be null on creation
-
 
         public ICollection<int> MessagesIds { get; set; } = new List<int>();
 
         public ICollection<int> FilesIds { get; set; } = new List<int>();
 
         public ICollection<int> TagsIds { get; set; } = new List<int>();
+
+        public ICollection<int> ExecutorsIds { get; set; } = new List<int>();
     }
 }

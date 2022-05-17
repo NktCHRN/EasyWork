@@ -4,6 +4,7 @@ using Business.Services;
 using Data;
 using Data.Entities;
 using NUnit.Framework;
+using System.Collections.Generic;
 using TaskEntity = Data.Entities.Task;
 
 namespace Tests.BLLTests
@@ -85,35 +86,35 @@ namespace Tests.BLLTests
                 {
                     Name = "Task 1",
                     ProjectId = 1,
-                    ExecutorId = 1,
+                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.Archived
                 },
                 new TaskEntity()
                 {
                     Name = "Task 2",
                     ProjectId = 1,
-                    ExecutorId = 1,
+                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.Validate
                 },
                 new TaskEntity()
                 {
                     Name = "Task 3",
                     ProjectId = 2,
-                    ExecutorId = 1,
+                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.Complete
                 },
                 new TaskEntity()
                 {
                     Name = "Task 4",
                     ProjectId = 1,
-                    ExecutorId = 1,
+                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.ToDo
                 },
                 new TaskEntity()
                 {
                     Name = "Task 5",
                     ProjectId = 2,
-                    ExecutorId = 1,
+                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.InProgress
                 }
             };

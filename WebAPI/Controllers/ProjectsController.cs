@@ -449,35 +449,7 @@ namespace WebAPI.Controllers
                 foreach (var task in tasksElement)
                 {
                     var mappedTask = _mapper.Map<TaskReducedDTO>(task);
-                    UserMiniWithAvatarDTO? executor = null;
-                    if (task.ExecutorId is not null)
-                    {
-                        var userModel = await _userManager.FindByIdAsync(task.ExecutorId.ToString());
-                        executor = new UserMiniWithAvatarDTO()
-                        {
-                            Id = task.ExecutorId.Value
-                        };
-                        if (userModel is not null)
-                        {
-                            string? avatarType = null;
-                            string? avatarURL = null;
-                            if (userModel.AvatarFormat is not null)
-                            {
-                                avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                                avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
-                            }
-                            executor = executor with
-                            {
-                                FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
-                                MIMEAvatarType = avatarType,
-                                AvatarURL = avatarURL
-                            };
-                        }
-                    }
-                    mappedTasks.Last().Add(mappedTask with
-                    {
-                        Executor = executor
-                    });
+                    mappedTasks.Last().Add(mappedTask);
                 }
             }
             var result = new TasksDTO()
@@ -506,35 +478,7 @@ namespace WebAPI.Controllers
             foreach (var task in tasks)
             {
                 var mappedTask = _mapper.Map<TaskReducedDTO>(task);
-                UserMiniWithAvatarDTO? executor = null;
-                if (task.ExecutorId is not null)
-                {
-                    var userModel = await _userManager.FindByIdAsync(task.ExecutorId.ToString());
-                    executor = new UserMiniWithAvatarDTO()
-                    {
-                        Id = task.ExecutorId.Value
-                    };
-                    if (userModel is not null)
-                    {
-                        string? avatarType = null;
-                        string? avatarURL = null;
-                        if (userModel.AvatarFormat is not null)
-                        {
-                            avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                            avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar"; ;
-                        }
-                        executor = executor with
-                        {
-                            FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
-                            MIMEAvatarType = avatarType,
-                            AvatarURL = avatarURL
-                        };
-                    }
-                }
-                mappedTasks.Add(mappedTask with
-                {
-                    Executor = executor
-                });
+                mappedTasks.Add(mappedTask);
             }
             return Ok(mappedTasks);
         }
@@ -559,22 +503,6 @@ namespace WebAPI.Controllers
                 var startDate = (task.StartDate >= from) ? task.StartDate : from;
                 var endDate = (task.EndDate is not null && task.EndDate <= to) ? task.EndDate.Value : to;
                 var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : endDate;
-                UserMiniReducedDTO? executor = null;
-                if (task.ExecutorId is not null)
-                {
-                    var userModel = await _userManager.FindByIdAsync(task.ExecutorId.ToString());
-                    executor = new UserMiniReducedDTO()
-                    {
-                        Id = task.ExecutorId.Value
-                    };
-                    if (userModel is not null)
-                    {
-                        executor = executor with
-                        {
-                            FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd()
-                        };
-                    }
-                }
                 mappedTasks.Add(new GanttTaskDTO()
                 {
                     Id = task.Id,
@@ -582,7 +510,6 @@ namespace WebAPI.Controllers
                     GanttStartDate = startDate,
                     GanttDeadline = deadline,
                     GanttEndDate = endDate,
-                    Executor = executor
                 });
             }
             var result = new GanttDTO()

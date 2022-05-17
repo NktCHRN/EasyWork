@@ -15,5 +15,11 @@ namespace Business.Interfaces
         Task AddTagToTaskAsync(int taskId, int tagId);
 
         Task DeleteTagFromTaskAsync(int taskId, int tagId);
+
+        Task AddExecutorToTaskAsync(int taskId, int userId);
+
+        Task DeleteExecutorFromTaskAsync(int taskId, int userId);
+
+        Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId);
     }
 }
