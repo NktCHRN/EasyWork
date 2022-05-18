@@ -30,7 +30,7 @@ namespace Business.Services
         private IEnumerable<Ban> GetNotMappedActiveUserBans(int userId)
         {
             return _context.Bans
-                .Where(b => b.UserId == userId && b.DateTo >= DateTime.Now && b.DateFrom <= DateTime.Now);
+                .Where(b => b.UserId == userId && b.DateTo >= DateTime.UtcNow && b.DateFrom <= DateTime.UtcNow);
         }
         private async Task DeleteNotMappedAsync(Ban model)
         {
@@ -45,7 +45,7 @@ namespace Business.Services
         /// <exception cref="ArgumentException">Thrown if model was not valid</exception>
         public async Task AddAsync(BanModel model)
         {
-            model.DateFrom = DateTime.Now;
+            model.DateFrom = DateTime.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));

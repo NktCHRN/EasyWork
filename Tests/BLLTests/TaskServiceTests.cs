@@ -36,7 +36,7 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = 1,
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             },
             new TaskModel()         // 1
             {
@@ -47,20 +47,9 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = -1,
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             },
             new TaskModel()         // 2
-            {
-                Name = "Task 1",
-                StartDate = new DateTime(2022, 1, 1),
-                Status = TaskStatuses.ToDo,
-                Deadline = new DateTime(2022, 2, 1),
-                Description = "This is the description of the task 1",
-                Priority = TaskPriorities.Middle,
-                ProjectId = 1,
-                ExecutorId = -2
-            },
-            new TaskModel()         // 3
             {
                 Name = "Task 1",
                 StartDate = new DateTime(2022, 1, 1),
@@ -69,7 +58,7 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = 1,
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             }
         };
 
@@ -84,7 +73,7 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = 1,
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             },
             new TaskModel()             // 1
             {
@@ -103,7 +92,7 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Lowest,
                 ProjectId = 1,
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             },
             new TaskModel()             // 3
             {
@@ -193,6 +182,11 @@ namespace Tests.BLLTests
                 },
                 new UserOnProject()
                 {
+                    ProjectId = 1,
+                    UserId = 3
+                },
+                new UserOnProject()
+                {
                     ProjectId = 2,
                     UserId = 5
                 },
@@ -214,7 +208,11 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = 1,
-                ExecutorId = 2,
+                Executors = new List<User>
+                {
+                    _context.Users.Find(2)!, 
+                    _context.Users.Find(3)! 
+                },
                     Tags = new List<Tag>()
                     {
                         _context.Tags.Single(t => t.Id == 1),
@@ -238,7 +236,7 @@ namespace Tests.BLLTests
                 Status = TaskStatuses.ToDo,
                 Priority = TaskPriorities.Low,
                 ProjectId = 1,
-                ExecutorId = 5,
+                Executors = new List<User>{_context.Users.Find(5)! },
                     Tags = new List<Tag>()
                     {
                         _context.Tags.Single(t => t.Id == 4),
@@ -254,7 +252,7 @@ namespace Tests.BLLTests
                 Status = TaskStatuses.Validate,
                 Priority = TaskPriorities.Low,
                 ProjectId = 2,
-                ExecutorId = 5,
+                Executors = new List<User>{_context.Users.Find(5)! },
                     Tags = new List<Tag>()
                     {
                         _context.Tags.Single(t => t.Id == 4)
@@ -269,7 +267,7 @@ namespace Tests.BLLTests
                 Status = TaskStatuses.Complete,
                 Priority = TaskPriorities.Low,
                 ProjectId = 1,
-                ExecutorId = 5
+                Executors = new List<User>{_context.Users.Find(5)! },
                 },
                 new TaskEntity()                // id 6
                 {
@@ -359,7 +357,7 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = 1,
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             }
         };
 
@@ -375,7 +373,7 @@ namespace Tests.BLLTests
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
                 ProjectId = 2,              // changed
-                ExecutorId = 2
+                ExecutorsIds = new List<int>{2 }
             }
         };
 
@@ -390,14 +388,13 @@ namespace Tests.BLLTests
             Description = "This is new description of the task 1",
             Priority = TaskPriorities.High,
             ProjectId = 1,
-            ExecutorId = 5
+            ExecutorsIds = new List<int> { 5 }
         };
 
         [Test]
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        [TestCase(3)]
         public void IsValidTest_InvalidModel_ReturnsFalseWithError(int modelNumber)
         {
             // Arrange
@@ -1001,6 +998,177 @@ namespace Tests.BLLTests
             Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
             Assert.AreEqual(expectedMsgCount, actual.First().MessagesIds.Count);
             Assert.AreEqual(expectedFilesCount, actual.First().FilesIds.Count);
+        }
+
+        [Test]
+        public async Task GetTaskExecutorsAsyncTest_ReturnsRightUsers()
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;
+            var expected = new int[] { 2, 3 };
+
+            // Act
+            var actual = (await _service.GetTaskExecutorsAsync(taskId)).Select(e => e.Id);
+
+            // Assert
+            Assert.IsTrue(expected.SequenceEqual(actual));
+        }
+
+        [Test]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(8)]
+        public void DeleteExecutorFromTaskAsyncTest_InvalidTaskId_ThrowsInvalidOperationException(int taskId)
+        {
+            // Arrange
+            SeedData();
+            var userId = 1;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteExecutorFromTaskAsync(taskId, userId),
+                "Method does not throw InvalidOperationException if the task id is invalid");
+        }
+
+        [Test]
+        [TestCase(-1)]          // invalid id
+        [TestCase(0)]           // invalid id
+        [TestCase(1)]           // valid, but does not belong to the task with id "1"
+        [TestCase(4)]           // valid, but does not belong to the task with id "1"
+        [TestCase(7)]           // invalid id
+        public void DeleteExecutorFromTaskAsyncTest_UserDoesNotBelongToTask_ThrowsInvalidOperationException(int userId)
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteExecutorFromTaskAsync(taskId, userId),
+                "Method does not throw InvalidOperationException if the tag id is invalid");
+        }
+
+        [Test]
+        public async Task DeleteExecutorFromTaskAsyncTest_ValidData_DeletesUserFromTask()
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;
+            var userId = 2;
+            var expectedTaskUsersCount = 1;
+            var expectedUserTasksCount = 0;
+
+            // Act
+            await _service.DeleteExecutorFromTaskAsync(taskId, userId);
+
+            // Assert
+            var task = await _context.Tasks.Include(t => t.Executors).SingleAsync(t => t.Id == taskId);
+            var tag = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
+            Assert.AreEqual(expectedTaskUsersCount, task.Executors.Count, "Method does not delete a user from a task");
+            Assert.AreEqual(expectedUserTasksCount, tag.Tasks.Count, "Method does not delete a task from a user");
+        }
+
+        [Test]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(8)]
+        public void AddExecutorToTaskAsyncTest_InvalidTaskId_ThrowsInvalidOperationException(int taskId)
+        {
+            // Arrange
+            SeedData();
+            var userId = 1;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddExecutorToTaskAsync(taskId, userId),
+                "Method does not throw InvalidOperationException if the task id is invalid");
+        }
+
+        [Test]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(8)]
+        public void AddExecutorToTaskAsyncTest_InvalidUserId_ThrowsInvalidOperationException(int tagId)
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddExecutorToTaskAsync(taskId, tagId),
+                "Method does not throw InvalidOperationException if the user id is invalid");
+        }
+
+        [Test]
+        [TestCase(1)]
+        [TestCase(4)]
+        public void AddExecutorToTaskAsyncTest_UserIsNotOnProject_ThrowsArgumentException(int tagId)
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;
+
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => await _service.AddExecutorToTaskAsync(taskId, tagId),
+                "Method does not throw ArgumentException if the user is not on the task's project");
+        }
+
+        [Test]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void AddExecutorToTaskAsyncTest_AlreadyTaskUserId_ThrowsInvalidOperationException(int tagId)
+        {
+            // Arrange
+            SeedData();
+            var taskId = 1;         // projectId = 1
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddExecutorToTaskAsync(taskId, tagId),
+                "Method does not throw InvalidOperationException if the task already has such an executor");
+        }
+
+        [Test]
+        public void AddExecutorToTaskAsyncTest_TooManyExecutors_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var task = new TaskEntity
+            {
+                Name = "Add Executor Test Task",
+                Executors = new List<User>(),
+                ProjectId = 1
+            };
+            for (int i = 0; i < 10; i++)
+                task.Executors.Add(new User() { FirstName=$"User{i+1}"});
+            _context.Tasks.Add(task);
+            _context.SaveChanges();
+            var newUserId = 2;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddExecutorToTaskAsync(task.Id, newUserId),
+                "Method does not throw InvalidOperationException if the task already has too many executors");
+        }
+
+        [Test]
+        public async Task AddExecutorToTaskAsyncTest_ValidData_AddsUserToTask()
+        {
+            // Arrange
+            SeedData();
+            var taskId = 3;
+            var userId = 3;
+            var expectedExecutorsCount = 2;
+            var oldUser = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
+            var expectedUserEmail = oldUser.Email;
+            var expectedTagTasksCount = oldUser.Tasks.Count + 1;
+
+            // Act
+            await _service.AddExecutorToTaskAsync(taskId, userId);
+
+            // Assert
+            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
+            var user = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
+            Assert.AreEqual(expectedExecutorsCount, task.Executors.Count, "Method does not add the user to the task");
+            Assert.AreEqual(expectedTagTasksCount, user.Tasks.Count, "Method does not add the user to the task");
+            Assert.AreEqual(expectedUserEmail, task.Executors.Last().Email, "Method added wrong user to the task");
+            Assert.AreEqual(taskId, user.Tasks.Last().Id, "Method added wrong task to the user");
         }
     }
 }

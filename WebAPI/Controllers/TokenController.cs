@@ -32,10 +32,8 @@ namespace WebAPI.Controllers
             var principal = _service.GetPrincipalFromExpiredToken(accessToken);
             var username = principal.Identity!.Name;
             var user = await _userManager.FindByEmailAsync(username);
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
-            {
+            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
                 return BadRequest("Invalid client request");
-            }
             var newAccessToken = _service.GenerateAccessToken(principal.Claims);
             var newRefreshToken = _service.GenerateRefreshToken();
             user.RefreshToken = newRefreshToken;

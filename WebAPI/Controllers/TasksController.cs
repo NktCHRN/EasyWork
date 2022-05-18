@@ -66,34 +66,6 @@ namespace WebAPI.Controllers
             if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
                 return Forbid();
             var result = _mapper.Map<TaskDTO>(model);
-            if (model.ExecutorId is not null)
-            {
-                var userModel = await _userManager.FindByIdAsync(model.ExecutorId.ToString());
-                var executor = new UserMiniWithAvatarDTO()
-                {
-                    Id = model.ExecutorId.Value
-                };
-                if (userModel is not null)
-                {
-                    string? avatarType = null;
-                    string? avatarURL = null;
-                    if (userModel.AvatarFormat is not null)
-                    {
-                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
-                    }
-                    executor = executor with
-                    {
-                        FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
-                        MIMEAvatarType = avatarType,
-                        AvatarURL = avatarURL
-                    };
-                }
-                result = result with
-                {
-                    Executor = executor
-                };
-            }
             return Ok(result);
         }
 
@@ -332,7 +304,7 @@ namespace WebAPI.Controllers
                     }
                     sender = sender with
                     {
-                        FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                        FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
                         MIMEAvatarType = avatarType,
                         AvatarURL = avatarURL
                     };
@@ -362,7 +334,7 @@ namespace WebAPI.Controllers
             {
                 Text = dto.Text,
                 SenderId = userId.Value,
-                Date = DateTime.Now,
+                Date = DateTime.UtcNow,
                 TaskId = id
             };
             try
@@ -390,7 +362,7 @@ namespace WebAPI.Controllers
                 }
                 sender = sender with
                 {
-                    FullName = (userModel.LastName is null) ? userModel.FirstName : userModel.FirstName + " " + userModel.LastName,
+                    FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
                     MIMEAvatarType = avatarType,
                     AvatarURL = avatarURL
                 };
@@ -400,6 +372,108 @@ namespace WebAPI.Controllers
                 Sender = sender
             };
             return Created($"{this.GetApiUrl()}Messages/{message.Id}", result);
+        }
+
+        [HttpGet("{id}/users")]
+        public async Task<IActionResult> GetTaskExecutors(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var result = await _taskService.GetTaskExecutorsAsync(id);
+            var mapped = new List<UserMiniWithAvatarDTO>();
+            foreach (var user in result)
+            {
+                string? avatarType = null;
+                string? avatarURL = null;
+                if (user.AvatarFormat is not null)
+                {
+                    avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
+                    avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
+                }
+                mapped.Add(new UserMiniWithAvatarDTO()
+                {
+                    Id = user.Id,
+                    FullName = $"{user.FirstName} {user.LastName}".TrimEnd(),
+                    MIMEAvatarType = avatarType,
+                    AvatarURL = avatarURL
+                });
+            }
+            return Ok(mapped);
+        }
+
+        [HttpPost("{id}/users")]
+        public async Task<IActionResult> AddUser(int id, [FromBody] AddExecutorDTO dto)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            try
+            {
+                await _taskService.AddExecutorToTaskAsync(id, dto.Id);
+            }
+            catch (InvalidOperationException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            string? avatarType = null;
+            string? avatarURL = null;
+            var user = await _userManager.FindByIdAsync(dto.Id.ToString());
+            UserMiniWithAvatarDTO createdResult = new()
+            {
+                Id = dto.Id
+            };
+            if (user != null)
+            {
+                if (user.AvatarFormat is not null)
+                {
+                    avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
+                    avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
+                }
+                createdResult = createdResult with
+                {
+                    FullName = $"{user.FirstName} {user.LastName}".TrimEnd(),
+                    MIMEAvatarType = avatarType,
+                    AvatarURL = avatarURL
+                };
+            }
+            return Created($"{this.GetApiUrl()}Tasks/{id}/Users", createdResult);
+        }
+
+        [HttpDelete("{id}/users/{userId}")]
+        public async Task<IActionResult> DeleteUser(int id, int userId)
+        {
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, myId.Value))
+                return Forbid();
+            try
+            {
+                await _taskService.DeleteExecutorFromTaskAsync(id, userId);
+            }
+            catch (InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }

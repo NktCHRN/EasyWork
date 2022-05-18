@@ -11,7 +11,5 @@
         public DateTime GanttDeadline { get; init; }
 
         public DateTime GanttEndDate { get; init; }
-
-        public UserMiniReducedDTO? Executor { get; init; }
     }
 }

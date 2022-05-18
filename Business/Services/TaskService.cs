@@ -29,6 +29,7 @@ namespace Business.Services
             var model = await _context.Tasks
                 .Include(t => t.Tags)
                 .Include(t => t.Files)
+                .Include(t => t.Executors)
                 .SingleOrDefaultAsync(t => t.Id == id);
             if (model is null)
                 throw new InvalidOperationException("Model with such an id was not found");
@@ -37,7 +38,7 @@ namespace Business.Services
         public async Task AddAsync(TaskModel model)
         {
             if (model.StartDate == default)
-                model.StartDate = DateTime.Now;
+                model.StartDate = DateTime.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
@@ -125,6 +126,7 @@ namespace Business.Services
                 .Include(t => t.Messages)
                 .Include(t => t.Files)
                 .Include(t => t.Tags)
+                .Include(t => t.Executors)
                 .SingleOrDefaultAsync(m => m.Id == id);
             return _mapper.Map<TaskModel?>(model);
         }
@@ -132,7 +134,10 @@ namespace Business.Services
         public IEnumerable<TaskModel> GetUserTasks(int userId)
         {
             return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
-                .Where(t => t.ExecutorId == userId)).OrderBy(t => IsDone(t.Status)).ThenByDescending(t => t.Id);
+                .Include(t => t.Executors))
+                .Where(t => t.ExecutorsIds.Contains(userId))
+                .OrderBy(t => IsDone(t.Status))
+                .ThenByDescending(t => t.Id);
         }
 
         internal static bool IsDone(TaskStatuses status) => status >= TaskStatuses.Validate;
@@ -153,12 +158,6 @@ namespace Business.Services
                 firstErrorMessage = "The project with such an id was not found";
                 return false;
             }
-            if (model.ExecutorId is not null 
-                && !_context.UsersOnProjects.Any(uop => uop.UserId == model.ExecutorId && uop.ProjectId == model.ProjectId))
-            {
-                firstErrorMessage = "The user with such an id (ExecutorId) was not found or does not work on this project";
-                return false;
-            }
             return true;
         }
 
@@ -171,7 +170,7 @@ namespace Business.Services
             if (model.ProjectId != existingModel.ProjectId)
                 throw new ArgumentException("Project id cannot be changed", nameof(model));
             if (model.Status == TaskStatuses.Complete && existingModel.Status < TaskStatuses.Complete)
-                model.EndDate = DateTime.Now;
+                model.EndDate = DateTime.UtcNow;
             else if (model.Status < TaskStatuses.Complete)
                 model.EndDate = null;
             existingModel = _mapper.Map(model, existingModel);
@@ -200,6 +199,43 @@ namespace Business.Services
                 .Include(t => t.Tags)
                 .Where(t => t.ProjectId == projectId && t.Status == status && t.Tags.Any(t => t.Id == tagId));
             return _mapper.Map<IEnumerable<TaskModel>>(result).Reverse();
+        }
+
+        public async Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId)
+        {
+            var task = await _context.Tasks
+                .Include(t => t.Executors)
+                .SingleOrDefaultAsync(t => t.Id == taskId);
+            return (task is null) ? new List<User>() : task.Executors;
+        }
+
+        const int _maxExecutorsCount = 10;
+
+        public async Task AddExecutorToTaskAsync(int taskId, int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user is null)
+                throw new InvalidOperationException("User with such an id was not found");
+            var task = await GetNotMappedByIdAsync(taskId);
+            if (task.Executors.Any(t => t.Id == userId))
+                throw new InvalidOperationException("This task already has such a user");
+            if (!_context.UsersOnProjects.Any(uop => uop.UserId == userId && uop.ProjectId == task.ProjectId))
+                throw new ArgumentException("The user with such an id (ExecutorId) does not work on this project",
+                    nameof(userId));
+            if (task.Executors.Count >= _maxExecutorsCount)
+                throw new InvalidOperationException($"Too many executors. Maximum: {_maxExecutorsCount}");
+            task.Executors.Add(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteExecutorFromTaskAsync(int taskId, int userId)
+        {
+            var task = await GetNotMappedByIdAsync(taskId);
+            var user = task.Executors.SingleOrDefault(t => t.Id == userId);
+            if (user is null)
+                throw new InvalidOperationException("User with such an id does not belong to the task");
+            task.Executors.Remove(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

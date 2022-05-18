@@ -14,8 +14,6 @@
 
         public DateTime? EndDate { get; init; }
 
-        public UserMiniWithAvatarDTO? Executor { get; init; }
-
         public string Status { get; set; } = string.Empty;
 
         public string? Priority { get; set; }

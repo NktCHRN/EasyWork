@@ -45,15 +45,13 @@ namespace Data.Entities
         public int ProjectId { get; set; }
         public Project? Project { get; set; }
 
-        public int? ExecutorId { get; set; }
-        [ForeignKey("ExecutorId")]
-        public User? Executor { get; set; }
-
 
         public ICollection<Message> Messages { get; set; } = new List<Message>();
 
         public ICollection<File> Files { get; set; } = new List<File>();
 
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+        public ICollection<User> Executors { get; set; } = new List<User>();
     }
 }

@@ -191,42 +191,42 @@ namespace Tests.BLLTests
                 {
                     Name = "Task 1",
                     ProjectId = 1,
-                    ExecutorId = 1,
+                    Executors = new List<User>() {_context.Users.Find(1)!},
                     Status = TaskStatuses.InProgress
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 2",
                     ProjectId = 1,
-                    ExecutorId = 1,
+                    Executors = new List<User>() {_context.Users.Find(1)!},
                     Status = TaskStatuses.Validate
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 3",
                     ProjectId = 1,
-                    ExecutorId = 7,
+                    Executors = new List<User>() {_context.Users.Find(7)!},
                     Status = TaskStatuses.ToDo
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 4",
                     ProjectId = 1,
-                    ExecutorId = 7,
+                    Executors = new List<User>() {_context.Users.Find(7)!},
                     Status = TaskStatuses.Complete
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 5",
                     ProjectId = 1,
-                    ExecutorId = 7,
+                    Executors = new List<User>() {_context.Users.Find(7)!},
                     Status = TaskStatuses.Complete
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 6",
                     ProjectId = 3,
-                    ExecutorId = 5,
+                    Executors = new List<User>() {_context.Users.Find(5)!},
                     Status = TaskStatuses.Archived
                 }
             };

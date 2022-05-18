@@ -1,6 +1,7 @@
 ﻿using Business.Interfaces;
 using Business.Other;
 using Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services
 {
@@ -15,7 +16,9 @@ namespace Business.Services
 
         public UserStats GetStatsById(int userId)
         {
-            var userTasks = _context.Tasks.Where(t => t.ExecutorId == userId);
+            var userTasks = _context.Tasks
+                .Include(t => t.Executors)
+                .Where(t => t.Executors.Select(e => e.Id).Contains(userId));
             var tasksDoneCount = userTasks.AsEnumerable().Where(t => TaskService.IsDone(t.Status)).Count();
             return new UserStats()
             {
