@@ -193,12 +193,11 @@ namespace Business.Services
                 .Include(t => t.Files)
                 .Include(t => t.Tags);
             if (tagId is null)
-                return _mapper.Map<IEnumerable<TaskModel>>(tasksExtended.Where(t => t.ProjectId == projectId && t.Status == status))
-                    .Reverse();
+                return _mapper.Map<IEnumerable<TaskModel>>(tasksExtended.Where(t => t.ProjectId == projectId && t.Status == status));
             var result = tasksExtended
                 .Include(t => t.Tags)
                 .Where(t => t.ProjectId == projectId && t.Status == status && t.Tags.Any(t => t.Id == tagId));
-            return _mapper.Map<IEnumerable<TaskModel>>(result).Reverse();
+            return _mapper.Map<IEnumerable<TaskModel>>(result);
         }
 
         public async Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId)
