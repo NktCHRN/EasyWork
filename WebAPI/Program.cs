@@ -93,6 +93,13 @@ builder.Services.AddScoped<IUserOnProjectService, UserOnProjectService>();
 builder.Services.AddScoped<IUserStatsService, UserStatsService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile), typeof(AutoMapperWebAPIProfile));
+builder.Services.AddCors(setup =>
+{
+    setup.AddPolicy("default", options =>
+    {
+        options.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+    });
+});
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<CustomEmailConfirmationTokenProviderOptions>(opt =>
@@ -123,6 +130,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("default");
 
 app.UseHttpsRedirection();
 
