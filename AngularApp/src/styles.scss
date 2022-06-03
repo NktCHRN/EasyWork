@@ -1,0 +1,134 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$AngularApp-primary: mat.define-palette(mat.$orange-palette);
+$AngularApp-accent: mat.define-palette(mat.$deep-orange-palette);
+
+// The warn palette is optional (defaults to red).
+$AngularApp-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$AngularApp-theme: mat.define-light-theme((
+  color: (
+    primary: $AngularApp-primary,
+    accent: $AngularApp-accent,
+    warn: $AngularApp-warn,
+  )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($AngularApp-theme);
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+@import 'variables';
+@import '../node_modules/font-awesome/scss/font-awesome';
+html, body { height: 100%; }
+body { margin: 0; font-family: 'Open sans', sans-serif !important; }
+
+.bg-white {
+    background-color: white;
+}
+
+$background-lightgray: #eeeeee;
+
+.btn-rounded {
+    border-radius: 20px !important;
+    font-weight: 400;
+    font-size: 0.8em;
+}
+
+.container-nav {
+    padding: 5px 20px;
+}
+
+main {
+    padding:75px 0px 0px 0px;
+    z-index:0;
+}
+
+.navbar-with-delimiter {
+    box-shadow: 0 1rem 1rem rgba(0,0,0,0.05),inset 0 -1px 0 rgba(0,0,0,0.15);
+}
+
+.jumbotron
+{
+    padding: 50px 20px;
+    background-color: $background-lightgray
+}
+
+.jumbo-text {
+    font-size: large;
+    text-align: justify;
+}
+
+.extra-rounded {
+    border-radius: 30px;
+}
+
+.jumbo-img-wrapper {
+    width: 100%;
+    object-fit: cover;
+    object-position: left;
+}
+
+@mixin zero-margin($pad-up-dn, $pad-left-right)
+{
+    margin:0px auto;
+	padding: $pad-up-dn $pad-left-right;
+}
+
+.row-content {
+    @include zero-margin(50px, 0px);
+    min-height:350px;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+.googleLogo {
+    margin-bottom: 4px;
+    height: 20px;
+}
+
+.orange {
+    color: orange
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.brand {
+    height: 50px;
+    object-fit: cover;
+}
+
+.brand>img {
+    height: 100%;
+}
+
+.fixed {
+    position: fixed;
+}
+
+.full {
+    width: 100%;
+}
+
+.text-center {
+    text-align: center;
+}

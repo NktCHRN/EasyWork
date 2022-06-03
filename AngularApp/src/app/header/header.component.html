@@ -1,0 +1,24 @@
+      <mat-toolbar class="fixed bg-white navbar-with-delimiter container-nav">
+        <mat-toolbar-row>
+            <a routerLink="/home" class="brand">
+                <img fxHide fxShow.gt-sm src="../../assets/logo.png">
+                <img fxShow fxHide.gt-sm src="../../assets/logo-mini.png">
+            </a>
+          <span class="spacer"></span>
+          <div fxHide fxShow.gt-sm>
+          <div class="container" fxLayoutGap="10px">
+            <button mat-button class="btn-rounded">Sign in</button>
+            <button mat-stroked-button color="primary" class="btn-rounded">Sign up</button>
+          </div>
+          </div>
+          <button (click)="showBtns()" fxShow fxHide.gt-sm mat-icon-button class="orange" aria-label="Icon-button with menu icon">
+            <mat-icon>menu</mat-icon>
+          </button>
+        </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="showRows" fxHide.gt-sm>
+              <div class="container full" fxLayoutGap="10px" fxLayout="row" fxLayoutAlign="center center">
+                <button mat-button class="btn-rounded">Sign in</button>
+                <button mat-stroked-button color="primary" class="btn-rounded">Sign up</button>
+              </div>
+            </mat-toolbar-row>
+      </mat-toolbar>
