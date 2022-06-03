@@ -720,7 +720,7 @@ namespace Tests.BLLTests
             SeedData();
             var status = TaskStatuses.Archived;
             var projectId = 1;
-            IEnumerable<int> expectedTasksIds = new[] { 7, 6 };
+            IEnumerable<int> expectedTasksIds = new[] { 6, 7 };
 
             // Act
             var actualTasks = _service.GetProjectTasksByStatusAndTag(projectId, status);
@@ -938,7 +938,7 @@ namespace Tests.BLLTests
             SeedData();
             var projectId = 1;
             var status = TaskStatuses.ToDo;
-            var expectedIds = new int[] { 3, 1};
+            var expectedIds = new int[] { 1, 3};
 
             // Act
             var actualIds = _service.GetProjectTasksByStatusAndTag(projectId, status).Select(t => t.Id);
@@ -987,7 +987,7 @@ namespace Tests.BLLTests
             };
             _context.Files.Add(file);
             _context.SaveChanges();
-            var expectedIds = new int[] { 8, 1 };
+            var expectedIds = new int[] { 1, 8 };
 
             // Act
             var actual = _service.GetProjectTasksByStatusAndTag(projectId, status, tagId);
@@ -996,8 +996,8 @@ namespace Tests.BLLTests
             // Assert
             Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
             Assert.IsTrue(expectedIds.SequenceEqual(actualIds), "Method returnes wrong elements");
-            Assert.AreEqual(expectedMsgCount, actual.First().MessagesIds.Count);
-            Assert.AreEqual(expectedFilesCount, actual.First().FilesIds.Count);
+            Assert.AreEqual(expectedMsgCount, actual.Last().MessagesIds.Count);
+            Assert.AreEqual(expectedFilesCount, actual.Last().FilesIds.Count);
         }
 
         [Test]
