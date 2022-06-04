@@ -1,0 +1,25 @@
+@import '../../variables';
+
+.jumbotron
+{
+    background-color: $background-lightgray
+}
+
+.jumbo-text {
+    font-size: large;
+    text-align: justify;
+}
+
+.jumbo-img-wrapper {
+    max-height: 400px;
+    max-width: 400px;
+}
+
+.content-img-wrapper {
+    max-height: 200px;
+    max-width: 300px;
+}
+
+.mat-typography h1 {
+    line-height: 1.2 !important;
+}

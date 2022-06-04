@@ -1,0 +1,42 @@
+<header class="jumbotron content">
+        <div class="container" fxLayout="column-reverse" fxLayout.gt-sm="row" fxLayoutAlign="center center" fxLayoutGap="30px">
+            <div fxFlex.gt-xs="50" fxFlex.gt-md="67">
+                <br class="d-sm-none">
+                <h1 class="font-extra-thin text-xl">A completely new approach to project management</h1>
+                <p class="text-muted jumbo-text">Bring your best ideas to life using our powerful software. 
+                    Organize your work, give tasks to your subordinates, view project statistics and do many other things using 
+                    <strong>EasyWork®</strong>.
+                    Build your dreams and simplify routine work tasks!
+                    <br>This is a completely new and modern approach to teamwork
+                </p>
+            </div>
+            <div fxFlex.gt-xs="50" fxFlex.gt-md="33" fxLayoutAlign="center center">
+                <div class="jumbo-img-wrapper" >
+                    <img src="../../assets/EW-start-1.png" alt="webpage example" class="extra-rounded img-cover-left">
+                </div>
+            </div>
+        </div>
+</header>
+<div class="content">
+    <div class="row-content container" fxLayoutAlign="center center" fxLayoutGap="30px" fxLayout="column" fxLayout.gt-sm="{{i % 2 == 0 ? 'row' : 'row-reverse'}}" *ngFor="let item of content; index as i;">
+        <div fxLayoutAlign="center center" fxFlex.gt-sm="25">
+            <div class="content-img-wrapper">
+                <img src="../../assets/{{item.image.name}}" alt="a piece of cake" class="extra-rounded img-cover-center">
+            </div>
+        </div>
+        <div fxFlex.gt-sm="75">
+            <br fxHide.gt-sm>
+            <h2 class="mt-0 font-extra-thin text-lg">{{item.heading}}</h2>
+            <p class="text-justify text-muted text-md" [innerHTML]="item.text"></p>
+        </div>
+    </div>
+    <div class="row-content" fxLayout="row" fxLayoutAlign="center center">
+        <div class="col text-center">
+            <h2 class="mt-0 text-lg"><em class="font-extra-thin">So, what is the conclusion?</em></h2>
+            <p class="text-muted text-md">
+                Let's try <strong>EasyWork®</strong> right now to get the most of it.<br>
+                Join the community of <strong>{{info.usersCount}} members</strong> who have already created <strong>{{info.projectsCount}} projects</strong>!
+            </p>
+        </div>
+    </div>
+</div>

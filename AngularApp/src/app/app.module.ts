@@ -13,13 +13,19 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import {MatDividerModule} from '@angular/material/divider'; 
 import {MatButtonModule} from '@angular/material/button'
 import {MatMenuModule} from '@angular/material/menu';
-import { FooterComponent } from './footer/footer.component'
+import { FooterComponent } from './footer/footer.component';
+import { HomeComponent } from './home/home.component'
+import { baseURL } from './shared/baseurl';
+import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
+import { GeneralinfoService } from './services/generalinfo.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
-    FooterComponent
+    FooterComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -31,9 +37,14 @@ import { FooterComponent } from './footer/footer.component'
     FlexLayoutModule,
     MatMenuModule,
     MatButtonModule,
-    MatDividerModule
+    MatDividerModule,
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    GeneralinfoService,
+    ProcessHTTPMsgService,
+    {provide: 'baseURL', useValue: baseURL}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
