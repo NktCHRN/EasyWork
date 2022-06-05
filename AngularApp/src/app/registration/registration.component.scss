@@ -3,3 +3,19 @@
     font-size: 14pt;
     line-height: 42pt !important;
 }
+
+.resp-width {
+    max-width: 50%;
+}
+
+@media screen and (max-width: 959px)
+{
+    .resp-width {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .mb-12 {
+        margin-bottom: 12px;
+    }
+}

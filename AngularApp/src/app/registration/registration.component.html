@@ -1,17 +1,17 @@
 <div class="profile container" fxLayoutAlign="center center">
-    <div fxLayout="column" style="width:50%" fxLayoutGap="25px">
+    <div fxLayout="column container" fxFlex="100%" fxFlex.gt-sm="60%" fxLayoutGap="25px">
         <div>
             <h1>Registration</h1>
             <hr>
         </div>
-        <form style="width:100%" novalidate method="POST" [formGroup]="registrationForm" (ngSubmit)="onSubmit()" #rform="ngForm" *ngIf="!success && !loading">
-            <p fxLayoutAlign="space-between center">
-                <mat-form-field appearance="fill">
+        <form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="registrationForm" (ngSubmit)="onSubmit()" #rform="ngForm" *ngIf="!success && !loading" fxFlex>
+            <p fxLayout="column" fxLayout.gt-sm="row" fxLayoutAlign="space-between center" fxFlex>
+                <mat-form-field appearance="fill" class="resp-width mb-12">
                     <mat-label>First name</mat-label>
                     <input matInput formControlName="firstName">
                     <mat-error *ngIf="formErrors.firstName">{{formErrors.firstName}}</mat-error>
                 </mat-form-field>    
-                <mat-form-field appearance="fill">
+                <mat-form-field appearance="fill" class="resp-width">
                     <mat-label>Last name (optional)</mat-label>
                     <input matInput formControlName="lastName">
                     <mat-error *ngIf="formErrors.lastName">{{formErrors.lastName}}</mat-error>
