@@ -165,3 +165,26 @@ main {
 .text-muted {
     color: #6c757d;
 }
+
+.profile {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 25px 25px;
+    width: 90%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 15px;
+    box-shadow: 0 0 5px grey;
+}
+
+@media screen and (min-width: 960px) {
+    .profile {
+        width: 60%;
+    }
+    
+}
+
+.red {
+    color: red;
+}

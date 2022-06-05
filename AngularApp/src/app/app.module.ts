@@ -20,6 +20,16 @@ import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
 import { GeneralinfoService } from './services/generalinfo.service';
 import { HttpClientModule } from '@angular/common/http';
 import { NotfoundComponent } from './notfound/notfound.component';
+import { RegistrationComponent } from './registration/registration.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatNativeDateModule} from '@angular/material/core';
+import {MatFormFieldModule} from '@angular/material/form-field'; 
+import { MatInputModule } from '@angular/material/input';
+import { AccountService } from './services/account.service';
+import { confirmEmailURI } from './shared/confirmemailuri';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'; 
 
 @NgModule({
   declarations: [
@@ -27,7 +37,9 @@ import { NotfoundComponent } from './notfound/notfound.component';
     HeaderComponent,
     FooterComponent,
     HomeComponent,
-    NotfoundComponent
+    NotfoundComponent,
+    RegistrationComponent,
+    EmailConfirmationComponent
   ],
   imports: [
     BrowserModule,
@@ -40,12 +52,21 @@ import { NotfoundComponent } from './notfound/notfound.component';
     MatMenuModule,
     MatButtonModule,
     MatDividerModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatNativeDateModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     GeneralinfoService,
     ProcessHTTPMsgService,
-    {provide: 'baseURL', useValue: baseURL}
+    {provide: 'baseURL', useValue: baseURL},
+    {provide: 'confirmEmailURI', useValue: confirmEmailURI},
+    AccountService
   ],
   bootstrap: [AppComponent]
 })

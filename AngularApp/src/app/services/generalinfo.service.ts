@@ -15,9 +15,9 @@ export class GeneralinfoService extends BaseService {
     super();
   }
 
-  serviceBaseURL: string = this.baseURL + 'GeneralInfo/';
+  override serviceBaseURL: string = this.baseURL + 'GeneralInfo/';
 
-  getInfo(): Observable<GeneralInfo>
+  public getInfo(): Observable<GeneralInfo>
   {
     return this.http.get<GeneralInfo>(this.serviceBaseURL)
     .pipe(catchError(this.processHTTPMsgService.handleError))

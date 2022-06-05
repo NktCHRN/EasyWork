@@ -1,0 +1,62 @@
+<div class="profile container" fxLayoutAlign="center center">
+    <div fxLayout="column" style="width:50%" fxLayoutGap="25px">
+        <div>
+            <h1>Registration</h1>
+            <hr>
+        </div>
+        <form style="width:100%" novalidate method="POST" [formGroup]="registrationForm" (ngSubmit)="onSubmit()" #rform="ngForm" *ngIf="!success && !loading">
+            <p fxLayoutAlign="space-between center">
+                <mat-form-field appearance="fill">
+                    <mat-label>First name</mat-label>
+                    <input matInput formControlName="firstName">
+                    <mat-error *ngIf="formErrors.firstName">{{formErrors.firstName}}</mat-error>
+                </mat-form-field>    
+                <mat-form-field appearance="fill">
+                    <mat-label>Last name (optional)</mat-label>
+                    <input matInput formControlName="lastName">
+                    <mat-error *ngIf="formErrors.lastName">{{formErrors.lastName}}</mat-error>
+                </mat-form-field>
+            </p>
+            <p>
+                <mat-form-field appearance="fill" style="width:100%">
+                    <mat-label>Email address</mat-label>
+                    <input matInput formControlName="email">
+                    <mat-error *ngIf="formErrors.email">{{formErrors.email}}</mat-error>
+                </mat-form-field>
+            </p>
+            <p>
+                <mat-form-field appearance="fill" style="width:100%">
+                    <mat-label>Password</mat-label>
+                    <input matInput [type]="hide ? 'password' : 'text'" formControlName="password">
+                    <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                      <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    </button>
+                    <mat-error *ngIf="formErrors.password">{{formErrors.password}}</mat-error>
+                </mat-form-field>
+            </p>
+            <p>
+                <mat-form-field appearance="fill" style="width:100%">
+                    <mat-label>Confirm password</mat-label>
+                    <input matInput [type]="hide ? 'password' : 'text'" formControlName="passwordConfirm">
+                    <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                      <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    </button>
+                    <mat-error *ngIf="formErrors.passwordConfirm">{{formErrors.passwordConfirm}}</mat-error>
+                </mat-form-field>
+            </p>
+            <button style="width:100%" type="submit" mat-raised-button color="primary" [disabled]="registrationForm.invalid">Sign up</button>
+            <p class="or"><strong>- or -</strong></p>
+            <button style="width:100%" type="button" mat-raised-button>
+                <img src="../../assets/Google_'G'_Logo.svg" alt="google logo" class="googleLogo"> Continue with Google
+            </button>
+        </form>
+        <div *ngIf="success">
+            <h2 class="orange">You successfully registered on the website!</h2>
+            <p>Please, confirm your email before signing in - just check the mailbox of 
+                <span class="deep-orange"><a href="mailto:{{registerUser?.email}}">{{registerUser?.email}}</a></span></p>
+        </div>
+        <div *ngIf="loading">
+            <mat-spinner></mat-spinner>
+        </div>
+    </div>
+</div>
