@@ -44,7 +44,7 @@ export class HomeComponent implements OnInit {
     },
   ];
 
-  info: GeneralInfo = new GeneralInfo();
+  info: GeneralInfo | undefined | null;
 
   constructor(private generalInfoService: GeneralinfoService) { }
 

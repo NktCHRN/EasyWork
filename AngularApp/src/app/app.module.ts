@@ -19,13 +19,15 @@ import { baseURL } from './shared/baseurl';
 import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
 import { GeneralinfoService } from './services/generalinfo.service';
 import { HttpClientModule } from '@angular/common/http';
+import { NotfoundComponent } from './notfound/notfound.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     FooterComponent,
-    HomeComponent
+    HomeComponent,
+    NotfoundComponent
   ],
   imports: [
     BrowserModule,
