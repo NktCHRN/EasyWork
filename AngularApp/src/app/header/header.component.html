@@ -7,7 +7,7 @@
           <span class="spacer"></span>
           <div fxHide fxShow.gt-sm>
           <div class="container" fxLayoutGap="10px">
-            <button mat-button class="btn-rounded">Sign in</button>
+            <button mat-button class="btn-rounded" routerLink="login">Sign in</button>
             <button mat-stroked-button color="primary" class="btn-rounded" routerLink="registration">Sign up</button>
           </div>
           </div>
@@ -17,7 +17,7 @@
         </mat-toolbar-row>
             <mat-toolbar-row *ngIf="showRows" fxHide.gt-sm>
               <div class="container full" fxLayoutGap="10px" fxLayout="row" fxLayoutAlign="center center">
-                <button mat-button class="btn-rounded">Sign in</button>
+                <button mat-button class="btn-rounded" routerLink="login">Sign in</button>
                 <button mat-stroked-button color="primary" class="btn-rounded" routerLink="registration">Sign up</button>
               </div>
             </mat-toolbar-row>

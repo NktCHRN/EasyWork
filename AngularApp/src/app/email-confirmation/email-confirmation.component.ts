@@ -46,7 +46,7 @@ export class EmailConfirmationComponent implements OnInit {
     .subscribe({
       next: () => 
       {
-        this._snackBar.open("The email was sent once more successfully", "Close", {duration: 5000})
+        this._snackBar.open("The email has been sent once more successfully", "Close", {duration: 5000})
       },
       error: err => {
         this._snackBar.open(err, "Close")

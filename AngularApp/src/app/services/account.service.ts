@@ -1,7 +1,9 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
+import { AuthenticatedResponse } from '../shared/authenticatedresponse';
 import { CustomEncoder } from '../shared/customencoder';
+import { LoginModel } from '../shared/loginmodel';
 import { RegisterUser } from '../shared/registeruser';
 import { ResendEmailConfirmation } from '../shared/resendemailconfirmation';
 import { BaseService } from './base.service';
@@ -19,7 +21,7 @@ export class AccountService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'Account/';
 
-  public register(user: RegisterUser)
+  public register(user: RegisterUser): Observable<RegisterUser>
   {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -27,6 +29,16 @@ export class AccountService extends BaseService {
       })
     };
     return this.http.post<RegisterUser>(this.serviceBaseURL + 'register', user, httpOptions)
+      .pipe(catchError(this.processHTTPMsgService.handleError));
+  }
+
+  public login(user: LoginModel): Observable<AuthenticatedResponse> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
+    return this.http.post<AuthenticatedResponse>(this.serviceBaseURL + 'login', user, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 
@@ -46,4 +58,5 @@ export class AccountService extends BaseService {
     return this.http.post<ResendEmailConfirmation>(this.serviceBaseURL + 'EmailConfirmationMessageResend', model, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
+
 }

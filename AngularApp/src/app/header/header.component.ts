@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Component({
   selector: 'app-header',
@@ -9,7 +10,21 @@ export class HeaderComponent implements OnInit {
 
   showRows: boolean = false;
 
-  constructor() { }
+  isUserAuthenticated = (): boolean => {
+    const token = localStorage.getItem("jwt");
+
+    if (token && !this.jwtHelper.isTokenExpired(token)){
+      return true;
+    }
+
+    return false;
+  }
+  
+  logOut = () => {
+    localStorage.removeItem("jwt");
+  }
+
+  constructor(private jwtHelper: JwtHelperService) { }
 
   ngOnInit(): void {  }
 

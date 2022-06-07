@@ -1,0 +1,42 @@
+<div class="profile container" fxLayoutAlign="center center">
+    <div fxLayout="column container" fxFlex="100%" fxFlex.gt-sm="60%" fxLayoutGap="25px">
+        <div>
+            <h1>Login</h1>
+            <hr>
+        </div>
+        <form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="loginForm" (ngSubmit)="onSubmit()" #lform="ngForm" *ngIf="!loading" fxFlex>
+            <p>
+                <mat-form-field appearance="fill" style="width:100%">
+                    <mat-label>Email address</mat-label>
+                    <input matInput formControlName="email">
+                    <mat-error *ngIf="formErrors.email">{{formErrors.email}}</mat-error>
+                </mat-form-field>
+            </p>
+            <p>
+                <mat-form-field appearance="fill" style="width:100%">
+                    <mat-label>Password</mat-label>
+                    <input matInput [type]="hide ? 'password' : 'text'" formControlName="password">
+                    <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                      <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    </button>
+                    <mat-error *ngIf="formErrors.password">{{formErrors.password}}</mat-error>
+                </mat-form-field>
+            </p>
+            <p class="red mb-30" *ngIf="errorMessage">
+                {{errorMessage}}
+            </p>
+            <p *ngIf="confirmEmail" class="mb-30">
+                <span class="red">Error: your email is not confirmed yet <br>
+                If you haven't received a message, please, click the button below:</span>
+                <button mat-raised-button color="primary" (click)="resendEmail()" disabled="{{disableButton}}">Send one more message</button>
+            </p>
+            <button style="width:100%;" class="mb-30" type="submit" mat-raised-button color="primary">Sign in</button>
+            <button style="width:100%" type="button" mat-raised-button>
+                <img src="../../assets/Google_'G'_Logo.svg" alt="google logo" class="googleLogo"> Continue with Google
+            </button>
+        </form>
+        <div *ngIf="loading">
+            <mat-spinner></mat-spinner>
+        </div>
+    </div>
+</div>

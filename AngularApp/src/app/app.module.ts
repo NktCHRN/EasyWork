@@ -30,6 +30,13 @@ import { confirmEmailURI } from './shared/confirmemailuri';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'; 
+import { JwtModule } from "@auth0/angular-jwt";
+import { LoginComponent } from './login/login.component';
+import { CabinetComponent } from './cabinet/cabinet.component';
+
+export function tokenGetter() { 
+  return localStorage.getItem("jwt"); 
+}
 
 @NgModule({
   declarations: [
@@ -39,7 +46,9 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     HomeComponent,
     NotfoundComponent,
     RegistrationComponent,
-    EmailConfirmationComponent
+    EmailConfirmationComponent,
+    LoginComponent,
+    CabinetComponent
   ],
   imports: [
     BrowserModule,
@@ -59,7 +68,14 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     MatFormFieldModule,
     MatInputModule,
     MatSnackBarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+        allowedDomains: ["localhost:7255"],
+        disallowedRoutes: []
+      }
+    })
   ],
   providers: [
     GeneralinfoService,

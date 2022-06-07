@@ -105,7 +105,6 @@ export class RegistrationComponent implements OnInit {
     this.loading = true;
     this.registerUser = this.registrationForm.value;
     this.registerUser!.clientURI = this.confirmEmailURI;
-    console.log(this.registerUser?.clientURI)
     this.accountService.register(this.registerUser!)
     .subscribe({
       next: () => {
