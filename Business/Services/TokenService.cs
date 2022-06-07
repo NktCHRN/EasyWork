@@ -53,7 +53,7 @@ namespace Business.Services
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration.GetSection("JwtBearer:Secret").Value)),
                 ValidateIssuerSigningKey = true,
 
-                ValidateLifetime = true
+                ValidateLifetime = false
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
