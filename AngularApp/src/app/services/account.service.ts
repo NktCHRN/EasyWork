@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable } from 'rxjs';
+import { catchError, Observable, Subject } from 'rxjs';
 import { AuthenticatedResponse } from '../shared/authenticatedresponse';
 import { CustomEncoder } from '../shared/customencoder';
 import { LoginModel } from '../shared/loginmodel';
@@ -8,14 +8,22 @@ import { RegisterUser } from '../shared/registeruser';
 import { ResendEmailConfirmation } from '../shared/resendemailconfirmation';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { SocialAuthService } from "angularx-social-login";
+import { GoogleLoginProvider } from "angularx-social-login";
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { ExternalAuthModel } from '../shared/externalauthmodel';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService extends BaseService {
 
+  private _authChangeSub = new Subject<boolean>()
+  public authChanged = this._authChangeSub.asObservable();
+
   constructor(private http: HttpClient,
-    private processHTTPMsgService: ProcessHTTPMsgService) {
+    private processHTTPMsgService: ProcessHTTPMsgService,
+    private _jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService) {
     super();
   }
 
@@ -57,6 +65,33 @@ export class AccountService extends BaseService {
     };
     return this.http.post<ResendEmailConfirmation>(this.serviceBaseURL + 'EmailConfirmationMessageResend', model, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
+  }
+
+  public signInWithGoogle = ()=> {
+    return this._externalAuthService.signIn(GoogleLoginProvider.PROVIDER_ID);
+  }
+
+  public signOutExternal = () => {
+    this._externalAuthService.signOut();
+  }
+
+  public externalLogin = (body: ExternalAuthModel) => {
+    return this.http.post<AuthenticatedResponse>(this.serviceBaseURL + "ExternalLogin", body);
+  }
+
+  public isUserAuthenticated = (): boolean => {
+    const token = localStorage.getItem("jwt");
+ 
+    return (token as unknown as boolean) && !this._jwtHelper.isTokenExpired(token!);
+  }
+
+  public logout = () => {
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("refreshToken");
+  }
+
+  public sendAuthStateChangeNotification = (isAuthenticated: boolean) => {
+    this._authChangeSub.next(isAuthenticated);
   }
 
 }

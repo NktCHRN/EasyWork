@@ -31,7 +31,7 @@
                 <button mat-raised-button color="primary" (click)="resendEmail()" disabled="{{disableButton}}">Send one more message</button>
             </p>
             <button style="width:100%;" class="mb-30" type="submit" mat-raised-button color="primary">Sign in</button>
-            <button style="width:100%" type="button" mat-raised-button>
+            <button style="width:100%" type="button" mat-raised-button (click)="externalLogin()">
                 <img src="../../assets/Google_'G'_Logo.svg" alt="google logo" class="googleLogo"> Continue with Google
             </button>
         </form>

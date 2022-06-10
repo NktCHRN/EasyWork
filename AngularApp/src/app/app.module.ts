@@ -33,6 +33,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { JwtModule } from "@auth0/angular-jwt";
 import { LoginComponent } from './login/login.component';
 import { CabinetComponent } from './cabinet/cabinet.component';
+import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
+import { GoogleLoginProvider } from 'angularx-social-login';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -75,14 +77,29 @@ export function tokenGetter() {
         allowedDomains: ["localhost:7255"],
         disallowedRoutes: []
       }
-    })
+    }),
+    SocialLoginModule
   ],
   providers: [
     GeneralinfoService,
     ProcessHTTPMsgService,
     {provide: 'baseURL', useValue: baseURL},
     {provide: 'confirmEmailURI', useValue: confirmEmailURI},
-    AccountService
+    AccountService,
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '133068226796-q4hbsusi3uqpeqj3s1tlii1ifknqc2s3.apps.googleusercontent.com'
+            )
+          },
+        ],
+      } as SocialAuthServiceConfig
+    }
   ],
   bootstrap: [AppComponent]
 })

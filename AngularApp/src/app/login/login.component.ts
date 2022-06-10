@@ -2,8 +2,10 @@ import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { SocialUser } from 'angularx-social-login';
 import { AccountService } from '../services/account.service';
 import { AuthenticatedResponse } from '../shared/authenticatedresponse';
+import { ExternalAuthModel } from '../shared/externalauthmodel';
 import { LoginModel } from '../shared/loginmodel';
 import { ResendEmailConfirmation } from '../shared/resendemailconfirmation';
 
@@ -21,6 +23,7 @@ export class LoginComponent implements OnInit {
   errorMessage: string | undefined | null;
   confirmEmail: string | undefined | null;
   disableButton: boolean = false;
+  readonly returnUrl: string = "/cabinet";
 
   formErrors : any = {
     'email': '',
@@ -97,7 +100,8 @@ export class LoginComponent implements OnInit {
         const refreshToken = response.token!.refreshToken;
         localStorage.setItem("jwt", token);
         localStorage.setItem("refreshToken", refreshToken); 
-        this.router.navigate(["/cabinet"]);
+        this.accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
+        this.router.navigate([this.returnUrl]);
       },
       error: error => { 
         this.loading = false;
@@ -127,5 +131,36 @@ export class LoginComponent implements OnInit {
         this._snackBar.open(err, "Close", {duration: 5000})
       }
     })
+  }
+
+  public externalLogin = () => {
+    this.errorMessage = undefined;
+    this.accountService.signInWithGoogle()
+    .then(res => {
+      const user: SocialUser = { ...res };
+      const externalAuth: ExternalAuthModel = {
+        provider: user.provider,
+        idToken: user.idToken
+      }
+      this.validateExternalAuth(externalAuth);
+    }, error => this.errorMessage = error.statusText)
+  }
+
+  private validateExternalAuth(externalAuth: ExternalAuthModel) {
+    this.accountService.externalLogin(externalAuth)
+      .subscribe({
+        next: response => {
+        const token = response.token!.accessToken;
+        const refreshToken = response.token!.refreshToken;
+        localStorage.setItem("jwt", token);
+        localStorage.setItem("refreshToken", refreshToken); 
+        this.accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
+        this.router.navigate([this.returnUrl]);
+      },
+      error: error => {
+        this.errorMessage = error.statusText;
+        this.accountService.signOutExternal();
+      }
+    });
   }
 }

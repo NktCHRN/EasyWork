@@ -1,5 +1,7 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { SocialAuthService } from 'angularx-social-login';
+import { AccountService } from '../services/account.service';
 
 @Component({
   selector: 'app-header',
@@ -9,24 +11,28 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 export class HeaderComponent implements OnInit {
 
   showRows: boolean = false;
-
-  isUserAuthenticated = (): boolean => {
-    const token = localStorage.getItem("jwt");
-
-    if (token && !this.jwtHelper.isTokenExpired(token)){
-      return true;
-    }
-
-    return false;
-  }
+  public isExternalAuth: boolean = false;
+  public isUserAuthenticated: boolean = false;
   
   logOut = () => {
-    localStorage.removeItem("jwt");
+    this.accountService.logout();
+    if(this.isExternalAuth)
+      this.accountService.signOutExternal();
   }
 
-  constructor(private jwtHelper: JwtHelperService) { }
+  constructor(private jwtHelper: JwtHelperService,
+    private accountService: AccountService,
+    private socialAuthService: SocialAuthService) { }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void {  
+    this.accountService.authChanged
+    .subscribe(res => {
+      this.isUserAuthenticated = res;
+    })
+    this.socialAuthService.authState.subscribe((user: any) => {
+      this.isExternalAuth = user != null;
+    })
+  }
 
   showBtns() : void {
     this.showRows = !this.showRows;

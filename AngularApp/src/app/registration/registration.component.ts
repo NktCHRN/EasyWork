@@ -4,6 +4,9 @@ import { AccountService } from '../services/account.service';
 import { createHasLowerCaseValidator, createHasNumbericValidator, createHasUpperCaseValidator, createIsEqualToValidator, createNotWhitespaceValidator } from '../shared/customvalidators';
 import { RegisterUser } from '../shared/registeruser';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { SocialUser } from 'angularx-social-login';
+import { ExternalAuthModel } from '../shared/externalauthmodel';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registration',
@@ -57,7 +60,8 @@ export class RegistrationComponent implements OnInit {
   constructor(private fb: FormBuilder, 
     private accountService: AccountService,
     private _snackBar: MatSnackBar,
-    @Inject('confirmEmailURI') public confirmEmailURI:string) {
+    @Inject('confirmEmailURI') public confirmEmailURI:string,
+    private router: Router) {
       this.createForm();
      }
 
@@ -119,4 +123,33 @@ export class RegistrationComponent implements OnInit {
     });
   }
 
+  public externalLogin = () => {
+    this.accountService.signInWithGoogle()
+    .then(res => {
+      const user: SocialUser = { ...res };
+      const externalAuth: ExternalAuthModel = {
+        provider: user.provider,
+        idToken: user.idToken
+      }
+      this.validateExternalAuth(externalAuth);
+    }, error => this._snackBar.open("Google Auth: " + error.statusText, "Close", {duration: 5000}))
+  }
+
+  private validateExternalAuth(externalAuth: ExternalAuthModel) {
+    this.accountService.externalLogin(externalAuth)
+      .subscribe({
+        next: response => {
+        const token = response.token!.accessToken;
+        const refreshToken = response.token!.refreshToken;
+        localStorage.setItem("jwt", token);
+        localStorage.setItem("refreshToken", refreshToken); 
+        this.accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
+        this.router.navigate(["/cabinet"]);
+      },
+      error: error => {
+        this._snackBar.open("Google Auth: " + error.statusText, "Close", {duration: 5000});
+        this.accountService.signOutExternal();
+      }
+    });
+  }
 }
