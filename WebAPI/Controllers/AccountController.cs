@@ -323,9 +323,8 @@ namespace WebAPI.Controllers
                         {
                             var notMIME = _fileManager.GetImageType(type);
                             if (notMIME is not null)
-                            {
-                                await _userAvatarService.UpdateAvatarAsync(user.Id, await picture.Content.ReadAsByteArrayAsync(), type);
-                            }
+                                await _userAvatarService
+                                    .UpdateAvatarAsync(user.Id, await picture.Content.ReadAsByteArrayAsync(), notMIME);
                         }
                     }
                     await _userManager.AddLoginAsync(user, info);
