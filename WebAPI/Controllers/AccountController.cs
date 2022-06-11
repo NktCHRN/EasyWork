@@ -289,7 +289,6 @@ namespace WebAPI.Controllers
             return Ok();
         }
 
-        // NOT TESTED!
         [HttpPost("ExternalLogin")]
         public async Task<IActionResult> ExternalLogin([FromBody] ExternalAuthDTO externalAuth)
         {
