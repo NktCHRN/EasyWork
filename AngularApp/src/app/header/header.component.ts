@@ -12,7 +12,8 @@ export class HeaderComponent implements OnInit {
 
   showRows: boolean = false;
   public isExternalAuth: boolean = false;
-  public isUserAuthenticated: boolean = false;
+  public isUserAuthenticated: boolean | null | undefined;
+  public isAuthed: Promise<boolean> | null | undefined;
   
   logOut = () => {
     this.accountService.logout();
@@ -21,7 +22,7 @@ export class HeaderComponent implements OnInit {
   }
 
   constructor(private jwtHelper: JwtHelperService,
-    private accountService: AccountService,
+    public accountService: AccountService,
     private socialAuthService: SocialAuthService) { }
 
   ngOnInit(): void {  
@@ -32,6 +33,7 @@ export class HeaderComponent implements OnInit {
     this.socialAuthService.authState.subscribe((user: any) => {
       this.isExternalAuth = user != null;
     })
+    this.isAuthed = this.accountService.isUserAuthenticated();
   }
 
   showBtns() : void {

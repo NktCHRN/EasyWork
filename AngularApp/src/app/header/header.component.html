@@ -4,6 +4,8 @@
                 <img fxHide fxShow.gt-sm src="../../assets/logo.png">
                 <img fxShow fxHide.gt-sm src="../../assets/logo-mini.png">
             </a>
+            <span>{{isAuthed | async}}</span>
+            <span>{{isExternalAuth}}</span>
           <span class="spacer"></span>
           <div fxHide fxShow.gt-sm>
           <div class="container" fxLayoutGap="10px">
