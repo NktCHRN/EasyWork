@@ -1,7 +1,10 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { SocialAuthService } from 'angularx-social-login';
 import { AccountService } from '../services/account.service';
+import { UserinfoService } from '../services/userinfo.service';
+import { UserReducedModule } from '../shared/UserReducedModel';
 
 @Component({
   selector: 'app-header',
@@ -13,28 +16,41 @@ export class HeaderComponent implements OnInit {
   showRows: boolean = false;
   public isExternalAuth: boolean = false;
   public isUserAuthenticated: boolean | null | undefined;
-  public isAuthed: Promise<boolean> | null | undefined;
+  public user: UserReducedModule | null | undefined;
   
   logOut = () => {
     this.accountService.logout();
+    this.accountService.sendAuthStateChangeNotification(false);
     if(this.isExternalAuth)
       this.accountService.signOutExternal();
+    this.router.navigate(['home']);
   }
 
   constructor(private jwtHelper: JwtHelperService,
     public accountService: AccountService,
-    private socialAuthService: SocialAuthService) { }
+    private socialAuthService: SocialAuthService,
+    private router: Router,
+    private userInfoService: UserinfoService) { }
 
   ngOnInit(): void {  
     this.accountService.authChanged
     .subscribe(res => {
-      this.isUserAuthenticated = res;
+      this.onAuthChange(res);
     })
     this.socialAuthService.authState.subscribe((user: any) => {
       this.isExternalAuth = user != null;
     })
-    this.isAuthed = this.accountService.isUserAuthenticated();
+    this.accountService.isUserAuthenticated().then(res => this.onAuthChange(res));
   }
+
+   private onAuthChange(res: boolean): void {
+    this.isUserAuthenticated = res;
+            if (res)
+      {
+        this.userInfoService.get(localStorage.getItem('jwt')!)
+        .subscribe(user => this.user = user);
+      }
+   }
 
   showBtns() : void {
     this.showRows = !this.showRows;

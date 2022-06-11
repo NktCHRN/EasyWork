@@ -35,6 +35,8 @@ import { LoginComponent } from './login/login.component';
 import { CabinetComponent } from './cabinet/cabinet.component';
 import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
+import { UserinfoService } from './services/userinfo.service';
+import { TokenGuardService } from './services/token-guard.service';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -99,7 +101,9 @@ export function tokenGetter() {
           },
         ],
       } as SocialAuthServiceConfig
-    }
+    },
+    UserinfoService,
+    TokenGuardService
   ],
   bootstrap: [AppComponent]
 })

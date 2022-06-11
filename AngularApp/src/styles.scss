@@ -192,3 +192,15 @@ main {
 .mb-30 {
     margin-bottom: 30px !important;
 }
+
+.avatar {
+    border-radius: 100%;
+}
+
+$medium-icon-size: 30px;
+.icon-medium.mat-icon
+{
+    width: $medium-icon-size;
+    height: $medium-icon-size;
+    font-size: $medium-icon-size;
+}

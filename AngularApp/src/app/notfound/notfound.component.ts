@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TokenGuardService } from '../services/token-guard.service';
 
 @Component({
   selector: 'app-notfound',
@@ -7,9 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NotfoundComponent implements OnInit {
 
-  constructor() { }
+  constructor(private tokenGuardService: TokenGuardService) { }
 
   ngOnInit(): void {
+    this.tokenGuardService.refreshToken();
   }
 
 }

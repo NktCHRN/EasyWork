@@ -12,7 +12,6 @@ import { SocialAuthService } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
-import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,8 +23,7 @@ export class AccountService extends BaseService {
 
   constructor(private http: HttpClient,
     private processHTTPMsgService: ProcessHTTPMsgService,
-    private jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService,
-    private tokenService: TokenService) {
+    private jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService) {
     super();
   }
 
@@ -86,8 +84,7 @@ export class AccountService extends BaseService {
     if (token && !this.jwtHelper.isTokenExpired(token)){
       return true;
     }
-    const isRefreshSuccess = await this.tokenService.tryRefreshingTokens(token!); 
-    return isRefreshSuccess;
+    return false;
   }
 
   public logout = () => {
