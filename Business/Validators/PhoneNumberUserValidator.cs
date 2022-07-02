@@ -33,7 +33,7 @@ namespace Business.Identity
         /// </returns>
         public async Task<IdentityResult> ValidateAsync(UserManager<User> manager, User user)
         {
-            if (user.PhoneNumber is not null)
+            if (!string.IsNullOrEmpty(user.PhoneNumber))
             {
                 if (user.PhoneNumber.Length < 8)
                     return IdentityResult.Failed(new IdentityError() { Description = "This phone number is too short" });
