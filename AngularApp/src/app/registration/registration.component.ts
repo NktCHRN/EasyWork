@@ -1,12 +1,14 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AccountService } from '../services/account.service';
-import { createHasLowerCaseValidator, createHasNumbericValidator, createHasUpperCaseValidator, createIsEqualToValidator, createNotWhitespaceValidator } from '../shared/customvalidators';
+import { createHasLowerCaseValidator, createHasNumbericValidator, createHasUpperCaseValidator, createIsDusplicateValidator, createIsEqualToValidator, createNotWhitespaceValidator } from '../shared/customvalidators';
 import { RegisterUser } from '../shared/registeruser';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { SocialUser } from 'angularx-social-login';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
 import { Router } from '@angular/router';
+import { BooleanContainer } from '../shared/booleanContainer';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-registration',
@@ -20,7 +22,8 @@ export class RegistrationComponent implements OnInit {
   @ViewChild('rform') registrationFormDirective: any;
   loading: boolean = false;
   registerUser: RegisterUser | null | undefined;
-  success: boolean = false
+  success: boolean = false;
+  isEmailDuplicate: BooleanContainer = new BooleanContainer();
 
   formErrors : any = {
     'firstName': '',
@@ -41,7 +44,8 @@ export class RegistrationComponent implements OnInit {
     },
     'email': {
       'required':      'Email is required.',
-      'email':         'Email not in valid format.'
+      'email':         'Email not in valid format.',
+      'notDuplicate' : 'This email is already taken'
     },
     'password': {
       'required':      'Password is required.',
@@ -57,11 +61,11 @@ export class RegistrationComponent implements OnInit {
   };
 
 
-  constructor(private fb: FormBuilder, 
-    private accountService: AccountService,
+  constructor(private _fb: FormBuilder, 
+    private _accountService: AccountService,
     private _snackBar: MatSnackBar,
     @Inject('confirmEmailURI') public confirmEmailURI:string,
-    private router: Router) {
+    private _router: Router) {
       this.createForm();
      }
 
@@ -69,10 +73,10 @@ export class RegistrationComponent implements OnInit {
   }
 
   createForm() {
-    this.registrationForm = this.fb.group({
+    this.registrationForm = this._fb.group({
       firstName: ['', [Validators.required, createNotWhitespaceValidator(), Validators.maxLength(50)] ],
       lastName: ['', [Validators.maxLength(50)] ],
-      email: ['', [Validators.required, Validators.email] ],
+      email: ['', [Validators.required, Validators.email, createIsDusplicateValidator(this.isEmailDuplicate)] ],
       password: ['', [Validators.required, Validators.minLength(8), createHasNumbericValidator(), createHasLowerCaseValidator(), createHasUpperCaseValidator()]],
       passwordConfirm: ['', [Validators.required, createIsEqualToValidator('password')]]
     });
@@ -90,7 +94,6 @@ export class RegistrationComponent implements OnInit {
     for (const field in this.formErrors)
     {
       if (this.formErrors.hasOwnProperty(field)) {
-        // clear previous error message (if any)
         this.formErrors[field] = '';
         const control = form.get(field);
         if (control && control.dirty && !control.valid) {
@@ -109,22 +112,40 @@ export class RegistrationComponent implements OnInit {
     this.loading = true;
     this.registerUser = this.registrationForm.value;
     this.registerUser!.clientURI = this.confirmEmailURI;
-    this.accountService.register(this.registerUser!)
+    this._accountService.register(this.registerUser!)
     .subscribe({
       next: () => {
         this.loading = false;
         this.success = true;   
       },
-      error: errmess => { 
+      error: error => { 
         this.registerUser = null; 
         this.loading = false;
-        this._snackBar.open(errmess, "Close")
+        let found: any = error.error.find((element: { code: string; }) => element.code == 'DuplicateEmail');
+        if (found)
+        {
+          this.validationMessages.email.notDuplicate = found.description;
+          this.isEmailDuplicate.value = true;
+          let email = this.registrationForm.get('email');
+          email?.markAsTouched();
+          email?.markAsDirty();
+          email?.updateValueAndValidity();
+          this.onValueChanged();
+          this.registrationForm.get('email')?.valueChanges.pipe(first())
+          .subscribe(() => 
+          {
+              this.isEmailDuplicate.value = false;
+              email?.updateValueAndValidity();
+          })
+        }
+        else
+          this._snackBar.open(`${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close");
       }
     });
   }
 
   public externalLogin = () => {
-    this.accountService.signInWithGoogle()
+    this._accountService.signInWithGoogle()
     .then(res => {
       const user: SocialUser = { ...res };
       const externalAuth: ExternalAuthModel = {
@@ -136,19 +157,19 @@ export class RegistrationComponent implements OnInit {
   }
 
   private validateExternalAuth(externalAuth: ExternalAuthModel) {
-    this.accountService.externalLogin(externalAuth)
+    this._accountService.externalLogin(externalAuth)
       .subscribe({
         next: response => {
         const token = response.token!.accessToken;
         const refreshToken = response.token!.refreshToken;
         localStorage.setItem("jwt", token);
         localStorage.setItem("refreshToken", refreshToken); 
-        this.accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
-        this.router.navigate(["/cabinet"]);
+        this._accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
+        this._router.navigate(["/cabinet"]);
       },
       error: error => {
         this._snackBar.open("Google Auth: " + error.statusText, "Close", {duration: 5000});
-        this.accountService.signOutExternal();
+        this._accountService.signOutExternal();
       }
     });
   }

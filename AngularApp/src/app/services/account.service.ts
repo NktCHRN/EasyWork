@@ -21,9 +21,9 @@ export class AccountService extends BaseService {
   private _authChangeSub = new Subject<boolean>()
   public authChanged = this._authChangeSub.asObservable();
 
-  constructor(private http: HttpClient,
-    private processHTTPMsgService: ProcessHTTPMsgService,
-    private jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService) {
+  constructor(private _http: HttpClient,
+    private _processHTTPMsgService: ProcessHTTPMsgService,
+    private _jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService) {
     super();
   }
 
@@ -36,8 +36,8 @@ export class AccountService extends BaseService {
         'Content-Type':  'application/json'
       })
     };
-    return this.http.post<RegisterUser>(this.serviceBaseURL + 'register', user, httpOptions)
-      .pipe(catchError(this.processHTTPMsgService.handleError));
+    return this._http.post<RegisterUser>(this.serviceBaseURL + 'register', user, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
   public login(user: LoginModel): Observable<AuthenticatedResponse> {
@@ -46,15 +46,15 @@ export class AccountService extends BaseService {
         'Content-Type':  'application/json'
       })
     };
-    return this.http.post<AuthenticatedResponse>(this.serviceBaseURL + 'login', user, httpOptions)
-      .pipe(catchError(this.processHTTPMsgService.handleError));
+    return this._http.post<AuthenticatedResponse>(this.serviceBaseURL + 'login', user, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
   public confirmEmail = (token: string, email: string) => {
     let params = new HttpParams({ encoder: new CustomEncoder() })
     params = params.append('token', token);
     params = params.append('email', email);
-    return this.http.get(this.serviceBaseURL + "EmailConfirmation", { params: params }).pipe(catchError(this.processHTTPMsgService.handleError));
+    return this._http.get(this.serviceBaseURL + "EmailConfirmation", { params: params }).pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
   public resendEmail(model: ResendEmailConfirmation) {
@@ -63,8 +63,8 @@ export class AccountService extends BaseService {
         'Content-Type':  'application/json'
       })
     };
-    return this.http.post<ResendEmailConfirmation>(this.serviceBaseURL + 'EmailConfirmationMessageResend', model, httpOptions)
-      .pipe(catchError(this.processHTTPMsgService.handleError));
+    return this._http.post<ResendEmailConfirmation>(this.serviceBaseURL + 'EmailConfirmationMessageResend', model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
   public signInWithGoogle = ()=> {
@@ -76,12 +76,12 @@ export class AccountService extends BaseService {
   }
 
   public externalLogin = (body: ExternalAuthModel) => {
-    return this.http.post<AuthenticatedResponse>(this.serviceBaseURL + "ExternalLogin", body);
+    return this._http.post<AuthenticatedResponse>(this.serviceBaseURL + "ExternalLogin", body);
   }
 
   public isUserAuthenticated = async (): Promise<boolean> => {
     const token = localStorage.getItem("jwt");    
-    if (token && !this.jwtHelper.isTokenExpired(token)){
+    if (token && !this._jwtHelper.isTokenExpired(token)){
       return true;
     }
     return false;

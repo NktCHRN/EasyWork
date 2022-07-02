@@ -1,4 +1,5 @@
 import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { BooleanContainer } from './booleanContainer';
 
 export function createNotWhitespaceValidator(): ValidatorFn {
     return (control:AbstractControl) : ValidationErrors | null => {
@@ -11,6 +12,13 @@ export function createNotWhitespaceValidator(): ValidatorFn {
         const isWhitespace = control.value.trim().length === 0;
 
         return !isWhitespace ? null: {notWhitespace:true};
+    }
+}
+
+export function createIsDusplicateValidator(isDuplicate: BooleanContainer): ValidationErrors
+{
+    return (control:AbstractControl) : ValidationErrors | null => {
+        return !isDuplicate.value ? null : {notDuplicate : true};
     }
 }
 
