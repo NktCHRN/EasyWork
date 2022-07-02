@@ -4,18 +4,8 @@
     line-height: 42pt !important;
 }
 
-.resp-width {
-    max-width: 50%;
-    width: 48%;
-}
-
 @media screen and (max-width: 959px)
 {
-    .resp-width {
-        max-width: 100%;
-        width: 100%;
-    }
-
     .mb-12 {
         margin-bottom: 12px;
     }

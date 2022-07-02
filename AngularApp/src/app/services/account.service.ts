@@ -12,6 +12,8 @@ import { SocialAuthService } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
+import { UserModel } from '../shared/user.model';
+import { UpdateUser } from '../shared/update-user';
 
 @Injectable({
   providedIn: 'root'
@@ -96,4 +98,27 @@ export class AccountService extends BaseService {
     this._authChangeSub.next(isAuthenticated);
   }
 
+  public get(token: string) : Observable<UserModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<UserModel>(this.serviceBaseURL, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public update(token: string, user: UpdateUser)
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.put(this.serviceBaseURL, user, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
 }

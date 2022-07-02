@@ -133,6 +133,10 @@ main {
     width: 100%;
 }
 
+.w-75 {
+    width: 75%;
+}
+
 .text-center {
     text-align: center;
 }
@@ -178,6 +182,10 @@ main {
     box-shadow: 0 0 5px grey;
 }
 
+.no-shadow {
+    box-shadow: 0 0 0;
+}
+
 @media screen and (min-width: 960px) {
     .profile {
         width: 60%;
@@ -203,4 +211,39 @@ $medium-icon-size: 30px;
     width: $medium-icon-size;
     height: $medium-icon-size;
     font-size: $medium-icon-size;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate-content {
+    width:100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resp-width {
+    max-width: 50%;
+    width: 48%;
+}
+
+@media screen and (max-width: 959px)
+{
+    .resp-width {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+.black {
+    color: black !important;
+}
+
+.snackbar-orange {
+    background-color: orange;
+    color: white;
 }

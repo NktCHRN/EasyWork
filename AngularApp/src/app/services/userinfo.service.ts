@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
-import { UserReducedModule } from '../shared/UserReducedModel';
+import { UserReducedModel } from '../shared/user-reduced.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
 
@@ -17,7 +17,19 @@ export class UserinfoService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'UserInfo/';
 
-  public get(token: string): Observable<UserReducedModule>
+  private static lastUser : UserReducedModel | null | undefined;
+
+  public getLastUser() : UserReducedModel | null | undefined
+  {
+    return UserinfoService.lastUser;
+  }
+
+  public setLastUser(user : UserReducedModel | null | undefined)
+  {
+    UserinfoService.lastUser = user;
+  }
+
+  public get(token: string): Observable<UserReducedModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -25,7 +37,7 @@ export class UserinfoService extends BaseService {
         'Authorization': 'Bearer ' + token
       })
     };
-    return this.http.get<UserReducedModule>(this.serviceBaseURL, httpOptions)
+    return this.http.get<UserReducedModel>(this.serviceBaseURL, httpOptions)
       .pipe(catchError(this.processHTTPMsgService.handleError));
   }
 }

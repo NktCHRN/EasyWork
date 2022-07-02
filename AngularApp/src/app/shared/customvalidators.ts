@@ -1,5 +1,5 @@
 import {AbstractControl, ValidationErrors, ValidatorFn} from '@angular/forms';
-import { BooleanContainer } from './booleanContainer';
+import { BooleanContainer } from './booleancontainer';
 
 export function createNotWhitespaceValidator(): ValidatorFn {
     return (control:AbstractControl) : ValidationErrors | null => {

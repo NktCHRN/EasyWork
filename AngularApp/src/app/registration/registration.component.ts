@@ -7,7 +7,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import { SocialUser } from 'angularx-social-login';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
 import { Router } from '@angular/router';
-import { BooleanContainer } from '../shared/booleanContainer';
+import { BooleanContainer } from '../shared/booleancontainer';
 import { first } from 'rxjs/operators';
 
 @Component({

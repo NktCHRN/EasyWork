@@ -1,4 +1,4 @@
-export class UserReducedModule
+export class UserReducedModel
 {
     fullName: string = '';
     avatarURL: string | null | undefined;

@@ -37,6 +37,7 @@ import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-logi
 import { GoogleLoginProvider } from 'angularx-social-login';
 import { UserinfoService } from './services/userinfo.service';
 import { TokenGuardService } from './services/token-guard.service';
+import {MatBadgeModule} from '@angular/material/badge'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -80,7 +81,8 @@ export function tokenGetter() {
         disallowedRoutes: []
       }
     }),
-    SocialLoginModule
+    SocialLoginModule,
+    MatBadgeModule
   ],
   providers: [
     GeneralinfoService,

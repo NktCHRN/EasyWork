@@ -1,10 +1,10 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { SocialAuthService } from 'angularx-social-login';
 import { AccountService } from '../services/account.service';
 import { UserinfoService } from '../services/userinfo.service';
-import { UserReducedModule } from '../shared/UserReducedModel';
+import { UserReducedModel } from '../shared/user-reduced.model';
 
 @Component({
   selector: 'app-header',
@@ -16,7 +16,6 @@ export class HeaderComponent implements OnInit {
   showRows: boolean = false;
   public isExternalAuth: boolean = false;
   public isUserAuthenticated: boolean | null | undefined;
-  public user: UserReducedModule | null | undefined;
   
   logOut = () => {
     this.accountService.logout();
@@ -30,7 +29,7 @@ export class HeaderComponent implements OnInit {
     public accountService: AccountService,
     private socialAuthService: SocialAuthService,
     private router: Router,
-    private userInfoService: UserinfoService) { }
+    public userInfoService: UserinfoService) { }
 
   ngOnInit(): void {  
     this.accountService.authChanged
@@ -45,10 +44,10 @@ export class HeaderComponent implements OnInit {
 
    private onAuthChange(res: boolean): void {
     this.isUserAuthenticated = res;
-            if (res)
+      if (res)
       {
         this.userInfoService.get(localStorage.getItem('jwt')!)
-        .subscribe(user => this.user = user);
+        .subscribe(user => this.userInfoService.setLastUser(user));
       }
    }
 
