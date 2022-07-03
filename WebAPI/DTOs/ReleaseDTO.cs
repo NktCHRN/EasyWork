@@ -8,6 +8,6 @@
 
         public string? Description { get; init; }
 
-        public DateTime Date { get; init; }
+        public DateTimeOffset Date { get; init; }
     }
 }

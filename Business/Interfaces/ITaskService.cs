@@ -6,7 +6,7 @@ namespace Business.Interfaces
 {
     public interface ITaskService : ICRUD<TaskModel>, IModelValidator<TaskModel>
     {
-        IEnumerable<TaskModel> GetProjectTasksByDate(int projectId, DateTime from, DateTime to);
+        IEnumerable<TaskModel> GetProjectTasksByDate(int projectId, DateTimeOffset from, DateTimeOffset to);
 
         IEnumerable<TaskModel> GetProjectTasksByStatusAndTag(int projectId, TaskStatuses status, int? tagId = null);
 

@@ -6,10 +6,10 @@
 
         public string Name { get; init; } = string.Empty;
 
-        public DateTime GanttStartDate { get; init; }
+        public DateTimeOffset GanttStartDate { get; init; }
 
-        public DateTime GanttDeadline { get; init; }
+        public DateTimeOffset GanttDeadline { get; init; }
 
-        public DateTime GanttEndDate { get; init; }
+        public DateTimeOffset GanttEndDate { get; init; }
     }
 }

@@ -30,11 +30,11 @@ namespace Data.Entities
         public string? Description { get; set; }
 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateTimeOffset StartDate { get; set; }
 
-        public DateTime? Deadline { get; set; }
+        public DateTimeOffset? Deadline { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTimeOffset? EndDate { get; set; }
 
         [Required]
         public TaskStatuses Status { get; set; }

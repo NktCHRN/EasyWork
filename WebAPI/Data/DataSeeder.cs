@@ -31,7 +31,7 @@ namespace WebAPI.Data
                 Email = "14nik20@gmail.com",
                 FirstName = "Nikita",
                 LastName = "Chernikov",
-                RegistrationDate = DateTime.UtcNow
+                RegistrationDate = DateTimeOffset.UtcNow
             };
             // you may also add a phone number
             user.NormalizedEmail = user.Email.ToUpperInvariant();

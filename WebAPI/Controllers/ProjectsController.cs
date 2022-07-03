@@ -78,7 +78,7 @@ namespace WebAPI.Controllers
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                StartDate = DateTime.UtcNow,
+                StartDate = DateTimeOffset.UtcNow,
                 InviteCode = Guid.NewGuid()
             };
             try
@@ -196,7 +196,7 @@ namespace WebAPI.Controllers
             if (role is null || role < UserOnProjectRoles.Manager)
                 return Forbid();
             var release = _mapper.Map<ReleaseModel>(dto);
-            release.Date = DateTime.UtcNow;
+            release.Date = DateTimeOffset.UtcNow;
             release.ProjectId = id;
             try
             {
@@ -484,7 +484,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}/gantt")]
-        public async Task<IActionResult> GetGanttChart(int id, [FromQuery]DateTime from, [FromQuery]DateTime to)
+        public async Task<IActionResult> GetGanttChart(int id, [FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
         {
             if (from >= to)
                 return BadRequest("\"From\" should be earlier than \"to\"");

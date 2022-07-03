@@ -100,13 +100,13 @@ namespace WebAPI.Controllers
                     ErrorDetails = await MapBansAsync(bans)
                 });
             }
-            user.LastSeen = DateTime.UtcNow;
+            user.LastSeen = DateTimeOffset.UtcNow;
             var refreshToken = _tokenService.GenerateRefreshToken();
             await _refreshTokenService.AddAsync(new RefreshTokenModel
             {
                 Token = refreshToken,
                 UserId = user.Id,
-                ExpiryTime = DateTime.UtcNow.AddDays(RefreshTokenLifeTime)
+                ExpiryTime = DateTimeOffset.UtcNow.AddDays(RefreshTokenLifeTime)
         });
             return Ok(new LoginResponseDTO()
             {
@@ -151,12 +151,12 @@ namespace WebAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var user = _mapper.Map<User>(model);
-            user.RegistrationDate = DateTime.UtcNow;
+            user.RegistrationDate = DateTimeOffset.UtcNow;
             user.UserName = model.Email;
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser is not null 
                 && !existingUser.EmailConfirmed 
-                && existingUser.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTime.UtcNow)
+                && existingUser.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTimeOffset.UtcNow)
                 await _userManager.DeleteAsync(existingUser);
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -244,7 +244,7 @@ namespace WebAPI.Controllers
             if (!user.EmailConfirmed)
             {
                 string errorMessage;
-                if (user.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTime.UtcNow)
+                if (user.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTimeOffset.UtcNow)
                 {
                     await _userManager.DeleteAsync(user);
                     errorMessage = "Invalid request";
@@ -314,7 +314,7 @@ namespace WebAPI.Controllers
                         UserName = payload.Email,
                         FirstName = payload.GivenName,
                         LastName = payload.FamilyName,
-                        RegistrationDate = DateTime.UtcNow,
+                        RegistrationDate = DateTimeOffset.UtcNow,
                         EmailConfirmed = true
                     };
                     await _userManager.CreateAsync(user);
@@ -357,13 +357,13 @@ namespace WebAPI.Controllers
                 });
             }
 
-            user.LastSeen = DateTime.UtcNow;
+            user.LastSeen = DateTimeOffset.UtcNow;
             var refreshToken = _tokenService.GenerateRefreshToken();
             await _refreshTokenService.AddAsync(new RefreshTokenModel
             {
                 Token = refreshToken,
                 UserId = user.Id,
-                ExpiryTime = DateTime.UtcNow.AddDays(RefreshTokenLifeTime)
+                ExpiryTime = DateTimeOffset.UtcNow.AddDays(RefreshTokenLifeTime)
             });
             var accessToken = _tokenService.GenerateAccessToken(await GetClaimsAsync(user));
             return Ok(new LoginResponseDTO {
@@ -394,7 +394,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> UpdateLastSeen()
         {
             var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
-            user.LastSeen = DateTime.UtcNow;
+            user.LastSeen = DateTimeOffset.UtcNow;
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);

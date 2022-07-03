@@ -334,7 +334,7 @@ namespace WebAPI.Controllers
             {
                 Text = dto.Text,
                 SenderId = userId.Value,
-                Date = DateTime.UtcNow,
+                Date = DateTimeOffset.UtcNow,
                 TaskId = id
             };
             try

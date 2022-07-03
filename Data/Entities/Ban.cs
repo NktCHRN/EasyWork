@@ -8,10 +8,10 @@ namespace Data.Entities
         public int Id { get; set; }
 
         [Required]
-        public DateTime DateFrom { get; set; }
+        public DateTimeOffset DateFrom { get; set; }
 
         [Required]
-        public DateTime DateTo { get; set; }
+        public DateTimeOffset DateTo { get; set; }
 
         [Column(TypeName = "nvarchar(400)")]
         public string? Hammer { get; set; }

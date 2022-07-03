@@ -10,13 +10,13 @@
 
         public string? LastName { get; init; }
 
-        public DateTime RegistrationDate { get; init; }
+        public DateTimeOffset RegistrationDate { get; init; }
 
         public string? AvatarURL { get; init; }
 
         public string? MIMEAvatarType { get; init; }
 
-        public DateTime LastSeen { get; init; }
+        public DateTimeOffset LastSeen { get; init; }
 
         public int TasksDone { get; init; }
 

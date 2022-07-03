@@ -8,7 +8,7 @@
 
         public string Email { get; init; } = string.Empty;
 
-        public DateTime? LastSeen { get; init; }
+        public DateTimeOffset? LastSeen { get; init; }
 
         public string? AvatarURL { get; init; }
 

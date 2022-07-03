@@ -16,7 +16,7 @@
 
         public string? MIMEAvatarType { get; init; }
 
-        public DateTime? LastSeen { get; init; }
+        public DateTimeOffset? LastSeen { get; init; }
 
         public int TasksDone { get; init; }
 

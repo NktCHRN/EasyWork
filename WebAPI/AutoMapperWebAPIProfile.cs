@@ -34,7 +34,7 @@ namespace WebAPI
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<User, UserProfileDTO>()
                 .ForMember(u => u.LastSeen,
-                    m => m.MapFrom<DateTime?>(usr => (usr.LastSeen == DateTime.MinValue) ? null : usr.LastSeen))
+                    m => m.MapFrom<DateTimeOffset?>(usr => (usr.LastSeen == DateTimeOffset.MinValue) ? null : usr.LastSeen))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
                 .ForMember(u => u.Projects, m => m.Ignore())
                 .ForMember(u => u.TasksDone, m => m.Ignore())
@@ -42,7 +42,7 @@ namespace WebAPI
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<User, UserProfileReducedDTO>()
                 .ForMember(u => u.LastSeen,
-                    m => m.MapFrom<DateTime?>(usr => (usr.LastSeen == DateTime.MinValue) ? null : usr.LastSeen))
+                    m => m.MapFrom<DateTimeOffset?>(usr => (usr.LastSeen == DateTimeOffset.MinValue) ? null : usr.LastSeen))
                 .ForMember(u => u.FullName,
                     m => m.MapFrom(usr => $"{usr.FirstName} {usr.LastName}".TrimEnd()))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())

@@ -9,7 +9,7 @@ namespace Business.Models
         [Required(AllowEmptyStrings = false)]
         public string Token { get; set; } = string.Empty;
 
-        public DateTime ExpiryTime { get; set; }
+        public DateTimeOffset ExpiryTime { get; set; }
 
         [Required]
         public int UserId { get; set; }

@@ -35,7 +35,7 @@ namespace Business.Services
 
         public async Task AddAsync(ProjectModel model)
         {
-            model.StartDate = DateTime.UtcNow;
+            model.StartDate = DateTimeOffset.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));

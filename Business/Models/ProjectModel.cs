@@ -13,7 +13,7 @@ namespace Business.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateTimeOffset StartDate { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
         public int? MaxToDo { get; set; }

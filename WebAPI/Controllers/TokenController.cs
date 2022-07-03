@@ -34,7 +34,7 @@ namespace WebAPI.Controllers
             if (userId == null)
                 return BadRequest("Invalid client request");
             var tokenModel = await _refreshTokenService.FindAsync(tokenApiModel.RefreshToken, userId.Value);
-            if (tokenModel is null || tokenModel.Token != refreshToken || tokenModel.ExpiryTime <= DateTime.UtcNow)
+            if (tokenModel is null || tokenModel.Token != refreshToken || tokenModel.ExpiryTime <= DateTimeOffset.UtcNow)
                 return BadRequest("Invalid client request");
             var newAccessToken = _service.GenerateAccessToken(principal.Claims);
             var newRefreshToken = _service.GenerateRefreshToken();

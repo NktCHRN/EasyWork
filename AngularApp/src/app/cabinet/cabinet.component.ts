@@ -54,6 +54,7 @@ export class CabinetComponent implements OnInit {
       next: result => 
       {
         this.user = result;
+        this.user.registrationDate = new Date(this.user.registrationDate).toString();       // conversion from UTC to local
         this.form.controls['firstName'].setValue(this.user.firstName);
         this.form.controls['lastName'].setValue(this.user.lastName);
         this.form.controls['phoneNumber'].setValue(this.user.phoneNumber);

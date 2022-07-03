@@ -10,7 +10,7 @@ namespace WebAPI.DTOs
 
         public string? Description { get; set; }
 
-        public DateTime? Deadline { get; set; }
+        public DateTimeOffset? Deadline { get; set; }
 
         [Required(AllowEmptyStrings = false)]
         public string Status { get; set; } = string.Empty;

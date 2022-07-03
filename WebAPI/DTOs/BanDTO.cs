@@ -4,9 +4,9 @@
     {
         public int Id { get; init; }
 
-        public DateTime DateFrom { get; init; }
+        public DateTimeOffset DateFrom { get; init; }
 
-        public DateTime DateTo { get; init; }
+        public DateTimeOffset DateTo { get; init; }
 
         public string? Hammer { get; init; }
 

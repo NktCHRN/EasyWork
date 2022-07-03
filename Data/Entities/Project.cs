@@ -14,7 +14,7 @@ namespace Data.Entities
         public string? Description { get; set; }
 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateTimeOffset StartDate { get; set; }
 
         public int? MaxToDo { get; set; }
 

@@ -6,9 +6,9 @@
 
         public string Name { get; init; } = string.Empty;
 
-        public DateTime StartDate { get; init; }
+        public DateTimeOffset StartDate { get; init; }
 
-        public DateTime? Deadline { get; init; }
+        public DateTimeOffset? Deadline { get; init; }
 
         public string Status { get; set; } = string.Empty;
     }

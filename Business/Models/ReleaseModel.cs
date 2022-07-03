@@ -13,7 +13,7 @@ namespace Business.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         [Required]
         public int ProjectId { get; set; }

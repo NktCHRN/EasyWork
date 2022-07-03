@@ -18,13 +18,13 @@ namespace Data.Entities
         public string? LastName { get; set; } 
 
         [PersonalData]
-        public DateTime RegistrationDate { get; set; }
+        public DateTimeOffset RegistrationDate { get; set; }
 
         [Column(TypeName = "nvarchar(10)")]
         [StringLength(4, MinimumLength = 3, ErrorMessage = "The length of the avatar format should be 3 or 4")]
         public string? AvatarFormat { get; set; }
 
-        public DateTime LastSeen { get; set; }
+        public DateTimeOffset? LastSeen { get; set; }
 
         public ICollection<Ban> Bans { get; set; } = new List<Ban>();
         public ICollection<Ban> GivenBans { get; set; } = new List<Ban>();

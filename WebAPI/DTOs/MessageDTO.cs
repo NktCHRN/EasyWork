@@ -6,7 +6,7 @@
 
         public string Text { get; init; } = string.Empty;
 
-        public DateTime Date { get; init; }
+        public DateTimeOffset Date { get; init; }
 
         public UserMiniWithAvatarDTO Sender { get; init; } = new UserMiniWithAvatarDTO();
     }
