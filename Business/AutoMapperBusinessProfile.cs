@@ -39,6 +39,7 @@ namespace Business
             CreateMap<UserOnProject, UserOnProjectModel>().ReverseMap();
             CreateMap<Data.Entities.File, FileModelExtended>()
                 .ForMember(f => f.Size, m => m.Ignore());
+            CreateMap<RefreshToken, RefreshTokenModel>().ReverseMap();
         }
     }
 }

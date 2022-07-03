@@ -23,6 +23,8 @@ namespace Data
 
         public DbSet<Tag> Tags => Set<Tag>();
 
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
             Database.EnsureCreated();
@@ -68,6 +70,11 @@ namespace Data
             builder.Entity<Ban>()
             .HasOne(u => u.User)
             .WithMany(p => p.Bans)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<RefreshToken>()
+            .HasOne(u => u.User)
+            .WithMany(p => p.RefreshTokens)
             .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -33,13 +33,17 @@ namespace WebAPI.Controllers
 
         private readonly IUserAvatarService _userAvatarService;
 
-        public readonly IUserStatsService _userStatsService;
+        private readonly IUserStatsService _userStatsService;
 
-        public readonly IMessageService _messageService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        private int EmailConfirmationLifeTime => int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
+        private int EmailConfirmationLifeTime => 
+            int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IMessageService messageService)
+        private int RefreshTokenLifeTime =>
+            int.Parse(_configuration.GetSection("TokenProvidersSetting:RefreshTokenLifetimeInDays").Value);
+
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IRefreshTokenService refreshTokenService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -50,7 +54,7 @@ namespace WebAPI.Controllers
             _configuration = configuration;
             _userAvatarService = userAvatarService;
             _userStatsService = userStatsService;
-            _messageService = messageService;
+            _refreshTokenService = refreshTokenService;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -98,9 +102,12 @@ namespace WebAPI.Controllers
             }
             user.LastSeen = DateTime.UtcNow;
             var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await _userManager.UpdateAsync(user);
+            await _refreshTokenService.AddAsync(new RefreshTokenModel
+            {
+                Token = refreshToken,
+                UserId = user.Id,
+                ExpiryTime = DateTime.UtcNow.AddDays(RefreshTokenLifeTime)
+        });
             return Ok(new LoginResponseDTO()
             {
                 IsAuthSuccessful = true,
@@ -284,8 +291,7 @@ namespace WebAPI.Controllers
                 var errors = resetPasswordResult.Errors.Select(e => e.Description);
                 return BadRequest(errors);
             }
-            user.RefreshToken = null;
-            await _userManager.UpdateAsync(user);
+            await _refreshTokenService.DeleteUserTokensAsync(user.Id);
             return Ok();
         }
 
@@ -353,9 +359,12 @@ namespace WebAPI.Controllers
 
             user.LastSeen = DateTime.UtcNow;
             var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await _userManager.UpdateAsync(user);
+            await _refreshTokenService.AddAsync(new RefreshTokenModel
+            {
+                Token = refreshToken,
+                UserId = user.Id,
+                ExpiryTime = DateTime.UtcNow.AddDays(RefreshTokenLifeTime)
+            });
             var accessToken = _tokenService.GenerateAccessToken(await GetClaimsAsync(user));
             return Ok(new LoginResponseDTO {
                 Token = new TokenDTO()

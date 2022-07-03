@@ -26,9 +26,6 @@ namespace Data.Entities
 
         public DateTime LastSeen { get; set; }
 
-        public string? RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
-
         public ICollection<Ban> Bans { get; set; } = new List<Ban>();
         public ICollection<Ban> GivenBans { get; set; } = new List<Ban>();
 
@@ -37,5 +34,7 @@ namespace Data.Entities
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
 
         public ICollection<Message> Messages { get; set; } = new List<Message>();
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }
