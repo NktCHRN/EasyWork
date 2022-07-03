@@ -16,7 +16,7 @@ export class EmailConfirmationComponent implements OnInit {
   disableButton: boolean = false;
 
   constructor(private _accountService: AccountService, private _route: ActivatedRoute, 
-    @Inject('appURI') public appURI:string,
+    @Inject('emailConfirmationURL') private _emailConfirmationURL: string,
     private _snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
@@ -41,7 +41,7 @@ export class EmailConfirmationComponent implements OnInit {
     this.disableButton = true;
     let model = new ResendEmailConfirmation;
     model.email = this._route.snapshot.queryParams['email'],
-    model.clientURI = this.appURI + "emailconfirmation";
+    model.clientURI = this._emailConfirmationURL;
     this._accountService.resendEmail(model)
     .subscribe({
       next: () => 

@@ -47,7 +47,8 @@ export class LoginComponent implements OnInit {
 
   constructor(private _router: Router, private _fb: FormBuilder, 
     private _accountService: AccountService,
-    @Inject('appURI') public appURI:string,
+    @Inject('appURL') private _appURL:string,
+    @Inject('emailConfirmationURL') private _emailConfirmationURL: string,
     private _snackBar: MatSnackBar) { 
       this.createForm();
     }
@@ -140,7 +141,7 @@ export class LoginComponent implements OnInit {
     this.disableResendEmailButton = true;
     let model = new ResendEmailConfirmation();
     model.email = this.buttonEmail!;
-    model.clientURI = this.appURI + "emailconfirmation";
+    model.clientURI = this._emailConfirmationURL;
     this._accountService.resendEmail(model)
     .subscribe({
       next: () => 
@@ -158,7 +159,7 @@ export class LoginComponent implements OnInit {
     this.disableResetPasswordButton = true;
     let model = new ForgotPasswordModel();
     model.email = this.buttonEmail!;
-    model.clientURI = this.appURI + "resetpassword";
+    model.clientURI = this._appURL + "resetpassword";
     this._accountService.forgotPassword(model)
     .subscribe({
       next: () => 

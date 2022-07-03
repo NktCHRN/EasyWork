@@ -63,7 +63,7 @@ export class RegistrationComponent implements OnInit {
   constructor(private _fb: FormBuilder, 
     private _accountService: AccountService,
     private _snackBar: MatSnackBar,
-    @Inject('appURI') public appURI:string,
+    @Inject('emailConfirmationURL') private _emailConfirmationURL: string,
     private _router: Router) {
       this.createForm();
      }
@@ -110,7 +110,7 @@ export class RegistrationComponent implements OnInit {
   onSubmit() {
     this.loading = true;
     this.registerUser = this.registrationForm.value;
-    this.registerUser!.clientURI = this.appURI + "emailconfirmation";
+    this.registerUser!.clientURI = this._emailConfirmationURL;
     this._accountService.register(this.registerUser!)
     .subscribe({
       next: () => {
