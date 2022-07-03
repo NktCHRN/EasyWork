@@ -1,0 +1,1 @@
+export const appURI: string = "http://localhost:4200/";

@@ -7,16 +7,16 @@ import { TokenGuardService } from './services/token-guard.service';
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-  constructor(private router:Router, private jwtHelper: JwtHelperService, private tokenService: TokenGuardService){}
+  constructor(private _router:Router, private _jwtHelper: JwtHelperService, private _tokenGuardService: TokenGuardService){}
   
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const token = localStorage.getItem("jwt");    
-    if (token && !this.jwtHelper.isTokenExpired(token)){
+    if (token && !this._jwtHelper.isTokenExpired(token)){
       return true;
     }
-    const isRefreshSuccess = await this.tokenService.tryRefreshingTokens(token!); 
+    const isRefreshSuccess = await this._tokenGuardService.tryRefreshingTokens(token!); 
     if (!isRefreshSuccess) { 
-      this.router.navigate(["login"]); 
+      this._router.navigate(["login"]); 
     }
     return isRefreshSuccess;
   }

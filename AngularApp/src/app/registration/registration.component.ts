@@ -60,7 +60,6 @@ export class RegistrationComponent implements OnInit {
     }
   };
 
-
   constructor(private _fb: FormBuilder, 
     private _accountService: AccountService,
     private _snackBar: MatSnackBar,

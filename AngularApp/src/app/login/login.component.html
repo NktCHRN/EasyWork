@@ -25,10 +25,15 @@
             <p class="red mb-30" *ngIf="errorMessage">
                 {{errorMessage}}
             </p>
-            <p *ngIf="confirmEmail" class="mb-30">
-                <span class="red">Error: your email is not confirmed yet <br>
-                If you haven't received a message, please, click the button below:</span>
-                <button mat-raised-button color="primary" (click)="resendEmail()" disabled="{{disableButton}}">Send one more message</button>
+            <p *ngIf="showConfirmEmailButton" class="mb-30">
+                <span class="red">Error: your email ({{buttonEmail}}) is not confirmed yet <br>
+                If you haven't received a message, please, click the button below: </span>
+                <button mat-raised-button color="primary" (click)="resendEmail()" disabled="{{disableResendEmailButton}}">Send one more message</button>
+            </p>
+            <p *ngIf="showResetPasswordButton" class="mb-30">
+                <span class="red">Do not remember your password for {{buttonEmail}}? <br>
+                Click the button below to reset it: </span>
+                <button mat-raised-button color="primary" (click)="resetPassword()" disabled="{{disableResetPasswordButton}}">Reset password</button>
             </p>
             <button style="width:100%;" class="mb-30" type="submit" mat-raised-button color="primary">Sign in</button>
             <button style="width:100%" type="button" mat-raised-button (click)="externalLogin()">

@@ -14,6 +14,8 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
 import { UserModel } from '../shared/user.model';
 import { UpdateUser } from '../shared/update-user';
+import { ForgotPasswordModel } from '../shared/forgot-password.model';
+import { ResetPasswordModel } from '../shared/reset-password.model';
 
 @Injectable({
   providedIn: 'root'
@@ -65,7 +67,29 @@ export class AccountService extends BaseService {
         'Content-Type':  'application/json'
       })
     };
-    return this._http.post<ResendEmailConfirmation>(this.serviceBaseURL + 'EmailConfirmationMessageResend', model, httpOptions)
+    return this._http.post(this.serviceBaseURL + 'EmailConfirmationMessageResend', model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public forgotPassword(model: ForgotPasswordModel) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
+    return this._http.post(this.serviceBaseURL + 'forgotpassword', model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public resetPassword(model: ResetPasswordModel) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
+    return this._http.post(this.serviceBaseURL + 'resetpassword', model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

@@ -1,9 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AuthenticatedResponse } from '../shared/authenticatedresponse';
+import { RevokeTokenModel } from '../shared/revoke-token.model';
 import { TokenResponse } from '../shared/tokenresponse';
-import { AccountService } from './account.service';
 import { BaseService } from './base.service';
 
 @Injectable({
@@ -24,5 +23,15 @@ export class TokenService extends BaseService {
       })
     };
     return this.http.post<TokenResponse>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
+  }
+
+  public revokeToken(token: string, tokenModel: RevokeTokenModel) : Observable<Object> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this.http.post(this.serviceBaseURL + 'revoke', tokenModel, httpOptions)
   }
 }

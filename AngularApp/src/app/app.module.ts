@@ -26,7 +26,7 @@ import {MatNativeDateModule} from '@angular/material/core';
 import {MatFormFieldModule} from '@angular/material/form-field'; 
 import { MatInputModule } from '@angular/material/input';
 import { AccountService } from './services/account.service';
-import { confirmEmailURI } from './shared/confirmemailuri';
+import { appURI } from './shared/appuri';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'; 
@@ -37,7 +37,8 @@ import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-logi
 import { GoogleLoginProvider } from 'angularx-social-login';
 import { UserinfoService } from './services/userinfo.service';
 import { TokenGuardService } from './services/token-guard.service';
-import {MatBadgeModule} from '@angular/material/badge'; 
+import {MatBadgeModule} from '@angular/material/badge';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -53,7 +54,8 @@ export function tokenGetter() {
     RegistrationComponent,
     EmailConfirmationComponent,
     LoginComponent,
-    CabinetComponent
+    CabinetComponent,
+    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,
@@ -88,7 +90,7 @@ export function tokenGetter() {
     GeneralinfoService,
     ProcessHTTPMsgService,
     {provide: 'baseURL', useValue: baseURL},
-    {provide: 'confirmEmailURI', useValue: confirmEmailURI},
+    {provide: 'appURI', useValue: appURI},
     AccountService,
     {
       provide: 'SocialAuthServiceConfig',

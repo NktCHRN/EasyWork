@@ -14,8 +14,8 @@
                 </h1> 
             </div>
         </div>
-        <div fxFlex="100" fxLayout="column" fxLayoutGap="35px">
-            <form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="form" #cform="ngForm" *ngIf="user" fxFlex>
+        <div fxFlex="100" fxLayout="column" fxLayoutGap="35px" *ngIf="user">
+            <form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="form" #cform="ngForm" fxFlex>
                 <p fxLayout="column" fxLayout.gt-sm="row" fxLayoutAlign="space-between center" fxFlex>
                     <mat-form-field appearance="outline" class="resp-width mb-12">
                         <mat-label>First name</mat-label>

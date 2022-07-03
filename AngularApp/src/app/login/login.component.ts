@@ -6,6 +6,7 @@ import { SocialUser } from 'angularx-social-login';
 import { AccountService } from '../services/account.service';
 import { AuthenticatedResponse } from '../shared/authenticatedresponse';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
+import { ForgotPasswordModel } from '../shared/forgot-password.model';
 import { LoginModel } from '../shared/loginmodel';
 import { ResendEmailConfirmation } from '../shared/resendemailconfirmation';
 
@@ -21,9 +22,12 @@ export class LoginComponent implements OnInit {
   loading: boolean = false;
   loginUser: LoginModel = {email:'', password:''};
   errorMessage: string | undefined | null;
-  confirmEmail: string | undefined | null;
-  disableButton: boolean = false;
-  readonly returnUrl: string = "/cabinet";
+  buttonEmail: string | undefined | null;
+  disableResendEmailButton: boolean = false;
+  showConfirmEmailButton: boolean = false;
+  showResetPasswordButton: boolean = false;
+  disableResetPasswordButton: boolean = false;
+  private readonly _returnUrl: string = "/cabinet";
 
   formErrors : any = {
     'email': '',
@@ -41,9 +45,9 @@ export class LoginComponent implements OnInit {
   };
 
 
-  constructor(private router: Router, private fb: FormBuilder, 
-    private accountService: AccountService,
-    @Inject('confirmEmailURI') public confirmEmailURI:string,
+  constructor(private _router: Router, private _fb: FormBuilder, 
+    private _accountService: AccountService,
+    @Inject('appURI') public appURI:string,
     private _snackBar: MatSnackBar) { 
       this.createForm();
     }
@@ -52,7 +56,7 @@ export class LoginComponent implements OnInit {
   }
   
   createForm() {
-    this.loginForm = this.fb.group({
+    this.loginForm = this._fb.group({
       email: ['', [Validators.required, Validators.email] ],
       password: ['', [Validators.required]]
     });
@@ -88,11 +92,15 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     if (!this.loginForm.valid)
     return;
-    this.confirmEmail = undefined;
+    if (this.buttonEmail != this.loginForm.get('email')?.value)
+      this.disableResetPasswordButton = false;
+    this.showConfirmEmailButton = false;
+    this.showResetPasswordButton = false;
+    this.buttonEmail = undefined;
     this.errorMessage = undefined;
     this.loading = true;
     this.loginUser = this.loginForm.value;
-    this.accountService.login(this.loginUser!)
+    this._accountService.login(this.loginUser!)
     .subscribe({
       next: (response: AuthenticatedResponse) => {
         this.loading = false;
@@ -100,16 +108,28 @@ export class LoginComponent implements OnInit {
         const refreshToken = response.token!.refreshToken;
         localStorage.setItem("jwt", token);
         localStorage.setItem("refreshToken", refreshToken); 
-        this.accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
-        this.router.navigate([this.returnUrl]);
+        this._accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
+        this._router.navigate([this._returnUrl]);
       },
       error: error => { 
         this.loading = false;
-        if (error.message != "Please, confirm your email first")
-          this.errorMessage = error;
-        else
+        switch (error.message)
         {
-          this.confirmEmail = this.loginUser.email;
+          case "Please, confirm your email first": {
+            this.buttonEmail = this.loginUser.email;
+            this.showConfirmEmailButton = true;
+            break;
+          }
+          case "Wrong email or password": {
+            this.errorMessage = error;
+            this.buttonEmail = this.loginUser.email;
+            this.showResetPasswordButton = true;
+            break;
+          }
+          default: {
+            this.errorMessage = error;
+            break;
+          }
         }
       }
     });
@@ -117,25 +137,43 @@ export class LoginComponent implements OnInit {
 
   public resendEmail()
   {
-    this.disableButton = true;
+    this.disableResendEmailButton = true;
     let model = new ResendEmailConfirmation();
-    model.email = this.confirmEmail!;
-    model.clientURI = this.confirmEmailURI;
-    this.accountService.resendEmail(model)
+    model.email = this.buttonEmail!;
+    model.clientURI = this.appURI + "emailconfirmation";
+    this._accountService.resendEmail(model)
     .subscribe({
       next: () => 
       {
         this._snackBar.open("The email has been sent once more successfully", "Close", {duration: 5000})
       },
       error: err => {
-        this._snackBar.open(err, "Close", {duration: 5000})
+        this._snackBar.open("Error: " + err.error, "Close", {duration: 5000})
+      }
+    })
+  }
+
+  public resetPassword()
+  {
+    this.disableResetPasswordButton = true;
+    let model = new ForgotPasswordModel();
+    model.email = this.buttonEmail!;
+    model.clientURI = this.appURI + "resetpassword";
+    this._accountService.forgotPassword(model)
+    .subscribe({
+      next: () => 
+      {
+        this._snackBar.open("Please, follow the instructions in the email we have just sent you in order to reset your password", "Close", {duration: 5000})
+      },
+      error: err => {
+        this._snackBar.open("Error: " + err.error, "Close", {duration: 5000})
       }
     })
   }
 
   public externalLogin = () => {
     this.errorMessage = undefined;
-    this.accountService.signInWithGoogle()
+    this._accountService.signInWithGoogle()
     .then(res => {
       const user: SocialUser = { ...res };
       const externalAuth: ExternalAuthModel = {
@@ -147,19 +185,19 @@ export class LoginComponent implements OnInit {
   }
 
   private validateExternalAuth(externalAuth: ExternalAuthModel) {
-    this.accountService.externalLogin(externalAuth)
+    this._accountService.externalLogin(externalAuth)
       .subscribe({
         next: response => {
         const token = response.token!.accessToken;
         const refreshToken = response.token!.refreshToken;
         localStorage.setItem("jwt", token);
         localStorage.setItem("refreshToken", refreshToken); 
-        this.accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
-        this.router.navigate([this.returnUrl]);
+        this._accountService.sendAuthStateChangeNotification(response.isAuthSuccessful);
+        this._router.navigate([this._returnUrl]);
       },
       error: error => {
         this.errorMessage = error.statusText;
-        this.accountService.signOutExternal();
+        this._accountService.signOutExternal();
       }
     });
   }

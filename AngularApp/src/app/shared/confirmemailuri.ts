@@ -1,1 +1,0 @@
-export const confirmEmailURI:string = "http://localhost:4200/emailconfirmation";

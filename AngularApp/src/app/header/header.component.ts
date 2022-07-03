@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { SocialAuthService } from 'angularx-social-login';
 import { AccountService } from '../services/account.service';
+import { TokenService } from '../services/token.service';
 import { UserinfoService } from '../services/userinfo.service';
-import { UserReducedModel } from '../shared/user-reduced.model';
+import { RevokeTokenModel } from '../shared/revoke-token.model';
 
 @Component({
   selector: 'app-header',
@@ -13,30 +13,33 @@ import { UserReducedModel } from '../shared/user-reduced.model';
 })
 export class HeaderComponent implements OnInit {
 
-  showRows: boolean = false;
+  public showRows: boolean = false;
   public isExternalAuth: boolean = false;
   public isUserAuthenticated: boolean | null | undefined;
   
   logOut = () => {
+    let model = new RevokeTokenModel();
+    model.token = localStorage.getItem("refreshToken")!;
+    this._tokenService.revokeToken(localStorage.getItem('jwt')!, model).subscribe();
     this.accountService.logout();
     this.accountService.sendAuthStateChangeNotification(false);
     if(this.isExternalAuth)
       this.accountService.signOutExternal();
-    this.router.navigate(['home']);
+    this._router.navigate(['home']);
   }
 
-  constructor(private jwtHelper: JwtHelperService,
-    public accountService: AccountService,
-    private socialAuthService: SocialAuthService,
-    private router: Router,
-    public userInfoService: UserinfoService) { }
+  constructor(public accountService: AccountService,
+    private _socialAuthService: SocialAuthService,
+    private _router: Router,
+    public userInfoService: UserinfoService,
+    private _tokenService: TokenService) { }
 
   ngOnInit(): void {  
     this.accountService.authChanged
     .subscribe(res => {
       this.onAuthChange(res);
     })
-    this.socialAuthService.authState.subscribe((user: any) => {
+    this._socialAuthService.authState.subscribe((user: any) => {
       this.isExternalAuth = user != null;
     })
     this.accountService.isUserAuthenticated().then(res => this.onAuthChange(res));

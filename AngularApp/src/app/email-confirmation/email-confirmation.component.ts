@@ -15,8 +15,8 @@ export class EmailConfirmationComponent implements OnInit {
   errorMessage: string | undefined | null;
   disableButton: boolean = false;
 
-  constructor(private accountService: AccountService, private route: ActivatedRoute, 
-    @Inject('confirmEmailURI') public confirmEmailURI:string,
+  constructor(private _accountService: AccountService, private _route: ActivatedRoute, 
+    @Inject('appURI') public appURI:string,
     private _snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
@@ -24,10 +24,10 @@ export class EmailConfirmationComponent implements OnInit {
   }
 
   private confirmEmail = () => {
-    const token = this.route.snapshot.queryParams['token'];
-    const email = this.route.snapshot.queryParams['email'];
+    const token = this._route.snapshot.queryParams['token'];
+    const email = this._route.snapshot.queryParams['email'];
     
-    this.accountService.confirmEmail(token, email)
+    this._accountService.confirmEmail(token, email)
     .subscribe({
       next: () => this.showSuccess = true,
       error: (err: HttpErrorResponse) => {
@@ -40,16 +40,16 @@ export class EmailConfirmationComponent implements OnInit {
   {
     this.disableButton = true;
     let model = new ResendEmailConfirmation;
-    model.email = this.route.snapshot.queryParams['email'],
-    model.clientURI = this.confirmEmailURI;
-    this.accountService.resendEmail(model)
+    model.email = this._route.snapshot.queryParams['email'],
+    model.clientURI = this.appURI + "emailconfirmation";
+    this._accountService.resendEmail(model)
     .subscribe({
       next: () => 
       {
         this._snackBar.open("The email has been sent once more successfully", "Close", {duration: 5000})
       },
       error: err => {
-        this._snackBar.open(err, "Close")
+        this._snackBar.open("Error: " + err.error, "Close")
       }
     })
   }
