@@ -31,7 +31,7 @@ export class EmailConfirmationComponent implements OnInit {
     .subscribe({
       next: () => this.showSuccess = true,
       error: (err: HttpErrorResponse) => {
-        this.errorMessage = err.message;
+        this.errorMessage = err.error ?? err.message ?? err;
       }
     })
   }

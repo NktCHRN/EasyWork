@@ -56,6 +56,7 @@ $background-lightgray: #eeeeee;
 
 main {
     padding-top: 75px;
+    min-height: calc(100vh - 75px - 161.85px);
 }
 
 .navbar-with-delimiter {
@@ -133,8 +134,12 @@ main {
     width: 100%;
 }
 
-.w-75 {
-    width: 75%;
+$i: 0;
+@while $i <= 100 {
+    .w-#{$i} {
+        width: percentage($i/100);
+    }
+    $i: $i+ 5;
 }
 
 .text-center {
@@ -250,4 +255,31 @@ $medium-icon-size: 30px;
 
 .pre-wrap {
     white-space: pre-wrap
-  }
+}
+
+.dialog-responsive {
+    width: 80%;
+}
+
+@media screen and (min-width: 960px) {
+    .dialog-responsive {
+        width: 60%;
+    }
+}
+
+.mini-dialog-responsive {
+    width: 60%;
+}
+
+@media screen and (min-width: 960px) {
+    .mini-dialog-responsive {
+        width: 40%;
+    }
+}
+
+
+.dialog-close-button {
+    float: right;
+    top:-15px;
+    right:-15px;
+}

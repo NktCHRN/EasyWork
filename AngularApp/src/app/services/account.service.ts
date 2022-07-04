@@ -145,4 +145,26 @@ export class AccountService extends BaseService {
     return this._http.put(this.serviceBaseURL, user, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
+
+  public deleteAvatar(token: string) {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + "Avatar", httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public updateAvatar(token: string, file: FormData)
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.put(this.serviceBaseURL + "Avatar", file, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
 }

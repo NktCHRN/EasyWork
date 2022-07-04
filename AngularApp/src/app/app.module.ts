@@ -40,6 +40,14 @@ import { TokenGuardService } from './services/token-guard.service';
 import {MatBadgeModule} from '@angular/material/badge';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { emailConfirmationURL } from './shared/email-confirmation-url';
+import { AvatarShowComponent } from './cabinet/avatar-show/avatar-show.component';
+import { AvatarEditComponent } from './cabinet/avatar-edit/avatar-edit.component';
+import {MatDialogModule} from '@angular/material/dialog';
+import { AvatarBaseComponent } from './cabinet/avatar-base/avatar-base.component';
+import { AvatarDeleteComponent } from './cabinet/avatar-delete/avatar-delete.component'; 
+import { ImageCropperModule } from 'ngx-image-cropper';
+import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
+import { authInterceptor } from './auth.interceptor';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -57,6 +65,11 @@ export function tokenGetter() {
     LoginComponent,
     CabinetComponent,
     ResetPasswordComponent,
+    AvatarShowComponent,
+    AvatarEditComponent,
+    AvatarBaseComponent,
+    AvatarDeleteComponent,
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -85,7 +98,9 @@ export function tokenGetter() {
       }
     }),
     SocialLoginModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDialogModule,
+    ImageCropperModule
   ],
   providers: [
     GeneralinfoService,
@@ -109,7 +124,8 @@ export function tokenGetter() {
       } as SocialAuthServiceConfig
     },
     UserinfoService,
-    TokenGuardService
+    TokenGuardService,
+    authInterceptor
   ],
   bootstrap: [AppComponent]
 })

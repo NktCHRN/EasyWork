@@ -1,0 +1,20 @@
+  .button-row .mat-button-base {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+  
+$max: 750px;
+$min: 200px;
+
+  .button-row {
+    width: 40%;
+    max-width: $max;
+    min-width: $min;
+  }
+
+  .avatar-img-wrapper {
+    max-height: $max;
+    max-width: $max;
+    min-height: $min;
+    min-width: $min;
+}

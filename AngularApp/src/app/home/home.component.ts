@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { JwtHelperService } from '@auth0/angular-jwt';
 import { GeneralinfoService } from '../services/generalinfo.service';
 import { TokenGuardService } from '../services/token-guard.service';
 import { ContentItem } from '../shared/content-item';
@@ -49,7 +48,6 @@ export class HomeComponent implements OnInit {
   info: GeneralInfo | undefined | null;
 
   constructor(private generalInfoService: GeneralinfoService,
-    private jwtHelper: JwtHelperService,
     private tokenGuardService: TokenGuardService) { }
 
   ngOnInit(): void {
@@ -58,14 +56,7 @@ export class HomeComponent implements OnInit {
       next: info => this.info = info,
       error: err => console.log(err)
     });
-    this.refreshToken();
-  }
-
-  private async refreshToken()
-  {
-    const token = localStorage.getItem("jwt");    
-    if (!token || this.jwtHelper.isTokenExpired(token))
-      await this.tokenGuardService.tryRefreshingTokens(token!); 
+    this.tokenGuardService.refreshToken();
   }
 
 }

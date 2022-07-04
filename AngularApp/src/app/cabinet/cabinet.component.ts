@@ -1,13 +1,13 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AccountService } from '../services/account.service';
 import { UserinfoService } from '../services/userinfo.service';
-import { BooleanContainer } from '../shared/booleancontainer';
 import { createNotWhitespaceValidator } from '../shared/customvalidators';
 import { UpdateUser } from '../shared/update-user';
-import { UserReducedModel } from '../shared/user-reduced.model';
 import { UserModel } from '../shared/user.model';
+import { AvatarBaseComponent } from './avatar-base/avatar-base.component';
 
 @Component({
   selector: 'app-cabinet',
@@ -44,7 +44,7 @@ export class CabinetComponent implements OnInit {
   };
 
   constructor(private _fb: FormBuilder, public userInfoService: UserinfoService, private _accountService: AccountService,
-    private _snackBar: MatSnackBar) { 
+    private _snackBar: MatSnackBar, private _dialog: MatDialog) { 
     this.createForm();
   }
 
@@ -117,8 +117,7 @@ export class CabinetComponent implements OnInit {
         });
         this._accountService.get(localStorage.getItem('jwt')!)
         .subscribe(result => this.user = result);
-        this.userInfoService.get(localStorage.getItem('jwt')!)
-        .subscribe(user => this.userInfoService.setLastUser(user));
+        this.userInfoService.updateLastUser();
       },
       error: error => { 
         this._snackBar.open(`The user was not updated: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
@@ -127,5 +126,12 @@ export class CabinetComponent implements OnInit {
       }
     });
   }
+  }
+
+  openAvatarDialog() : void
+  {
+    this._dialog.open(AvatarBaseComponent, {
+      panelClass: "dialog-responsive"
+    });
   }
 }

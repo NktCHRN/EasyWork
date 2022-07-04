@@ -48,10 +48,7 @@ export class HeaderComponent implements OnInit {
    private onAuthChange(res: boolean): void {
     this.isUserAuthenticated = res;
       if (res)
-      {
-        this.userInfoService.get(localStorage.getItem('jwt')!)
-        .subscribe(user => this.userInfoService.setLastUser(user));
-      }
+        this.userInfoService.updateLastUser();
    }
 
   showBtns() : void {

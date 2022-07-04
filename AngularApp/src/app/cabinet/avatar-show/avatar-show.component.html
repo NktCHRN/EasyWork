@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>Your avatar</h1>
+<mat-dialog-content fxLayout="column" fxLayoutGap="30px">
+    <div fxLayoutAlign="center center">
+        <div class="avatar-wrapper avatar-img-wrapper w-40">
+            <img alt="avatar" src="{{linkToAvatar ? linkToAvatar : '../../assets/default-avatar.png'}}" class="img-cover-center full">
+        </div>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="button-row" fxLayoutGap="35px" fxLayout="row" fxLayoutAlign="center center" fxLayoutAlign.gt-sm="start center">
+                <div>
+                    <button mat-fab color="accent" aria-label="Edit" (click)="changeToEdit()">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  </div>
+              <div *ngIf="linkToAvatar">
+                <button mat-fab color="warn" aria-label="Delete" (click)="openDeleteDialog()">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+        </div>
+    </div>
+</mat-dialog-content>

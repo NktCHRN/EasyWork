@@ -27,6 +27,13 @@ export class UserinfoService extends BaseService {
   public setLastUser(user : UserReducedModel | null | undefined)
   {
     UserinfoService.lastUser = user;
+    if (UserinfoService.lastUser?.avatarURL)
+      UserinfoService.lastUser.avatarURL += "?" + Date.now().toString();
+  }
+
+  public updateLastUser() : void {
+    this.get(localStorage.getItem('jwt')!)
+    .subscribe(user => this.setLastUser(user));
   }
 
   public get(token: string): Observable<UserReducedModel>

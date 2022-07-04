@@ -34,4 +34,28 @@ export class TokenService extends BaseService {
     };
     return this.http.post(this.serviceBaseURL + 'revoke', tokenModel, httpOptions)
   }
+
+  public getJwtToken(): string | null | undefined
+  {
+    return localStorage.getItem('jwt');
+  }
+
+  public getRefreshToken(): string | null | undefined
+  {
+    return localStorage.getItem("refreshToken");
+  }
+
+  public getTokens(): TokenResponse
+  {
+    return {
+      accessToken: this.getJwtToken()!,
+      refreshToken: this.getRefreshToken()!
+    };
+  }
+
+  public setTokens(tokens: TokenResponse): void
+  {
+    localStorage.setItem("jwt", tokens.accessToken);
+    localStorage.setItem("refreshToken", tokens.refreshToken); 
+  }
 }
