@@ -5,8 +5,8 @@
                 <mat-card-title class="orange truncate-content"><a class="orange no-decor" title="to task">{{task.name}} ||Add a link!!!</a></mat-card-title>
                 <mat-card-content class="text-md">
                     <p><strong>Status:</strong> {{task.status}}</p>
-                    <p><strong>Start date:</strong> {{task.startDate | date:'d MMM y, HH:mm:ss'}}</p>
-                    <p *ngIf="task.deadline"><strong class="deep-orange">Deadline:</strong> {{task.deadline | date:'d MMM y, HH:mm:ss'}}</p>
+                    <p><strong>Start date:</strong> {{task.startDate | date:'d MMM y, HH:mm'}}</p>
+                    <p *ngIf="task.deadline"><strong class="deep-orange">Deadline:</strong> {{task.deadline | date:'d MMM y, HH:mm'}}</p>
                 </mat-card-content>
             </mat-card>
         </div>
