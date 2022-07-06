@@ -11,7 +11,7 @@ export class AvatarBaseComponent implements OnInit {
   public mode: AvatarPageMode = AvatarPageMode.Show;
   public modes = AvatarPageMode;
 
-  constructor(public _dialogRef: MatDialogRef<AvatarBaseComponent>) { }
+  constructor(private _dialogRef: MatDialogRef<AvatarBaseComponent>) { }
 
   ngOnInit(): void {
   }

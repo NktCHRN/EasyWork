@@ -15,7 +15,7 @@ export class ProcessHTTPMsgService {
     if (error.error instanceof ErrorEvent || error.error?.message) {
       newError = Error(error.error.message);
     }
-    else if ( error.error?.errorMessage) {
+    else if ( error.error?.errorMessage && !error.error?.errorDetails) {
       newError = Error(error.error?.errorMessage);
     } 
     else {

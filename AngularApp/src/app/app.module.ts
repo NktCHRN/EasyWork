@@ -52,7 +52,8 @@ import { ProfileComponent } from './profile/profile.component';
 import { UsersService } from './services/users.service';
 import { TasksComponent } from './tasks/tasks.component';
 import { TasksService } from './services/tasks.service';
-import {MatCardModule} from '@angular/material/card'; 
+import {MatCardModule} from '@angular/material/card';
+import { BannedComponent } from './banned/banned.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -76,7 +77,8 @@ export function tokenGetter() {
     AvatarDeleteComponent,
     ErrorDialogComponent,
     ProfileComponent,
-    TasksComponent
+    TasksComponent,
+    BannedComponent
   ],
   imports: [
     BrowserModule,

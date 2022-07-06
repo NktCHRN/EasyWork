@@ -19,7 +19,7 @@ const routes: Routes = [
   { path: 'emailconfirmation', component: EmailConfirmationComponent, data: { title: 'Email confirmation' } },
   { path: 'resetpassword', component: ResetPasswordComponent, data: { title: 'Reset password' } },
   { path: 'cabinet',  component: CabinetComponent, data: { title: 'Cabinet' }, canActivate: [AuthGuard] },
-  { path: 'users/:id',  component: ProfileComponent, data: { title: 'Profile' }, canActivate: [AuthGuard] },
+  { path: 'users/:id',  component: ProfileComponent, data: { title: 'Profile' } },
   { path: 'tasks',  component: TasksComponent, data: { title: 'My tasks' }, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', pathMatch: 'full', 

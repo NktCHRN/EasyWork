@@ -25,9 +25,8 @@ export class AuthInterceptor implements HttpInterceptor {
     }
     return next.handle(authReq).pipe(catchError(error => {
       if (error instanceof HttpErrorResponse 
-        && !authReq.url.includes('auth/signin') 
-        && error.status === 401 
-        && error?.error?.errorMessage != "Wrong email or password") {
+        && !authReq.url.toLowerCase().includes('login') 
+        && error.status === 401) {
         return this.handle401Error(authReq, next);
       }
       return throwError(() => error);

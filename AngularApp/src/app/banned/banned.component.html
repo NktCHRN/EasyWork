@@ -1,0 +1,12 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title class="red">You are banned from this website</h1>
+<mat-dialog-content fxLayout="column" fxLayoutGap="30px" class="text-md">
+    <div *ngFor="let ban of bans">
+        <p>From: {{ban.dateFrom | date:'d MMM y, HH:mm'}}</p>
+        <p>To: {{ban.dateTo | date:'d MMM y, HH:mm'}}</p>
+        <p>Reason: {{ban.hammer}}</p>
+        <p>Admin: <a title="admin" [routerLink]="['users', ban.admin.id]">{{ban.admin.fullName}}</a></p>
+    </div>
+</mat-dialog-content>

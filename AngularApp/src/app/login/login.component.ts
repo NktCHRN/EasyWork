@@ -1,8 +1,10 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { SocialUser } from 'angularx-social-login';
+import { BannedComponent } from '../banned/banned.component';
 import { AccountService } from '../services/account.service';
 import { AuthenticatedResponse } from '../shared/authenticatedresponse';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
@@ -49,7 +51,7 @@ export class LoginComponent implements OnInit {
     private _accountService: AccountService,
     @Inject('appURL') private _appURL:string,
     @Inject('emailConfirmationURL') private _emailConfirmationURL: string,
-    private _snackBar: MatSnackBar) { 
+    private _snackBar: MatSnackBar, private _dialog: MatDialog) { 
       this.createForm();
     }
   ngOnInit(): void {
@@ -114,24 +116,34 @@ export class LoginComponent implements OnInit {
       },
       error: error => { 
         this.loading = false;
-        switch (error.message)
-        {
-          case "Please, confirm your email first": {
-            this.buttonEmail = this.loginUser.email;
-            this.showConfirmEmailButton = true;
-            break;
+        if (error?.error?.errorMessage == "You are banned from this website")
+          error.message = "You are banned from this website";
+          switch (error.message)
+          {
+            case "Please, confirm your email first": {
+              this.buttonEmail = this.loginUser.email;
+              this.showConfirmEmailButton = true;
+              break;
+            }
+            case "Wrong email or password": {
+              this.errorMessage = error;
+              this.buttonEmail = this.loginUser.email;
+              this.showResetPasswordButton = true;
+              break;
+            }
+            case "You are banned from this website": {
+              this.errorMessage = `${error.message}`;
+              this._dialog.open(BannedComponent, {
+                panelClass: "dialog-responsive",
+                data: error.error.errorDetails
+              });
+              break;
+            }
+            default: {
+              this.errorMessage = error;
+              break;
+            }
           }
-          case "Wrong email or password": {
-            this.errorMessage = error;
-            this.buttonEmail = this.loginUser.email;
-            this.showResetPasswordButton = true;
-            break;
-          }
-          default: {
-            this.errorMessage = error;
-            break;
-          }
-        }
       }
     });
   }
@@ -197,8 +209,18 @@ export class LoginComponent implements OnInit {
         this._router.navigate([this._returnUrl]);
       },
       error: error => {
-        this.errorMessage = error.statusText;
-        this._accountService.signOutExternal();
+        if (error?.error?.errorMessage == "You are banned from this website"){
+          this.errorMessage = `${error.error.errorMessage}`;
+          this._dialog.open(BannedComponent, {
+            panelClass: "dialog-responsive",
+            data: error.error.errorDetails
+          });
+        }
+        else
+        {
+          this.errorMessage = error.statusText;
+          this._accountService.signOutExternal();
+        }
       }
     });
   }
