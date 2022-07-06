@@ -17,15 +17,18 @@ namespace WebAPI.Controllers
     {
         private readonly UserManager<User> _userManager;
 
-        public readonly IBanService _banService;
+        private readonly IBanService _banService;
 
         private readonly IMapper _mapper;
 
-        public BansController(IMapper mapper, UserManager<User> userManager, IBanService banService)
+        private readonly IRefreshTokenService _refreshTokenService;
+
+        public BansController(IMapper mapper, UserManager<User> userManager, IBanService banService, IRefreshTokenService refreshTokenService)
         {
             _mapper = mapper;
             _userManager = userManager;
             _banService = banService;
+            _refreshTokenService = refreshTokenService;
         }
 
         [HttpGet]
@@ -95,6 +98,7 @@ namespace WebAPI.Controllers
             try
             {
                 await _banService.AddAsync(mapped);
+                await _refreshTokenService.DeleteUserTokensAsync(mapped.UserId);
             }
             catch (ArgumentException exc)
             {
