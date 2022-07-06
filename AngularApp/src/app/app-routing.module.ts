@@ -7,6 +7,7 @@ import { EmailConfirmationComponent } from './email-confirmation/email-confirmat
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { NotfoundComponent } from './notfound/notfound.component';
+import { ProfileComponent } from './profile/profile.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'emailconfirmation', component: EmailConfirmationComponent, data: { title: 'Email confirmation' } },
   { path: 'resetpassword', component: ResetPasswordComponent, data: { title: 'Reset password' } },
   { path: 'cabinet',  component: CabinetComponent, data: { title: 'Cabinet' }, canActivate: [AuthGuard] },
+  { path: 'users/:id',  component: ProfileComponent, data: { title: 'Profile' }, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', pathMatch: 'full', 
   component: NotfoundComponent, data: { title: 'Not found' } },

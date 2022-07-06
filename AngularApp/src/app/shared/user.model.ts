@@ -1,12 +1,11 @@
-export class UserModel
+export interface UserModel
 {
-    email: string = '';
+    email: string;
     phoneNumber: string | null | undefined;
-    firstName: string = '';
+    firstName: string;
     lastName: string | null | undefined;
-    registrationDate: string = '';
     avatarURL: string | null | undefined;
-    tasksDone: number = 0;
-    tasksNotDone: number = 0;
-    projects: number = 0;
+    tasksDone: number;
+    tasksNotDone: number;
+    projects: number;
 }

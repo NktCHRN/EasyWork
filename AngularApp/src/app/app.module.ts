@@ -48,6 +48,8 @@ import { AvatarDeleteComponent } from './cabinet/avatar-delete/avatar-delete.com
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import { authInterceptor } from './auth.interceptor';
+import { ProfileComponent } from './profile/profile.component';
+import { UsersService } from './services/users.service';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -69,7 +71,8 @@ export function tokenGetter() {
     AvatarEditComponent,
     AvatarBaseComponent,
     AvatarDeleteComponent,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,
@@ -125,7 +128,8 @@ export function tokenGetter() {
     },
     UserinfoService,
     TokenGuardService,
-    authInterceptor
+    authInterceptor,
+    UsersService
   ],
   bootstrap: [AppComponent]
 })

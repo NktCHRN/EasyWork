@@ -15,7 +15,7 @@
             </div>
         </div>
         <div fxFlex="100" fxLayout="column" fxLayoutGap="35px" *ngIf="user">
-            <form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="form" #cform="ngForm" fxFlex>
+            <form fxLayout="column" class="container mb-0" style="width:100%" novalidate method="POST" [formGroup]="form" #cform="ngForm" fxFlex>
                 <p fxLayout="column" fxLayout.gt-sm="row" fxLayoutAlign="space-between center" fxFlex>
                     <mat-form-field appearance="outline" class="resp-width mb-12">
                         <mat-label>First name</mat-label>
@@ -42,15 +42,15 @@
                     </mat-form-field>
                 </p>
             </form>
-            <div class="info" fxLayout="row">
-                <div fxFlex="50" fxLayoutAlign="start center">
+            <div class="info" fxLayout="column" fxLayout.gt-sm="row">
+                <div fxFlex="50" fxLayoutAlign.gt-sm="start center">
                     <p>
-                        Tasks done: <strong class="orange">{{user.tasksDone}}</strong><br>
+                        <br>Tasks done: <strong class="orange">{{user.tasksDone}}</strong><br>
                         Not yet done: <strong class="deep-orange">{{user.tasksNotDone}}</strong><br>
                         Totally: <strong class="orange">{{user.tasksDone + user.tasksNotDone}}</strong>
                     </p>
                 </div>
-                <div fxFlex="50" fxLayoutAlign="end center">
+                <div fxFlex="50" fxLayoutAlign.gt-sm="end center">
                     <p>Participates in <strong class="orange"> {{user.projects}} </strong> projects</p>
                 </div>
             </div>

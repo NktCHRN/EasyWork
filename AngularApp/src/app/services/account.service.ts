@@ -12,7 +12,7 @@ import { SocialAuthService } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { ExternalAuthModel } from '../shared/externalauthmodel';
-import { UserModel } from '../shared/user.model';
+import { UserCabinetModel } from '../shared/user-cabinet.model';
 import { UpdateUser } from '../shared/update-user';
 import { ForgotPasswordModel } from '../shared/forgot-password.model';
 import { ResetPasswordModel } from '../shared/reset-password.model';
@@ -122,7 +122,7 @@ export class AccountService extends BaseService {
     this._authChangeSub.next(isAuthenticated);
   }
 
-  public get(token: string) : Observable<UserModel>
+  public get(token: string) : Observable<UserCabinetModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -130,7 +130,7 @@ export class AccountService extends BaseService {
         'Authorization': 'Bearer ' + token
       })
     };
-    return this._http.get<UserModel>(this.serviceBaseURL, httpOptions)
+    return this._http.get<UserCabinetModel>(this.serviceBaseURL, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

@@ -6,7 +6,7 @@ import { AccountService } from '../services/account.service';
 import { UserinfoService } from '../services/userinfo.service';
 import { createNotWhitespaceValidator } from '../shared/customvalidators';
 import { UpdateUser } from '../shared/update-user';
-import { UserModel } from '../shared/user.model';
+import { UserCabinetModel } from '../shared/user-cabinet.model';
 import { AvatarBaseComponent } from './avatar-base/avatar-base.component';
 
 @Component({
@@ -16,7 +16,7 @@ import { AvatarBaseComponent } from './avatar-base/avatar-base.component';
 })
 export class CabinetComponent implements OnInit {
 
-  user: UserModel = new UserModel();
+  user: UserCabinetModel = new UserCabinetModel();
   updateUser: UpdateUser = new UpdateUser();
   form: FormGroup = null!;
   @ViewChild('cform') formDirective: any;
