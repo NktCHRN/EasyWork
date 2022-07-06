@@ -50,6 +50,9 @@ import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
 import { authInterceptor } from './auth.interceptor';
 import { ProfileComponent } from './profile/profile.component';
 import { UsersService } from './services/users.service';
+import { TasksComponent } from './tasks/tasks.component';
+import { TasksService } from './services/tasks.service';
+import {MatCardModule} from '@angular/material/card'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -72,7 +75,8 @@ export function tokenGetter() {
     AvatarBaseComponent,
     AvatarDeleteComponent,
     ErrorDialogComponent,
-    ProfileComponent
+    ProfileComponent,
+    TasksComponent
   ],
   imports: [
     BrowserModule,
@@ -103,7 +107,8 @@ export function tokenGetter() {
     SocialLoginModule,
     MatBadgeModule,
     MatDialogModule,
-    ImageCropperModule
+    ImageCropperModule,
+    MatCardModule
   ],
   providers: [
     GeneralinfoService,
@@ -129,7 +134,8 @@ export function tokenGetter() {
     UserinfoService,
     TokenGuardService,
     authInterceptor,
-    UsersService
+    UsersService,
+    TasksService
   ],
   bootstrap: [AppComponent]
 })

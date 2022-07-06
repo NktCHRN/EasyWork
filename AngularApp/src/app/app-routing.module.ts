@@ -10,6 +10,7 @@ import { NotfoundComponent } from './notfound/notfound.component';
 import { ProfileComponent } from './profile/profile.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { TasksComponent } from './tasks/tasks.component';
 
 const routes: Routes = [
   { path: 'home',  component: HomeComponent, data: { title: 'Easy project management' } },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'resetpassword', component: ResetPasswordComponent, data: { title: 'Reset password' } },
   { path: 'cabinet',  component: CabinetComponent, data: { title: 'Cabinet' }, canActivate: [AuthGuard] },
   { path: 'users/:id',  component: ProfileComponent, data: { title: 'Profile' }, canActivate: [AuthGuard] },
+  { path: 'tasks',  component: TasksComponent, data: { title: 'My tasks' }, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', pathMatch: 'full', 
   component: NotfoundComponent, data: { title: 'Not found' } },

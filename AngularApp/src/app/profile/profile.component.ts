@@ -22,7 +22,7 @@ export class ProfileComponent implements OnInit {
         next: user => 
         {
           this.user = user;
-          this._titleService.setTitle(`${this.usersService.getFullName(user.firstName, user.lastName)}'s profile`);
+          this._titleService.setTitle(`EasyWork - ${this.usersService.getFullName(user.firstName, user.lastName)}'s profile`);
         },
         error: () => this._router.navigate(["**"], { skipLocationChange: true })
       });

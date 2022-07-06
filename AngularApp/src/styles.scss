@@ -106,7 +106,7 @@ main {
 }
 
 .orange {
-    color: orange
+    color: orange;
 }
 
 .deep-orange {
@@ -293,4 +293,13 @@ $medium-icon-size: 30px;
     padding-right: 10px;
     font-size: 14pt;
     font-weight: 500;
+}
+
+.my-10 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+.no-decor {
+    text-decoration: none !important;
 }
