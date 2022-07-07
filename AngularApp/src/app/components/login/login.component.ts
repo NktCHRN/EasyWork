@@ -10,7 +10,7 @@ import { AuthenticatedResponseModel } from '../../shared/token/authenticated-res
 import { ExternalAuthModel } from '../../shared/token/external-auth.model';
 import { ForgotPasswordModel } from '../../shared/user/forgot-password.model';
 import { LoginModel } from '../../shared/user/login.model';
-import { ResendEmailConfirmation } from '../../shared/user/resendemailconfirmation';
+import { ResendEmailConfirmationModel } from '../../shared/user/resend-email-confirmation.model';
 
 @Component({
   selector: 'app-login',
@@ -153,7 +153,7 @@ export class LoginComponent implements OnInit {
   public resendEmail()
   {
     this.disableResendEmailButton = true;
-    let model = new ResendEmailConfirmation();
+    let model = new ResendEmailConfirmationModel();
     model.email = this.buttonEmail!;
     model.clientURI = this._emailConfirmationURL;
     this._accountService.resendEmail(model)

@@ -3,7 +3,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../services/account.service';
-import { ResendEmailConfirmation } from '../../shared/user/resendemailconfirmation';
+import { ResendEmailConfirmationModel } from '../../shared/user/resend-email-confirmation.model';
 
 @Component({
   selector: 'app-email-confirmation',
@@ -39,7 +39,7 @@ export class EmailConfirmationComponent implements OnInit {
   public resendEmail()
   {
     this.disableButton = true;
-    let model = new ResendEmailConfirmation;
+    let model = new ResendEmailConfirmationModel;
     model.email = this._route.snapshot.queryParams['email'],
     model.clientURI = this._emailConfirmationURL;
     this._accountService.resendEmail(model)

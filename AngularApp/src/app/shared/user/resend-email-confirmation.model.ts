@@ -1,4 +1,4 @@
-export class ResendEmailConfirmation {
+export class ResendEmailConfirmationModel {
     email:	string = ''
     clientURI:	string = ''
 }

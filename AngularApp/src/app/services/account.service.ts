@@ -5,7 +5,7 @@ import { AuthenticatedResponseModel } from '../shared/token/authenticated-respon
 import { CustomEncoder } from '../shared/other/customencoder';
 import { LoginModel } from '../shared/user/login.model';
 import { RegisterUserModel } from '../shared/user/register-user.model';
-import { ResendEmailConfirmation } from '../shared/user/resendemailconfirmation';
+import { ResendEmailConfirmationModel } from '../shared/user/resend-email-confirmation.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
 import { SocialAuthService } from "angularx-social-login";
@@ -61,7 +61,7 @@ export class AccountService extends BaseService {
     return this._http.get(this.serviceBaseURL + "EmailConfirmation", { params: params }).pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public resendEmail(model: ResendEmailConfirmation) {
+  public resendEmail(model: ResendEmailConfirmationModel) {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json'
