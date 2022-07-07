@@ -7,53 +7,62 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatToolbarModule } from '@angular/material/toolbar'; 
 import {MatIconModule} from '@angular/material/icon';
-import { HeaderComponent } from './header/header.component';
+import { HeaderComponent } from './components/header/header.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import {MatDividerModule} from '@angular/material/divider'; 
 import {MatButtonModule} from '@angular/material/button'
 import {MatMenuModule} from '@angular/material/menu';
-import { FooterComponent } from './footer/footer.component';
-import { HomeComponent } from './home/home.component'
-import { baseURL } from './shared/baseurl';
+import { FooterComponent } from './components/footer/footer.component';
+import { HomeComponent } from './components/home/home.component'
+import { baseURL } from './shared/constants/baseurl';
 import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
 import { GeneralinfoService } from './services/generalinfo.service';
 import { HttpClientModule } from '@angular/common/http';
-import { NotfoundComponent } from './notfound/notfound.component';
-import { RegistrationComponent } from './registration/registration.component';
+import { NotfoundComponent } from './components/notfound/notfound.component';
+import { RegistrationComponent } from './components/registration/registration.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatNativeDateModule} from '@angular/material/core';
 import {MatFormFieldModule} from '@angular/material/form-field'; 
 import { MatInputModule } from '@angular/material/input';
 import { AccountService } from './services/account.service';
-import { appURL } from './shared/app-url';
+import { appURL } from './shared/constants/app-url';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
+import { EmailConfirmationComponent } from './components/email-confirmation/email-confirmation.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'; 
 import { JwtModule } from "@auth0/angular-jwt";
-import { LoginComponent } from './login/login.component';
-import { CabinetComponent } from './cabinet/cabinet.component';
+import { LoginComponent } from './components/login/login.component';
+import { CabinetComponent } from './components/cabinet/cabinet.component';
 import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
 import { UserinfoService } from './services/userinfo.service';
 import { TokenGuardService } from './services/token-guard.service';
 import {MatBadgeModule} from '@angular/material/badge';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { emailConfirmationURL } from './shared/email-confirmation-url';
-import { AvatarShowComponent } from './cabinet/avatar-show/avatar-show.component';
-import { AvatarEditComponent } from './cabinet/avatar-edit/avatar-edit.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { emailConfirmationURL } from './shared/constants/email-confirmation-url';
+import { AvatarShowComponent } from './components/cabinet/avatar/avatar-show/avatar-show.component';
+import { AvatarEditComponent } from './components/cabinet/avatar/avatar-edit/avatar-edit.component';
 import {MatDialogModule} from '@angular/material/dialog';
-import { AvatarBaseComponent } from './cabinet/avatar-base/avatar-base.component';
-import { AvatarDeleteComponent } from './cabinet/avatar-delete/avatar-delete.component'; 
+import { AvatarBaseComponent } from './components/cabinet/avatar/avatar-base/avatar-base.component';
+import { AvatarDeleteComponent } from './components/cabinet/avatar/avatar-delete/avatar-delete.component'; 
 import { ImageCropperModule } from 'ngx-image-cropper';
-import { ErrorDialogComponent } from './error-dialog/error-dialog.component';
-import { authInterceptor } from './auth.interceptor';
-import { ProfileComponent } from './profile/profile.component';
+import { ErrorDialogComponent } from './components/error-dialog/error-dialog.component';
+import { authInterceptor } from './interceptors/auth.interceptor';
+import { ProfileComponent } from './components/profile/profile.component';
 import { UsersService } from './services/users.service';
-import { TasksComponent } from './tasks/tasks.component';
+import { TasksComponent } from './components/tasks/tasks.component';
 import { TasksService } from './services/tasks.service';
 import {MatCardModule} from '@angular/material/card';
-import { BannedComponent } from './banned/banned.component'; 
+import { BannedComponent } from './components/banned/banned.component'; 
+import { ProjectsService } from './services/projects.service';
+import { ProjectsComponent } from './components/projects/projects.component';
+import { ProjectAddComponent } from './components/projects/project-add/project-add.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { ProjectJoinComponent } from './components/projects/project-add/project-join/project-join.component';
+import { ProjectCreateComponent } from './components/projects/project-add/project-create/project-create.component';
+import { ProjectComponent } from './components/project/project.component'; 
+import { InvitesService } from './services/invites.service';
+import { InviteComponent } from './components/invite/invite.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -78,7 +87,13 @@ export function tokenGetter() {
     ErrorDialogComponent,
     ProfileComponent,
     TasksComponent,
-    BannedComponent
+    BannedComponent,
+    ProjectsComponent,
+    ProjectAddComponent,
+    ProjectJoinComponent,
+    ProjectCreateComponent,
+    ProjectComponent,
+    InviteComponent
   ],
   imports: [
     BrowserModule,
@@ -110,7 +125,8 @@ export function tokenGetter() {
     MatBadgeModule,
     MatDialogModule,
     ImageCropperModule,
-    MatCardModule
+    MatCardModule,
+    MatButtonToggleModule
   ],
   providers: [
     GeneralinfoService,
@@ -137,7 +153,9 @@ export function tokenGetter() {
     TokenGuardService,
     authInterceptor,
     UsersService,
-    TasksService
+    TasksService,
+    ProjectsService,
+    InvitesService
   ],
   bootstrap: [AppComponent]
 })

@@ -1,21 +1,21 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, Subject } from 'rxjs';
-import { AuthenticatedResponse } from '../shared/authenticatedresponse';
-import { CustomEncoder } from '../shared/customencoder';
-import { LoginModel } from '../shared/loginmodel';
-import { RegisterUser } from '../shared/registeruser';
-import { ResendEmailConfirmation } from '../shared/resendemailconfirmation';
+import { AuthenticatedResponseModel } from '../shared/token/authenticated-response.model';
+import { CustomEncoder } from '../shared/other/customencoder';
+import { LoginModel } from '../shared/user/login.model';
+import { RegisterUserModel } from '../shared/user/register-user.model';
+import { ResendEmailConfirmation } from '../shared/user/resendemailconfirmation';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
 import { SocialAuthService } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { ExternalAuthModel } from '../shared/externalauthmodel';
-import { UserCabinetModel } from '../shared/user-cabinet.model';
-import { UpdateUser } from '../shared/update-user';
-import { ForgotPasswordModel } from '../shared/forgot-password.model';
-import { ResetPasswordModel } from '../shared/reset-password.model';
+import { ExternalAuthModel } from '../shared/token/external-auth.model';
+import { UserCabinetModel } from '../shared/user/cabinet/user-cabinet.model';
+import { UpdateUserModel } from '../shared/user/update-user.model';
+import { ForgotPasswordModel } from '../shared/user/forgot-password.model';
+import { ResetPasswordModel } from '../shared/user/reset-password.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,24 +33,24 @@ export class AccountService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'Account/';
 
-  public register(user: RegisterUser): Observable<RegisterUser>
+  public register(user: RegisterUserModel): Observable<RegisterUserModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json'
       })
     };
-    return this._http.post<RegisterUser>(this.serviceBaseURL + 'register', user, httpOptions)
+    return this._http.post<RegisterUserModel>(this.serviceBaseURL + 'register', user, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public login(user: LoginModel): Observable<AuthenticatedResponse> {
+  public login(user: LoginModel): Observable<AuthenticatedResponseModel> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json'
       })
     };
-    return this._http.post<AuthenticatedResponse>(this.serviceBaseURL + 'login', user, httpOptions)
+    return this._http.post<AuthenticatedResponseModel>(this.serviceBaseURL + 'login', user, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
@@ -102,7 +102,7 @@ export class AccountService extends BaseService {
   }
 
   public externalLogin = (body: ExternalAuthModel) => {
-    return this._http.post<AuthenticatedResponse>(this.serviceBaseURL + "ExternalLogin", body);
+    return this._http.post<AuthenticatedResponseModel>(this.serviceBaseURL + "ExternalLogin", body);
   }
 
   public isUserAuthenticated = async (): Promise<boolean> => {
@@ -134,7 +134,7 @@ export class AccountService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public update(token: string, user: UpdateUser)
+  public update(token: string, user: UpdateUserModel)
   {
     const httpOptions = {
       headers: new HttpHeaders({

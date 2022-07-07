@@ -1,0 +1,14 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title>Add a project</h1>
+<mat-button-toggle-group name="fontStyle" aria-label="Font Style" value="{{mode}}" (change)="onModeChange($event)">
+    <mat-button-toggle value="{{modes.Join}}">Join by invite code</mat-button-toggle>
+    <mat-button-toggle value="{{modes.Create}}">Create</mat-button-toggle>
+</mat-button-toggle-group>
+<mat-dialog-content>
+    <div class="add-project-form">
+        <app-project-join *ngIf="mode==modes.Join" (closeOuter)="closeDialog()"></app-project-join>
+        <app-project-create *ngIf="mode==modes.Create" (closeOuter)="closeDialog()"></app-project-create>
+    </div>
+</mat-dialog-content>

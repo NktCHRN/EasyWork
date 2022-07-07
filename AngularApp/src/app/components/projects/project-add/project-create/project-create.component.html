@@ -1,0 +1,26 @@
+<form fxLayout="column" class="container w-100" novalidate method="POST" [formGroup]="form" (ngSubmit)="onSubmit()" #cform="ngForm" *ngIf="!loading" fxFlex>
+    <p>
+        <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+            <mat-error *ngIf="formErrors.name">{{formErrors.name}}</mat-error>
+        </mat-form-field>
+    </p>
+    <p>
+        <mat-form-field appearance="fill" class="w-100">
+            <mat-label>Autosize textarea</mat-label>
+            <textarea matInput
+                      formControlName="description"
+                      cdkTextareaAutosize
+                      #descriptionAutosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="3"></textarea>
+        </mat-form-field>
+    </p>
+    <p class="red mb-30" *ngIf="errorMessage">
+        {{errorMessage}}
+    </p>
+    <button class="w-100" type="submit" mat-raised-button color="primary" [disabled]="form.invalid">Submit</button>
+</form>
+<div *ngIf="loading">
+    <mat-spinner></mat-spinner>
+</div>

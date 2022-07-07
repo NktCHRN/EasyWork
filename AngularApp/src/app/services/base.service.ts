@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { baseURL } from '../shared/baseurl';
+import { baseURL } from '../shared/constants/baseurl';
 
 @Injectable({
   providedIn: 'root'

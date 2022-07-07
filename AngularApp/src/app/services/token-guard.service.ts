@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { TokenResponse } from '../shared/tokenresponse';
+import { TokenResponseModel } from '../shared/token/token-response.model';
 import { AccountService } from './account.service';
 import { TokenService } from './token.service';
 
@@ -18,13 +18,13 @@ export class TokenGuardService {
       this.accountService.sendAuthStateChangeNotification(false);
       return false;
     }
-    const credentials: TokenResponse = { accessToken: token, refreshToken: refreshToken };
+    const credentials: TokenResponseModel = { accessToken: token, refreshToken: refreshToken };
     let isRefreshSuccess: boolean = false;
 
     try {
-      const refreshRes = await new Promise<TokenResponse>((resolve, reject) => {
+      const refreshRes = await new Promise<TokenResponseModel>((resolve, reject) => {
         this.tokenService.refreshToken(credentials).subscribe({
-          next: (res: TokenResponse) => resolve(res),
+          next: (res: TokenResponseModel) => resolve(res),
           error: (_) => { reject(); isRefreshSuccess = false;}
         });
       })

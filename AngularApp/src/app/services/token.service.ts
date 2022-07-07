@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RevokeTokenModel } from '../shared/revoke-token.model';
-import { TokenResponse } from '../shared/tokenresponse';
+import { RevokeTokenModel } from '../shared/token/revoke-token.model';
+import { TokenResponseModel } from '../shared/token/token-response.model';
 import { BaseService } from './base.service';
 
 @Injectable({
@@ -16,13 +16,13 @@ export class TokenService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'Token/';
   
-  public refreshToken(credentials: TokenResponse): Observable<TokenResponse> {
+  public refreshToken(credentials: TokenResponseModel): Observable<TokenResponseModel> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json'
       })
     };
-    return this.http.post<TokenResponse>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
+    return this.http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
   }
 
   public revokeToken(token: string, tokenModel: RevokeTokenModel) : Observable<Object> {
@@ -45,7 +45,7 @@ export class TokenService extends BaseService {
     return localStorage.getItem("refreshToken");
   }
 
-  public getTokens(): TokenResponse
+  public getTokens(): TokenResponseModel
   {
     return {
       accessToken: this.getJwtToken()!,
@@ -53,7 +53,7 @@ export class TokenService extends BaseService {
     };
   }
 
-  public setTokens(tokens: TokenResponse): void
+  public setTokens(tokens: TokenResponseModel): void
   {
     localStorage.setItem("jwt", tokens.accessToken);
     localStorage.setItem("refreshToken", tokens.refreshToken); 

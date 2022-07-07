@@ -1,16 +1,19 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AnonymousGuard } from './anonymous.guard';
-import { AuthGuard } from './auth.guard';
-import { CabinetComponent } from './cabinet/cabinet.component';
-import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
-import { HomeComponent } from './home/home.component';
-import { LoginComponent } from './login/login.component';
-import { NotfoundComponent } from './notfound/notfound.component';
-import { ProfileComponent } from './profile/profile.component';
-import { RegistrationComponent } from './registration/registration.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { TasksComponent } from './tasks/tasks.component';
+import { AnonymousGuard } from './guards/anonymous.guard';
+import { AuthGuard } from './guards/auth.guard';
+import { CabinetComponent } from './components/cabinet/cabinet.component';
+import { EmailConfirmationComponent } from './components/email-confirmation/email-confirmation.component';
+import { HomeComponent } from './components/home/home.component';
+import { LoginComponent } from './components/login/login.component';
+import { NotfoundComponent } from './components/notfound/notfound.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { ProjectComponent } from './components/project/project.component';
+import { ProjectsComponent } from './components/projects/projects.component';
+import { RegistrationComponent } from './components/registration/registration.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { TasksComponent } from './components/tasks/tasks.component';
+import { InviteComponent } from './components/invite/invite.component';
 
 const routes: Routes = [
   { path: 'home',  component: HomeComponent, data: { title: 'Easy project management' } },
@@ -21,6 +24,9 @@ const routes: Routes = [
   { path: 'cabinet',  component: CabinetComponent, data: { title: 'Cabinet' }, canActivate: [AuthGuard] },
   { path: 'users/:id',  component: ProfileComponent, data: { title: 'Profile' } },
   { path: 'tasks',  component: TasksComponent, data: { title: 'My tasks' }, canActivate: [AuthGuard] },
+  { path: 'projects',  component: ProjectsComponent, data: { title: 'My projects' }, canActivate: [AuthGuard] },
+  { path: 'projects/:id',  component: ProjectComponent, data: { title: 'Project' }, canActivate: [AuthGuard] },
+  { path: 'invite/:code',  component: InviteComponent, data: { title: 'Invite' }, canActivate: [AuthGuard] },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', pathMatch: 'full', 
   component: NotfoundComponent, data: { title: 'Not found' } },

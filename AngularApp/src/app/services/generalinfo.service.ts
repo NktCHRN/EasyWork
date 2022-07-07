@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
-import { GeneralInfo } from '../shared/generalinfo';
+import { GeneralInfo } from '../shared/home/generalinfo';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
 import { HttpClient } from '@angular/common/http';
