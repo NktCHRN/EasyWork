@@ -90,10 +90,21 @@ namespace Business.Services
             return _mapper.Map<IEnumerable<ProjectModel>>(projects);
         }
 
+        private static bool IsValid(ProjectLimitsModel limits, out string? firstErrorMessage)
+            => IModelValidator<ProjectLimitsModel>.IsValidByDefault(limits, out firstErrorMessage);
+
         public bool IsValid(ProjectModel model, out string? firstErrorMessage)
         {
-            var result = IModelValidator<ProjectModel>.IsValidByDefault(model, out firstErrorMessage);
-            return result;
+            if (!IModelValidator<ProjectModel>.IsValidByDefault(model, out firstErrorMessage))
+                return false;
+            if (!IsValid(model.Limits, out firstErrorMessage))
+                return false;
+            if (model.InviteCode == null && model.IsInviteCodeActive == true)
+            {
+                firstErrorMessage = "Invite code cannot be turned on when it is not defined. Please, generate it first";
+                return false;
+            }
+            return true;
         }
 
         public async Task UpdateAsync(ProjectModel model)
@@ -121,6 +132,24 @@ namespace Business.Services
             if (!parsed)
                 return null;
             return await GetProjectByActiveInviteCodeAsync(result);
+        }
+
+        public async Task<ProjectLimitsModel?> GetLimitsByIdAsync(int id)
+        {
+            var model = _mapper.Map<ProjectModel?>(await _context.Projects
+                .SingleOrDefaultAsync(m => m.Id == id));
+            return model?.Limits;
+        }
+
+        public async Task UpdateLimitsByIdAsync(int id, ProjectLimitsModel limits)
+        {
+            bool isValid = IsValid(limits, out string? error);
+            if (!isValid)
+                throw new ArgumentException(error, nameof(limits));
+            var existingModel = await GetNotMappedByIdAsync(id);
+            existingModel = _mapper.Map(limits, existingModel);
+            _context.Projects.Update(existingModel);
+            await _context.SaveChangesAsync();
         }
     }
 }

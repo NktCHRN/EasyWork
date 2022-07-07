@@ -4,7 +4,8 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using WebAPI.DTOs.Message;
+using WebAPI.DTOs.User;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -51,7 +52,7 @@ namespace WebAPI.Controllers
                 return Forbid();
             var result = _mapper.Map<MessageDTO>(model);
             var userModel = await _userManager.FindByIdAsync(model.SenderId.ToString());
-            var sender = new UserMiniWithAvatarDTO()
+            var sender = new UserMiniWithAvatarDTO
             {
                 Id = model.SenderId
             };

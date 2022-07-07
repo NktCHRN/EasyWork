@@ -6,7 +6,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.DTOs;
+using WebAPI.DTOs.Project;
+using WebAPI.DTOs.Project.Gantt;
+using WebAPI.DTOs.Project.Limits;
+using WebAPI.DTOs.Project.Tasks;
+using WebAPI.DTOs.ProjectRelease;
+using WebAPI.DTOs.Tag;
+using WebAPI.DTOs.Task;
+using WebAPI.DTOs.User;
+using WebAPI.DTOs.UserOnProject;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -64,6 +72,46 @@ namespace WebAPI.Controllers
             if (!await _userOnProjectService.IsOnProjectAsync(project.Id, userId.Value))
                 return Forbid();
             return Ok(_mapper.Map<ProjectDTO>(project));
+        }
+
+        [HttpGet("{id}/limits")]
+        public async Task<IActionResult> GetProjectLimits(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var limits = await _projectService.GetLimitsByIdAsync(id);
+            if (limits is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            return Ok(_mapper.Map<ProjectLimitsDTO>(limits));
+        }
+
+        [HttpPut("{id}/limits")]
+        public async Task<IActionResult> UpdateProjectLimits(int id, [FromBody]ProjectLimitsDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            try
+            {
+                await _projectService.UpdateLimitsByIdAsync(id, _mapper.Map<ProjectLimitsModel>(dto));
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            catch(InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
 
         [HttpPost]
@@ -170,7 +218,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
-            return NoContent();
+            return Created($"{this.GetApiUrl()}Invites/{project.InviteCode}", project.InviteCode);
         }
 
         [HttpGet("{id}/releases")]
@@ -259,7 +307,7 @@ namespace WebAPI.Controllers
             foreach (var user in users)
             {
                 var userModel = await _userManager.FindByIdAsync(user.UserId.ToString());
-                var userDTO = new UserMiniWithAvatarDTO()
+                var userDTO = new UserMiniWithAvatarDTO
                 {
                     Id = user.UserId
                 };

@@ -44,28 +44,7 @@ namespace Business.Services
                 throw new ArgumentException(error, nameof(model));
             if (model.EndDate is not null)
                 throw new ArgumentException("EndDate should be null on creation", nameof(model));
-            var project = await _context.Projects.SingleAsync(p => p.Id == model.ProjectId);
-            switch (model.Status)
-            {
-                case TaskStatuses.ToDo:
-                    if (project.MaxToDo is not null &&
-                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.ToDo).Count()
-                        >= project.MaxToDo)
-                        throw new InvalidOperationException("You cannot exceed the \"ToDo\" tasks limit");
-                    break;
-                case TaskStatuses.InProgress:
-                    if (project.MaxInProgress is not null &&
-                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.InProgress).Count()
-                        >= project.MaxInProgress)
-                        throw new InvalidOperationException("You cannot exceed the \"InProgress\" tasks limit");
-                    break;
-                case TaskStatuses.Validate:
-                    if (project.MaxValidate is not null &&
-                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.Validate).Count()
-                        >= project.MaxValidate)
-                        throw new InvalidOperationException("You cannot exceed the \"Validate\" tasks limit");
-                    break;
-            }
+            await CheckStatus(model);
             var mapped = _mapper.Map<TaskEntity>(model);
             await _context.Tasks.AddAsync(mapped);
             await _context.SaveChangesAsync();
@@ -161,6 +140,32 @@ namespace Business.Services
             return true;
         }
 
+        private async Task CheckStatus(TaskModel model)
+        {
+            var project = await _context.Projects.SingleAsync(p => p.Id == model.ProjectId);
+            switch (model.Status)
+            {
+                case TaskStatuses.ToDo:
+                    if (project.MaxToDo is not null &&
+                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.ToDo).Count()
+                        >= project.MaxToDo)
+                        throw new InvalidOperationException("You cannot exceed the \"ToDo\" tasks limit");
+                    break;
+                case TaskStatuses.InProgress:
+                    if (project.MaxInProgress is not null &&
+                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.InProgress).Count()
+                        >= project.MaxInProgress)
+                        throw new InvalidOperationException("You cannot exceed the \"InProgress\" tasks limit");
+                    break;
+                case TaskStatuses.Validate:
+                    if (project.MaxValidate is not null &&
+                        _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.Validate).Count()
+                        >= project.MaxValidate)
+                        throw new InvalidOperationException("You cannot exceed the \"Validate\" tasks limit");
+                    break;
+            }
+        }
+
         public async Task UpdateAsync(TaskModel model)
         {
             bool isValid = IsValid(model, out string? error);
@@ -173,6 +178,8 @@ namespace Business.Services
                 model.EndDate = DateTimeOffset.UtcNow;
             else if (model.Status < TaskStatuses.Complete)
                 model.EndDate = null;
+            if (model.Status != existingModel.Status)
+                await CheckStatus(model);
             existingModel = _mapper.Map(model, existingModel);
             _context.Tasks.Update(existingModel);
             await _context.SaveChangesAsync();

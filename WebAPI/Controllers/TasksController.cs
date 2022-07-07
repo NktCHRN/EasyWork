@@ -5,7 +5,12 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using WebAPI.DTOs.File;
+using WebAPI.DTOs.Message;
+using WebAPI.DTOs.Tag;
+using WebAPI.DTOs.Task;
+using WebAPI.DTOs.Task.Executor;
+using WebAPI.DTOs.User;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers

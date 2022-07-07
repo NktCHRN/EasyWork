@@ -20,7 +20,27 @@ namespace Business
                 m => m.MapFrom(pm => pm.Releases.Select(r => r.Id)))
                 .ForMember(e => e.TasksIds,
                 m => m.MapFrom(pm => pm.Tasks.Select(t => t.Id)))
-                .ReverseMap();
+                .ForMember(e => e.Limits,
+                m => m.MapFrom(pm => new ProjectLimitsModel
+                {
+                    MaxToDo = pm.MaxToDo,
+                    MaxInProgress = pm.MaxInProgress,
+                    MaxValidate = pm.MaxValidate
+                }));
+            CreateMap<ProjectModel, Project>()
+                .ForMember(d => d.MaxToDo,
+                s => s.MapFrom(m => m.Limits.MaxToDo))
+                .ForMember(d => d.MaxInProgress,
+                s => s.MapFrom(m => m.Limits.MaxInProgress))
+                .ForMember(d => d.MaxValidate,
+                s => s.MapFrom(m => m.Limits.MaxValidate));
+            CreateMap<ProjectLimitsModel, Project>()
+                .ForMember(d => d.MaxToDo,
+                s => s.MapFrom(m => m.MaxToDo))
+                .ForMember(d => d.MaxInProgress,
+                s => s.MapFrom(m => m.MaxInProgress))
+                .ForMember(d => d.MaxValidate,
+                s => s.MapFrom(m => m.MaxValidate));
             CreateMap<Release, ReleaseModel>().ReverseMap();
             CreateMap<Data.Entities.Task, TaskModel>()
                 .ForMember(e => e.FilesIds,

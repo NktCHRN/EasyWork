@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Authorization;
 using WebAPI.Other;
 using Business.Models;
+using WebAPI.DTOs.User;
+using WebAPI.DTOs.Token;
 
 namespace WebAPI.Controllers
 {

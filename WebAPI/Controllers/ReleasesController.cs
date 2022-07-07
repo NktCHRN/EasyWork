@@ -3,7 +3,7 @@ using Business.Interfaces;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using WebAPI.DTOs.ProjectRelease;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers

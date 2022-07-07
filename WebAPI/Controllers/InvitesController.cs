@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.DTOs;
+using WebAPI.DTOs.UserOnProject;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers

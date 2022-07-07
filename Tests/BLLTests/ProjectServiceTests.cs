@@ -10,6 +10,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tests.Comparers;
 using Task = System.Threading.Tasks.Task;
 
 namespace Tests.BLLTests
@@ -30,9 +31,12 @@ namespace Tests.BLLTests
             new ProjectModel()      // index 0
             {       // no name
                 Description = "This is project one description...",
-                MaxInProgress = 3,
+                Limits = new ProjectLimitsModel
+                {
+                                    MaxInProgress = 3,
                 MaxToDo = 1,
                 MaxValidate = 5,
+                },
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
             },
@@ -40,9 +44,10 @@ namespace Tests.BLLTests
             {
                 Name = "Invalid project 2",
                 Description = "This is project two description...",
+                Limits = new ProjectLimitsModel{
                 MaxInProgress = -3,
                 MaxToDo = 1,
-                MaxValidate = 5,
+                MaxValidate = 5, },
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = false,
             },
@@ -50,17 +55,28 @@ namespace Tests.BLLTests
             {
                 Name = "Invalid project 3",
                 Description = "This is project three description...",
+                Limits = new ProjectLimitsModel{
                 MaxInProgress = 3,
                 MaxToDo = -1,
                 MaxValidate = 5,
+                }
             },
             new ProjectModel()      // index 3
             {
                 Name = "Invalid project 4",
                 Description = "This is project four description...",
+                Limits = new ProjectLimitsModel{
                 MaxInProgress = 3,
                 MaxToDo = 1,
                 MaxValidate = -5,
+                }
+            },
+            new ProjectModel()      // index 4
+            {
+                Name = "Invalid project 5",
+                Description = "This is project one description...",
+                Limits = new ProjectLimitsModel { MaxInProgress = 3, MaxToDo = 1, MaxValidate = 5 },
+                IsInviteCodeActive = true,
             }
         };
 
@@ -70,18 +86,14 @@ namespace Tests.BLLTests
             {
                 Name = "Valid project 1",
                 Description = "This is project one description...",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 5,
+                Limits = new ProjectLimitsModel { MaxInProgress = 3, MaxToDo = 1, MaxValidate = 5 },
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
             },
             new ProjectModel()      // index 1
             {
                 Name = "Valid project 2",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 5,
+                Limits = new ProjectLimitsModel { MaxInProgress = 3, MaxToDo = 1, MaxValidate = 5 },
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
             },
@@ -89,9 +101,7 @@ namespace Tests.BLLTests
             {
                 Name = "Valid project 3",
                 Description = "This is project three description...",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 0,
+                Limits = new ProjectLimitsModel { MaxInProgress = 3, MaxToDo = 1, MaxValidate = 0 },
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = false,
             },
@@ -99,9 +109,7 @@ namespace Tests.BLLTests
             {
                 Name = "Valid project 4",
                 Description = "This is project four description...",
-                MaxInProgress = 13,
-                MaxToDo = 100,
-                MaxValidate = 50,
+                Limits = new ProjectLimitsModel { MaxInProgress = 13, MaxToDo = 100, MaxValidate = 50 },
             }
         };
 
@@ -340,9 +348,12 @@ namespace Tests.BLLTests
                 Id = 1,
                 Name = "Project sample 1",
                 Description = "This is project one description...",
-                MaxInProgress = 3,
-                MaxToDo = 1,
-                MaxValidate = 5,
+                Limits = new ProjectLimitsModel
+                {
+                    MaxInProgress = 3,
+                    MaxToDo = 1,
+                    MaxValidate = 5,
+                },
                 InviteCode = Guid.NewGuid(),
                 IsInviteCodeActive = true,
                 StartDate = DateTime.MaxValue       // changed
@@ -354,9 +365,12 @@ namespace Tests.BLLTests
             Id = 1,
             Name = "Updated project sample 1",
             Description = "This is updated project one description...",
-            MaxInProgress = 7,
-            MaxToDo = 7,
-            MaxValidate = 7,
+            Limits = new ProjectLimitsModel
+            {
+                MaxInProgress = 7,
+                MaxToDo = 7,
+                MaxValidate = 7,
+            },
             InviteCode = Guid.NewGuid(),
             IsInviteCodeActive = true,
             // Do not forget to fix start date
@@ -433,6 +447,7 @@ namespace Tests.BLLTests
             var model = _validProjects.First();
             var expectedName = model.Name;
             var expectedCount = _context.Projects.Count() + 1;
+            var expectedLimits = model.Limits;
 
             // Act
             await _service.AddAsync(model);
@@ -440,9 +455,17 @@ namespace Tests.BLLTests
             // Assert
             var actualCount = _context.Projects.Count();
             var actual = _context.Projects.Last();
+            var actualLimits = new ProjectLimitsModel
+            {
+                MaxToDo = actual.MaxToDo,
+                MaxInProgress = actual.MaxInProgress,
+                MaxValidate = actual.MaxValidate
+            };
             Assert.AreEqual(expectedCount, actualCount, "Method does not add a model to DB");
             Assert.AreEqual(expectedName, actual.Name, "Method does not add model with needed information");
             Assert.AreNotEqual(model.Id, 0, "Method does not set id to the model");
+            Assert.IsTrue((new ProjectLimitsModelEqualityComparer()).Equals(expectedLimits, actualLimits),
+    "Method set wrong limits");
         }
 
         [Test]
@@ -465,6 +488,90 @@ namespace Tests.BLLTests
 
             // Act & Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateAsync(model));
+        }
+
+        private readonly IEnumerable<ProjectLimitsModel> _invalidLimits = new ProjectLimitsModel[]
+        {
+            new ProjectLimitsModel
+            {
+                                MaxInProgress = -10,
+                MaxToDo = 8,
+                MaxValidate = 7
+            },
+            new ProjectLimitsModel
+            {
+                                MaxInProgress = 10,
+                MaxToDo = -8,
+                MaxValidate = 7
+            },
+            new ProjectLimitsModel
+            {
+                MaxInProgress = 10,
+                MaxToDo = 8,
+                MaxValidate = -7
+            }
+        };
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        public void UpdateLimitsByIdAsyncTest_InvalidModel_ThrowsArgumentException(int index)
+        {
+            // Arrange
+            SeedData();
+            var model = _invalidLimits.ElementAt(index);
+            var projectId = 1;
+
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => await _service.UpdateLimitsByIdAsync(projectId, model));
+        }
+
+        private readonly ProjectLimitsModel _validLimit = new()
+        {
+            MaxInProgress = 10,
+            MaxToDo = 8,
+            MaxValidate = 7
+        };
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(-1)]
+        [TestCase(20)]
+        public void UpdateLimitsByIdAsyncTest_InvalidProjectId_ThrowsInvalidOperationException(int projectId)
+        {
+            // Arrange
+            SeedData();
+            var model = _validLimit;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateLimitsByIdAsync(projectId, model));
+        }
+
+        [Test]
+        public async Task UpdateLimitsByIdAsyncTest_ValidModelAndProjectId_UpdatesModel()
+        {
+            // Arrange
+            SeedData();
+            var model = _validLimit;
+            var expected = model;
+            var projectId = 1;
+            var project = (await _context.Projects.FindAsync(projectId))!;
+            var expectedName = project.Name;
+
+            // Act
+            await _service.UpdateLimitsByIdAsync(projectId, model);
+            var actualProject = await _context.Projects.FindAsync(projectId);
+            Assert.NotNull(actualProject);
+            Assert.AreEqual(expectedName, actualProject!.Name, "The name should be left the same");
+            var actual = new ProjectLimitsModel
+            {
+                MaxToDo = actualProject!.MaxToDo,
+                MaxInProgress = actualProject!.MaxInProgress,
+                MaxValidate = actualProject!.MaxValidate
+            };
+            Assert.IsTrue(new ProjectLimitsModelEqualityComparer().Equals(expected, actual), 
+                "The method has not updated the limits");
         }
 
         [Test]
@@ -500,6 +607,7 @@ namespace Tests.BLLTests
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
+        [TestCase(4)]
         public void IsValidTest_InvalidModel_ReturnsFalseWithError(int modelNumber)
         {
             // Arrange
@@ -529,6 +637,46 @@ namespace Tests.BLLTests
             // Assert
             Assert.IsTrue(actual, "Method does not return true if model is valid");
             Assert.IsTrue(string.IsNullOrEmpty(error), "Method does not write null to the error message field");
+        }
+        
+        [Test]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(6)]
+        public async Task GetLimitsByIdAsyncTest_InvalidId_ReturnsNull(int id)
+        {
+            // Arrange
+            SeedData();
+
+            // Act
+            var returned = await _service.GetLimitsByIdAsync(id);
+
+            // Assert
+            Assert.IsNull(returned, "Method does not return null if id is invalid");
+        }
+
+        [Test]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public async Task GetLimitsByIdAsyncTest_ValidId_ReturnesElement(int id)
+        {
+            // Arrange
+            SeedData();
+            var project = (await _context.Projects.FindAsync(id))!;
+            var expected = new ProjectLimitsModel
+            {
+                MaxToDo = project.MaxToDo,
+                MaxInProgress = project.MaxInProgress,
+                MaxValidate = project.MaxValidate
+            };
+
+            // Act
+            var actual = await _service.GetLimitsByIdAsync(id);
+
+            // Assert
+            Assert.IsTrue(new ProjectLimitsModelEqualityComparer().Equals(expected, actual),
+                "Method returns wrong element");
         }
 
         [Test]
@@ -564,6 +712,25 @@ namespace Tests.BLLTests
             Assert.AreNotEqual(null, actual!.ReleasesIds, "Method does not load releases ids");
             Assert.AreNotEqual(null, actual!.TasksIds, "Method does not load tasks ids");
             Assert.AreNotEqual(null, actual!.TeamMembersIds, "Method does not load team members ids");
+        }
+
+        [Test]
+        public async Task GetByIdAsyncTest_ValidId_ReturnesElementWithRightLimits()
+        {
+            // Arrange
+            const int id = 1;
+            SeedData();
+            var expectedLimits = new ProjectLimitsModel
+            { MaxToDo = 1, MaxInProgress = 3, MaxValidate = 5 };
+
+            // Act
+            var actual = await _service.GetByIdAsync(id);
+
+            // Assert
+            Assert.AreEqual(id, actual!.Id, "Method returns wrong element");
+            Assert.IsTrue((new ProjectLimitsModelEqualityComparer()).Equals(expectedLimits, actual!.Limits),
+                "Method returned wrong limits");
+
         }
 
         [Test]

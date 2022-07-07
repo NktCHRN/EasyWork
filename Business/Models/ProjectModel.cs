@@ -15,14 +15,8 @@ namespace Business.Models
         [Required]
         public DateTimeOffset StartDate { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
-        public int? MaxToDo { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
-        public int? MaxInProgress { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Only positive numbers and zero allowed")]
-        public int? MaxValidate { get; set; }
+        [Required]
+        public ProjectLimitsModel Limits { get; set; } = new ProjectLimitsModel();
 
         public Guid? InviteCode { get; set; }
 

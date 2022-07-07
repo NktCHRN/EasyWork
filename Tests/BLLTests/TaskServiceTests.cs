@@ -136,13 +136,17 @@ namespace Tests.BLLTests
                 new Project()       // id 2
                 {
                     Name = "Project 2"
+                },
+                new Project()       // id 3
+                {
+                    Name = "Project 3",
+                    MaxToDo = 3,
+                    MaxInProgress = 2,
+                    MaxValidate = 1
                 }
             };
-            foreach (var project in projects)
-            {
-                _context.Projects.Add(project);
-                _context.SaveChanges();
-            }
+            _context.Projects.AddRange(projects);
+            _context.SaveChanges();
 
             var tags = new Tag[]
             {
@@ -711,6 +715,141 @@ namespace Tests.BLLTests
             var actual = await _context.Tasks.Include(t => t.Tags).SingleAsync(r => r.Id == model.Id);
             Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
             Assert.IsNull(actual.EndDate);
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_NotChangedStatus_UpdatesEntity()
+        {
+            // Arrange
+            SeedData();
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Validate,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = task.Status,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxValidate - 1; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = model.Status, ProjectId = project.Id }); ;
+                await _context.SaveChangesAsync();
+            }
+
+            // Act
+            await _service.UpdateAsync(model);
+
+            // Assert
+            var actual = await _context.Tasks.Include(t => t.Tags).SingleAsync(r => r.Id == task.Id);
+            Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_ExceedsToDo_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var testedStatus = TaskStatuses.ToDo;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Complete,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = testedStatus,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxToDo; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = testedStatus, ProjectId = project.Id });
+                await _context.SaveChangesAsync();
+            }
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAsync(model));
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_ExceedsInProgress_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var testedStatus = TaskStatuses.InProgress;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Complete,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = testedStatus,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxInProgress; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = testedStatus, ProjectId = project.Id });
+                await _context.SaveChangesAsync();
+            }
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAsync(model));
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_ExceedsValidate_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            SeedData();
+            var testedStatus = TaskStatuses.Validate;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Complete,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = testedStatus,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxValidate; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = testedStatus, ProjectId = project.Id });
+                await _context.SaveChangesAsync();
+            }
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAsync(model));
         }
 
         [Test]

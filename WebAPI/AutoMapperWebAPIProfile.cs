@@ -2,7 +2,17 @@
 using Business.Models;
 using Business.Other;
 using Data.Entities;
-using WebAPI.DTOs;
+using WebAPI.DTOs.Ban;
+using WebAPI.DTOs.File;
+using WebAPI.DTOs.Message;
+using WebAPI.DTOs.Project;
+using WebAPI.DTOs.Project.Limits;
+using WebAPI.DTOs.ProjectRelease;
+using WebAPI.DTOs.Tag;
+using WebAPI.DTOs.Task;
+using WebAPI.DTOs.User;
+using WebAPI.DTOs.User.Profile;
+using WebAPI.DTOs.UserOnProject;
 
 namespace WebAPI
 {
@@ -70,6 +80,8 @@ namespace WebAPI
             CreateMap<FileModelExtended, FileModelDTO>();
             CreateMap<MessageModel, MessageDTO>()
                 .ForMember(m => m.Sender, u => u.Ignore());
+            CreateMap<ProjectLimitsModel, ProjectLimitsDTO>()
+                .ReverseMap();
         }
     }
 }
