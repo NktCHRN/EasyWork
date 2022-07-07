@@ -34,13 +34,7 @@ namespace Business
                 s => s.MapFrom(m => m.Limits.MaxInProgress))
                 .ForMember(d => d.MaxValidate,
                 s => s.MapFrom(m => m.Limits.MaxValidate));
-            CreateMap<ProjectLimitsModel, Project>()
-                .ForMember(d => d.MaxToDo,
-                s => s.MapFrom(m => m.MaxToDo))
-                .ForMember(d => d.MaxInProgress,
-                s => s.MapFrom(m => m.MaxInProgress))
-                .ForMember(d => d.MaxValidate,
-                s => s.MapFrom(m => m.MaxValidate));
+            CreateMap<ProjectLimitsModel, Project>();
             CreateMap<Release, ReleaseModel>().ReverseMap();
             CreateMap<Data.Entities.Task, TaskModel>()
                 .ForMember(e => e.FilesIds,
