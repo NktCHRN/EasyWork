@@ -9,7 +9,7 @@ import { TokenService } from 'src/app/services/token.service';
   styleUrls: ['./invite.component.scss']
 })
 export class InviteComponent implements OnInit {
-  loading: boolean = false;
+  loading: boolean = true;
   errorMessage: string | null | undefined;
 
   constructor(private _route: ActivatedRoute, private _invitesService: InvitesService, private _router: Router, private _tokenService: TokenService) { }
