@@ -34,6 +34,7 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
+            model.AdditionDate = DateTimeOffset.UtcNow;
             await _context.UsersOnProjects.AddAsync(_mapper.Map<UserOnProject>(model));
             await _context.SaveChangesAsync();
         }

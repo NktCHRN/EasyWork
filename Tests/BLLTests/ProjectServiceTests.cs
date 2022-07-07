@@ -595,7 +595,34 @@ namespace Tests.BLLTests
             var actualProjectNumbers = actual.Select(p => p.Id);
             Assert.AreEqual(expectedProjectNumbers.Count(), actualProjectNumbers.Count(), "The quantities of elements are not equal. " +
                 "Wrong elements returned");
-            Assert.IsTrue(expectedProjectNumbers.SequenceEqual(actualProjectNumbers), "Elements are wrong or not sorted correctly");
+            Assert.IsTrue(!expectedProjectNumbers.Except(actualProjectNumbers).Any() 
+                && !actualProjectNumbers.Except(expectedProjectNumbers).Any(), "Elements are wrong");
+        }
+
+        [Test]
+        public void GetUserProjectsTest_ReturnsSortedProjects()
+        {
+            // Arrange
+            SeedData();
+            var userId = 1;
+            IEnumerable<int> expectedProjectNumbers = new[] { 2, 1, 3 };
+            var lastTime = DateTimeOffset.MaxValue;
+            foreach (var projectId in expectedProjectNumbers)
+            {
+                var uop = _context.UsersOnProjects.Single(u => u.UserId == userId && u.ProjectId == projectId);
+                uop.AdditionDate = lastTime;
+                _context.SaveChanges();
+                lastTime -= new TimeSpan(1, 1, 1);
+            }
+
+            // Act
+            var actual = _service.GetUserProjects(userId);
+
+            // Assert
+            var actualProjectNumbers = actual.Select(p => p.Id);
+            Assert.AreEqual(expectedProjectNumbers.Count(), actualProjectNumbers.Count(), "The quantities of elements are not equal. " +
+                "Wrong elements returned");
+            Assert.IsTrue(expectedProjectNumbers.SequenceEqual(actualProjectNumbers), "Elements are not sorted correctly");
         }
 
         [Test]

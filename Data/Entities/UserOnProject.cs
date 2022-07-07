@@ -13,6 +13,8 @@ namespace Data.Entities
         [Required]
         public UserOnProjectRoles Role { get; set; }
 
+        public DateTimeOffset AdditionDate { get; set; }
+
         [Required]
         public int ProjectId { get; set; }      // composite key
         public Project? Project { get; set; }
