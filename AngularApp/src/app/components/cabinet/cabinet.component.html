@@ -2,15 +2,15 @@
     <div fxLayout="column" fxFlex="100" fxLayoutGap="35px">
         <div fxLayout="row" fxFlex="100">
             <div fxFlex="30" fxFlex.gt-sm="20" class="full">
-                <a *ngIf="userInfoService.getLastUser() as user" fxLayoutAlign="center center" (click)="openAvatarDialog()" style="cursor: pointer">
+                <a *ngIf="miniUser" fxLayoutAlign="center center" (click)="openAvatarDialog()" style="cursor: pointer">
                     <span class="avatar-wrapper avatar-img-wrapper w-75" matBadge="edit" matBadgePosition="below" matBadgeColor="accent" matBadgeSize="large">
-                    <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="img-cover-center avatar full">
+                    <img alt="avatar" src="{{miniUser.avatarURL ? miniUser.avatarURL : '../../assets/default-avatar.png'}}" class="img-cover-center avatar full">
                     </span>
                 </a> 
             </div>
             <div fxFlex="70" fxFlex.gt-sm="80" fxLayoutAlign="center center">
-                <h1 *ngIf="userInfoService.getLastUser() as user" fxLayoutAlign="center center" class="truncate-content">
-                    <span class="truncate" [ngClass.gt-sm]="'text-xl'">{{user.fullName}}</span>
+                <h1 *ngIf="miniUser" fxLayoutAlign="center center" class="truncate-content">
+                    <span class="truncate" [ngClass.gt-sm]="'text-xl'">{{miniUser.fullName}}</span>
                 </h1> 
             </div>
         </div>

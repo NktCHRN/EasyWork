@@ -25,7 +25,7 @@
           </div>
           <div class="container" fxLayoutGap="10px" *ngIf="isUserAuthenticated" fxLayoutAlign="center center">
             <button mat-button [matMenuTriggerFor]="menu" class="menu-btn">
-              <span *ngIf="userInfoService.getLastUser() as user" fxLayoutAlign="center center">
+              <span *ngIf="user" fxLayoutAlign="center center">
                 <span class="avatar-wrapper">
                   <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="img-cover-center avatar">
                 </span> {{user.fullName}}

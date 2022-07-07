@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError } from 'rxjs';
+import { Observable, catchError, BehaviorSubject } from 'rxjs';
 import { UserReducedModel } from '../shared/user/user-reduced.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
@@ -17,18 +17,14 @@ export class UserinfoService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'UserInfo/';
 
-  private static lastUser : UserReducedModel | null | undefined;
-
-  public getLastUser() : UserReducedModel | null | undefined
-  {
-    return UserinfoService.lastUser;
-  }
+  private _lastUser: BehaviorSubject<UserReducedModel | null | undefined> = new BehaviorSubject<UserReducedModel | null | undefined>(undefined);
+  public lastUser: Observable<UserReducedModel | null | undefined> = this._lastUser.asObservable();
 
   public setLastUser(user : UserReducedModel | null | undefined)
   {
-    UserinfoService.lastUser = user;
-    if (UserinfoService.lastUser?.avatarURL)
-      UserinfoService.lastUser.avatarURL += "?" + Date.now().toString();
+    if (user?.avatarURL)
+      user.avatarURL += "?" + Date.now().toString();
+    this._lastUser.next(user);
   }
 
   public updateLastUser() : void {

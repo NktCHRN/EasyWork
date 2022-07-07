@@ -8,6 +8,7 @@ import { createNotWhitespaceValidator } from '../../customvalidators';
 import { UpdateUserModel } from '../../shared/user/update-user.model';
 import { UserCabinetModel } from '../../shared/user/cabinet/user-cabinet.model';
 import { AvatarBaseComponent } from './avatar/avatar-base/avatar-base.component';
+import { UserReducedModel } from 'src/app/shared/user/user-reduced.model';
 
 @Component({
   selector: 'app-cabinet',
@@ -16,6 +17,7 @@ import { AvatarBaseComponent } from './avatar/avatar-base/avatar-base.component'
 })
 export class CabinetComponent implements OnInit {
 
+  miniUser: UserReducedModel = new UserReducedModel();
   user: UserCabinetModel = new UserCabinetModel();
   updateUser: UpdateUserModel = new UpdateUserModel();
   form: FormGroup = null!;
@@ -43,7 +45,7 @@ export class CabinetComponent implements OnInit {
     }
   };
 
-  constructor(private _fb: FormBuilder, public userInfoService: UserinfoService, private _accountService: AccountService,
+  constructor(private _fb: FormBuilder, private _userInfoService: UserinfoService, private _accountService: AccountService,
     private _snackBar: MatSnackBar, private _dialog: MatDialog) { 
     this.createForm();
   }
@@ -61,6 +63,7 @@ export class CabinetComponent implements OnInit {
       },
       error: error => this._snackBar.open(error, "Close", {duration: 5000})
     });
+    this._userInfoService.lastUser.subscribe(user => this.miniUser = user!);
   }
 
   public changeNumber(event: any)
@@ -117,7 +120,7 @@ export class CabinetComponent implements OnInit {
         });
         this._accountService.get(localStorage.getItem('jwt')!)
         .subscribe(result => this.user = result);
-        this.userInfoService.updateLastUser();
+        this._userInfoService.updateLastUser();
       },
       error: error => { 
         this._snackBar.open(`The user was not updated: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {

@@ -17,7 +17,7 @@ export class AvatarShowComponent implements OnInit {
   constructor(private _userInfoService: UserinfoService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
-    this.linkToAvatar = this._userInfoService.getLastUser()?.avatarURL;
+    this._userInfoService.lastUser.subscribe(user => this.linkToAvatar = user?.avatarURL);
   }
 
   openDeleteDialog() : void {

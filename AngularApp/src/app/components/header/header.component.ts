@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SocialAuthService } from 'angularx-social-login';
+import { UserReducedModel } from 'src/app/shared/user/user-reduced.model';
 import { AccountService } from '../../services/account.service';
 import { TokenService } from '../../services/token.service';
 import { UserinfoService } from '../../services/userinfo.service';
@@ -16,39 +17,41 @@ export class HeaderComponent implements OnInit {
   public showRows: boolean = false;
   public isExternalAuth: boolean = false;
   public isUserAuthenticated: boolean | null | undefined;
+  public user: UserReducedModel | null | undefined;
   
   logOut = () => {
     let model = new RevokeTokenModel();
     model.token = localStorage.getItem("refreshToken")!;
     this._tokenService.revokeToken(localStorage.getItem('jwt')!, model).subscribe();
-    this.accountService.logout();
-    this.accountService.sendAuthStateChangeNotification(false);
+    this._accountService.logout();
+    this._accountService.sendAuthStateChangeNotification(false);
     if(this.isExternalAuth)
-      this.accountService.signOutExternal();
+      this._accountService.signOutExternal();
     this._router.navigate(['home']);
   }
 
-  constructor(public accountService: AccountService,
+  constructor(private _accountService: AccountService,
     private _socialAuthService: SocialAuthService,
     private _router: Router,
-    public userInfoService: UserinfoService,
+    private _userInfoService: UserinfoService,
     private _tokenService: TokenService) { }
 
   ngOnInit(): void {  
-    this.accountService.authChanged
+    this._accountService.authChanged
     .subscribe(res => {
       this.onAuthChange(res);
     })
     this._socialAuthService.authState.subscribe((user: any) => {
       this.isExternalAuth = user != null;
     })
-    this.accountService.isUserAuthenticated().then(res => this.onAuthChange(res));
+    this._accountService.isUserAuthenticated().then(res => this.onAuthChange(res));
+    this._userInfoService.lastUser.subscribe(user => this.user = user);
   }
 
    private onAuthChange(res: boolean): void {
     this.isUserAuthenticated = res;
       if (res)
-        this.userInfoService.updateLastUser();
+        this._userInfoService.updateLastUser();
    }
 
   showBtns() : void {
