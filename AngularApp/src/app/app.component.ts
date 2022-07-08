@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -10,16 +10,17 @@ import { filter, map } from 'rxjs';
 })
 export class AppComponent {
   constructor(
-    private router: Router,
-    private titleService: Title
+    private _router: Router,
+    private _titleService: Title,
+    @Inject('projectName') private _projectName: string
   ) {}
 
   ngOnInit() {
-    this.router.events
+    this._router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
         map(() => {
-          let route: ActivatedRoute = this.router.routerState.root;
+          let route: ActivatedRoute = this._router.routerState.root;
           let routeTitle = '';
           while (route!.firstChild) {
             route = route.firstChild;
@@ -32,7 +33,7 @@ export class AppComponent {
       )
       .subscribe((title: string) => {
         if (title) {
-          this.titleService.setTitle(`EasyWork - ${title}`);
+          this._titleService.setTitle(`${this._projectName} - ${title}`);
         }
       });
   }

@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { JwtHelperService } from '@auth0/angular-jwt';
 import { Observable } from 'rxjs';
 import { RevokeTokenModel } from '../shared/token/revoke-token.model';
 import { TokenResponseModel } from '../shared/token/token-response.model';
@@ -10,7 +11,7 @@ import { BaseService } from './base.service';
 })
 export class TokenService extends BaseService {
 
-  constructor(private http: HttpClient) {
+  constructor(private _http: HttpClient, private _jwtService: JwtHelperService) {
     super();
   }
 
@@ -22,7 +23,7 @@ export class TokenService extends BaseService {
         'Content-Type':  'application/json'
       })
     };
-    return this.http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
+    return this._http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
   }
 
   public revokeToken(token: string, tokenModel: RevokeTokenModel) : Observable<Object> {
@@ -32,12 +33,12 @@ export class TokenService extends BaseService {
         'Authorization': 'Bearer ' + token
       })
     };
-    return this.http.post(this.serviceBaseURL + 'revoke', tokenModel, httpOptions)
+    return this._http.post(this.serviceBaseURL + 'revoke', tokenModel, httpOptions)
   }
 
   public getJwtToken(): string | null | undefined
   {
-    return localStorage.getItem('jwt');
+    return this._jwtService.tokenGetter();
   }
 
   public getRefreshToken(): string | null | undefined

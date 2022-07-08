@@ -42,6 +42,14 @@ body { margin: 0; font-family: 'Open sans', sans-serif !important; line-height: 
     background-color: white;
 }
 
+.white {
+    color: white
+}
+
+.bg-orange {
+    background-color: orange;
+}
+
 $background-lightgray: #eeeeee;
 
 .btn-rounded {
@@ -56,7 +64,7 @@ $background-lightgray: #eeeeee;
 
 main {
     padding-top: 75px;
-    min-height: calc(100vh - 75px - 161.85px);
+    min-height: $min-height-main;
 }
 
 .navbar-with-delimiter {
@@ -305,4 +313,8 @@ $medium-icon-size: 30px;
 
 .formatted {
     white-space: pre-wrap;
+}
+
+.h-100 {
+    height: 100%;
 }

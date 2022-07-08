@@ -1,0 +1,78 @@
+@import '../../../variables';
+
+.mat-drawer-side {
+    height: calc(100% - $heaher-height - $footer-height) !important;
+    position: fixed !important;
+    margin-top: $heaher-height !important;
+    border: none !important;
+}
+
+@media screen and (max-width: 600px) {
+    .mat-drawer-side {
+        height: calc(100% - $heaher-phone-height - $footer-height) !important;
+        margin-top: $heaher-phone-height !important;
+    }
+}
+
+.project-sidenav {
+    padding: 0;
+    overflow-x: hidden !important;
+}
+
+::ng-deep {
+    .mat-drawer-inner-container {
+        overflow-x: hidden !important;
+    }
+}
+
+.project-sidenav-button {
+    position: fixed !important;
+    top: 80px;
+    background-color: rgba($color: white, $alpha: 0.5);
+}
+
+.mh-10 {
+    min-height: 10%;
+}
+
+.mh-80 {
+    min-height: 80%;
+}
+
+$icon-wrapper-size: 50px;
+
+.sidenav-icon-wrapper {
+    border: 3px solid white;
+    width: $icon-wrapper-size;
+    height: $icon-wrapper-size;
+    border-radius: 5px;
+}
+
+$icon-size: calc($icon-wrapper-size - 5px);
+
+.sidenav-icon {
+    width: $icon-size;
+    height: $icon-size;
+    font-size: $icon-size;
+}
+
+.sidenav-main>a{
+    color: white !important;
+    text-decoration: none !important;
+}
+
+.sidenav-main {
+    padding: 8px 15px;
+}
+
+.close-btn {
+    padding: 5px 0;
+}
+
+p {
+    margin: 0 !important
+}
+
+.active>.sidenav-icon-wrapper {
+    background-color: rgba($color: #D84315, $alpha: 0.5);
+}

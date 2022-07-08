@@ -1,2 +1,7 @@
 $fa-font-path: '~/node_modules/font-awesome/fonts';
 $background-lightgray: #eeeeee;
+$heaher-height: 74px;
+$heaher-phone-height: 66px;
+$footer-height: 161.85px;
+$min-height-main: calc(100vh - $heaher-height - $footer-height);
+$min-height-main-phone: calc(100vh - $heaher-phone-height - $footer-height);

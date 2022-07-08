@@ -63,6 +63,12 @@ import { ProjectCreateComponent } from './components/projects/project-add/projec
 import { ProjectComponent } from './components/project/project.component'; 
 import { InvitesService } from './services/invites.service';
 import { InviteComponent } from './components/invite/invite.component';
+import { ProjectInfoComponent } from './components/project/project-info/project-info.component';
+import { ProjectTasksComponent } from './components/project/project-tasks/project-tasks.component';
+import { ProjectArchiveComponent } from './components/project/project-archive/project-archive.component';
+import { ProjectGanttComponent } from './components/project/project-gantt/project-gantt.component';
+import { projectName } from './shared/constants/project-name';
+import { ProjectParticipantsComponent } from './components/project/project-participants/project-participants.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -93,7 +99,12 @@ export function tokenGetter() {
     ProjectJoinComponent,
     ProjectCreateComponent,
     ProjectComponent,
-    InviteComponent
+    InviteComponent,
+    ProjectInfoComponent,
+    ProjectTasksComponent,
+    ProjectArchiveComponent,
+    ProjectGanttComponent,
+    ProjectParticipantsComponent
   ],
   imports: [
     BrowserModule,
@@ -134,6 +145,7 @@ export function tokenGetter() {
     {provide: 'baseURL', useValue: baseURL},
     {provide: 'appURL', useValue: appURL},
     {provide: 'emailConfirmationURL', useValue: emailConfirmationURL},
+    {provide: 'projectName', useValue: projectName},
     AccountService,
     {
       provide: 'SocialAuthServiceConfig',
