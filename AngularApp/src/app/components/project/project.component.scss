@@ -17,6 +17,7 @@
 .project-sidenav {
     padding: 0;
     overflow-x: hidden !important;
+    box-shadow: 1rem 0 1rem rgba(0,0,0,0.05),inset -1px 0 0 rgba(0,0,0,0.15);
 }
 
 ::ng-deep {
