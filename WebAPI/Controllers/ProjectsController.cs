@@ -352,7 +352,22 @@ namespace WebAPI.Controllers
             var uop = await _userOnProjectService.GetByIdAsync(id, userId);
             if (uop is null)
                 return NotFound();
-            return Ok(_mapper.Map<UserOnProjectDTO>(uop));
+            return Ok(_mapper.Map<UserOnProjectReducedDTO>(uop));
+        }
+
+        [HttpGet("{id}/me")]
+        public async Task<IActionResult> GetMeAsProjectUser(int id)
+        {
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            var uop = await _userOnProjectService.GetByIdAsync(id, myId.Value);
+            if (uop is null)
+                return NotFound();
+            return Ok(_mapper.Map<UserOnProjectReducedDTO>(uop));
         }
 
         [HttpDelete("{id}/users/{userId}")]

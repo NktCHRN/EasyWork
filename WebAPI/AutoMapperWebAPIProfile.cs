@@ -52,12 +52,14 @@ namespace WebAPI
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<User, UserProfileReducedDTO>()
                 .ForMember(u => u.LastSeen,
-                    m => m.MapFrom<DateTimeOffset?>(usr => (usr.LastSeen == DateTimeOffset.MinValue) ? null : usr.LastSeen))
+                    m => m.MapFrom(usr => (usr.LastSeen == DateTimeOffset.MinValue) ? null : usr.LastSeen))
                 .ForMember(u => u.FullName,
                     m => m.MapFrom(usr => $"{usr.FirstName} {usr.LastName}".TrimEnd()))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<UserOnProjectModel, UserOnProjectDTO>()
+                .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
+            CreateMap<UserOnProjectModel, UserOnProjectReducedDTO>()
                 .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
             CreateMap<ProjectModel, ProjectReducedDTO>();
             CreateMap<ProjectModel, ProjectDTO>();
