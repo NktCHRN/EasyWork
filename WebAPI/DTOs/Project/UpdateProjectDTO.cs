@@ -9,7 +9,5 @@ namespace WebAPI.DTOs.Project
         public string Name { get; init; } = string.Empty;
 
         public string? Description { get; init; }
-
-        public bool IsInviteCodeActive { get; init; }
     }
 }

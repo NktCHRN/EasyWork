@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs.Project;
 using WebAPI.DTOs.Project.Gantt;
+using WebAPI.DTOs.Project.InviteCode;
 using WebAPI.DTOs.Project.Limits;
 using WebAPI.DTOs.Project.Tasks;
 using WebAPI.DTOs.ProjectRelease;
@@ -155,13 +156,11 @@ namespace WebAPI.Controllers
             if (userId is null)
                 return Unauthorized();
             var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
+            if (role is null || role < UserOnProjectRoles.Owner)
                 return Forbid();
             var project = await _projectService.GetByIdAsync(id);
             if (project is null)
                 return NotFound();
-            if (role == UserOnProjectRoles.Manager && (project.Name != dto.Name || project.Description != dto.Description))
-                return Forbid();
             project = _mapper.Map(dto, project);
             try
             {
@@ -193,6 +192,32 @@ namespace WebAPI.Controllers
             catch (InvalidOperationException)
             {
                 return NotFound();
+            }
+            return NoContent();
+        }
+
+        [HttpPut("{id}/inviteStatus")]
+        public async Task<IActionResult> UpdateInviteCodeStatus(int id, [FromBody] UpdateInviteCodeStatusDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            project = _mapper.Map(dto, project);
+            try
+            {
+                await _projectService.UpdateAsync(project);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
             }
             return NoContent();
         }

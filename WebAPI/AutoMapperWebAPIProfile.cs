@@ -6,6 +6,7 @@ using WebAPI.DTOs.Ban;
 using WebAPI.DTOs.File;
 using WebAPI.DTOs.Message;
 using WebAPI.DTOs.Project;
+using WebAPI.DTOs.Project.InviteCode;
 using WebAPI.DTOs.Project.Limits;
 using WebAPI.DTOs.ProjectRelease;
 using WebAPI.DTOs.Tag;
@@ -64,6 +65,7 @@ namespace WebAPI
             CreateMap<ProjectModel, ProjectReducedDTO>();
             CreateMap<ProjectModel, ProjectDTO>();
             CreateMap<UpdateProjectDTO, ProjectModel>();
+            CreateMap<UpdateInviteCodeStatusDTO, ProjectModel>();
             CreateMap<ReleaseModel, ReleaseDTO>();
             CreateMap<AddReleaseDTO, ReleaseModel>();
             CreateMap<TagModel, TagDTO>();
