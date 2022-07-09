@@ -1,5 +1,11 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
+import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
+import { ProjectsService } from 'src/app/services/projects.service';
+import { TokenService } from 'src/app/services/token.service';
+import { UserOnProjectRole } from 'src/app/shared/project/role/user-on-project-role';
+import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
+import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-project',
@@ -7,9 +13,38 @@ import { MatDrawer } from '@angular/material/sidenav';
   styleUrls: ['./project.component.scss']
 })
 export class ProjectComponent implements OnInit {
+  projectId: number = undefined!;
+  projectName: string = undefined!;
+  me: UserOnProjectReducedModel = undefined!;
+  userOnProjectRoles = UserOnProjectRole;
   
-  constructor() { }
+  constructor(private _route: ActivatedRoute, private _projectService: ProjectsService, private _tokenService: TokenService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
+    this._route.paramMap.subscribe(params => {
+      this.projectId = parseInt(params.get('id')!);
+      this._projectService.getReducedById(this._tokenService.getJwtToken()!, this.projectId)
+      .subscribe({
+        next: result => this.projectName = result.name,
+        error: () => this.projectName = `Project ${this.projectId}`
+      });
+      this._projectService.getMeAsProjectUser(this._tokenService.getJwtToken()!, this.projectId)
+      .subscribe({
+        next: result => this.me = result,
+        error: error => {
+          this._dialog.open(ErrorDialogComponent, {
+            panelClass: "dialog-responsive",
+            data: JSON.stringify(error) + '\nPlease, reload the page'
+          });
+        }
+      });
+    });
   }
+
+  onOutletLoaded(component: any): void {
+    component.projectId = this.projectId;
+    component.projectName = this.projectName;
+    component.me = this.me;
+    component.userOnProjectRoles = this.userOnProjectRoles
+} 
 }

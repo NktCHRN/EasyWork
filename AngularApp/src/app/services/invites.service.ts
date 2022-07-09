@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
-import { UserOnProjectModel } from '../shared/project/user-on-project.model';
+import { UserOnProjectModel } from '../shared/project/user-on-project/user-on-project.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
 
