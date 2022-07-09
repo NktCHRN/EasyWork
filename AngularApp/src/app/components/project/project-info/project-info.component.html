@@ -1,7 +1,7 @@
 <div class="project-profile" fxLayoutAlign="center center">
     <div *ngIf="project" fxLayout="column" fxLayoutGap="10px" class="w-100">
         <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between center">
-                <h1>{{project.name}}</h1>  
+                <h1 class="w-80">{{project.name}}</h1>  
                 <div *ngIf="me.role == userOnProjectRoles.Owner" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="end center">    
                     <button mat-flat-button color="accent" (click)="onModeChange()">
                         <mat-icon *ngIf="pageMode==pageModes.Show">edit</mat-icon>
