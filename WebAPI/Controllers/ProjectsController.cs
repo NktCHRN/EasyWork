@@ -75,6 +75,20 @@ namespace WebAPI.Controllers
             return Ok(_mapper.Map<ProjectDTO>(project));
         }
 
+        [HttpGet("{id}/reduced")]
+        public async Task<IActionResult> GetReducedInfoById(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(project.Id, userId.Value))
+                return Forbid();
+            return Ok(_mapper.Map<ProjectReducedDTO>(project));
+        }
+
         [HttpGet("{id}/limits")]
         public async Task<IActionResult> GetProjectLimits(int id)
         {
