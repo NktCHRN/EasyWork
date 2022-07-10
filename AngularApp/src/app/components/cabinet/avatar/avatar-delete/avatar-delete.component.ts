@@ -14,7 +14,7 @@ export class AvatarDeleteComponent implements OnInit {
   errorMessage: string | null | undefined;
   @Output() closeOuter = new EventEmitter();
 
-  constructor(public _dialogRef: MatDialogRef<AvatarDeleteComponent>,
+  constructor(private _dialogRef: MatDialogRef<AvatarDeleteComponent>,
     private _accountService: AccountService,
     private _userInfoService: UserinfoService) { }
 

@@ -3,6 +3,4 @@ export interface ProjectModel {
     name: string;
     description: string | null | undefined;
     startDate: string;
-    inviteCode: string | null | undefined;
-    isInviteCodeActive: boolean;
 }

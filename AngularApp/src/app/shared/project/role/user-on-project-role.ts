@@ -1,5 +1,5 @@
 export enum UserOnProjectRole {
-    User = "User",
-    Manager = "Manager",
-    Owner = "Owner"
+    User = 0,
+    Manager = 1,
+    Owner = 2
 }

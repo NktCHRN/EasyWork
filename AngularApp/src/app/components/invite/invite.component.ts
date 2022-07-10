@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InvitesService } from 'src/app/services/invites.service';
+import { InviteService } from 'src/app/services/invite.service';
 import { TokenService } from 'src/app/services/token.service';
 
 @Component({
@@ -12,7 +12,7 @@ export class InviteComponent implements OnInit {
   loading: boolean = true;
   errorMessage: string | null | undefined;
 
-  constructor(private _route: ActivatedRoute, private _invitesService: InvitesService, private _router: Router, private _tokenService: TokenService) { }
+  constructor(private _route: ActivatedRoute, private _invitesService: InviteService, private _router: Router, private _tokenService: TokenService) { }
 
   ngOnInit(): void {
     this._route.paramMap.subscribe(params => {

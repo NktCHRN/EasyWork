@@ -118,8 +118,6 @@ export class CabinetComponent implements OnInit {
           duration: 1000,
           panelClass: "snackbar-orange"
         });
-        this._accountService.get(localStorage.getItem('jwt')!)
-        .subscribe(result => this.user = result);
         this._userInfoService.updateLastUser();
       },
       error: error => { 

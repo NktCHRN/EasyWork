@@ -49,19 +49,19 @@ import { ImageCropperModule } from 'ngx-image-cropper';
 import { ErrorDialogComponent } from './components/error-dialog/error-dialog.component';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { ProfileComponent } from './components/profile/profile.component';
-import { UsersService } from './services/users.service';
+import { UserService } from './services/user.service';
 import { TasksComponent } from './components/tasks/tasks.component';
-import { TasksService } from './services/tasks.service';
+import { TaskService } from './services/task.service';
 import {MatCardModule} from '@angular/material/card';
 import { BannedComponent } from './components/banned/banned.component'; 
-import { ProjectsService } from './services/projects.service';
+import { ProjectService } from './services/project.service';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { ProjectAddComponent } from './components/projects/project-add/project-add.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import { ProjectJoinComponent } from './components/projects/project-add/project-join/project-join.component';
 import { ProjectCreateComponent } from './components/projects/project-add/project-create/project-create.component';
 import { ProjectComponent } from './components/project/project.component'; 
-import { InvitesService } from './services/invites.service';
+import { InviteService } from './services/invite.service';
 import { InviteComponent } from './components/invite/invite.component';
 import { ProjectInfoComponent } from './components/project/project-info/project-info.component';
 import { ProjectTasksComponent } from './components/project/project-tasks/project-tasks.component';
@@ -69,6 +69,13 @@ import { ProjectArchiveComponent } from './components/project/project-archive/pr
 import { ProjectGanttComponent } from './components/project/project-gantt/project-gantt.component';
 import { projectName } from './shared/constants/project-name';
 import { ProjectParticipantsComponent } from './components/project/project-participants/project-participants.component';
+import { ProjectInfoShowComponent } from './components/project/project-info/project-info-show/project-info-show.component';
+import { ProjectInfoEditComponent } from './components/project/project-info/project-info-edit/project-info-edit.component';
+import { ProjectInfoDeleteComponent } from './components/project/project-info/project-info-delete/project-info-delete.component';
+import { ProjectInviteComponent } from './components/project/invite/project-invite/project-invite.component';
+import { MatSlideToggleModule} from '@angular/material/slide-toggle'; 
+import {ClipboardModule} from '@angular/cdk/clipboard';
+import { ProjectInviteRegenerateComponent } from './components/project/invite/project-invite-regenerate/project-invite-regenerate.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -104,7 +111,12 @@ export function tokenGetter() {
     ProjectTasksComponent,
     ProjectArchiveComponent,
     ProjectGanttComponent,
-    ProjectParticipantsComponent
+    ProjectParticipantsComponent,
+    ProjectInfoShowComponent,
+    ProjectInfoEditComponent,
+    ProjectInfoDeleteComponent,
+    ProjectInviteComponent,
+    ProjectInviteRegenerateComponent
   ],
   imports: [
     BrowserModule,
@@ -137,7 +149,9 @@ export function tokenGetter() {
     MatDialogModule,
     ImageCropperModule,
     MatCardModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatSlideToggleModule,
+    ClipboardModule
   ],
   providers: [
     GeneralinfoService,
@@ -164,10 +178,10 @@ export function tokenGetter() {
     UserinfoService,
     TokenGuardService,
     authInterceptor,
-    UsersService,
-    TasksService,
-    ProjectsService,
-    InvitesService
+    UserService,
+    TaskService,
+    ProjectService,
+    InviteService
   ],
   bootstrap: [AppComponent]
 })

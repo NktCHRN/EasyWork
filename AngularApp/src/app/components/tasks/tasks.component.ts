@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TasksService } from '../../services/tasks.service';
+import { TaskService } from '../../services/task.service';
 import { TokenService } from '../../services/token.service';
 import { UserTaskModel } from '../../shared/task/user-task.model';
 
@@ -13,7 +13,7 @@ export class TasksComponent implements OnInit {
   errorMessage: string | null | undefined;
   loading: boolean = true;
 
-  constructor(private _tasksService: TasksService, private _tokenService: TokenService) { }
+  constructor(private _tasksService: TaskService, private _tokenService: TokenService) { }
 
   ngOnInit(): void {
     this._tasksService.get(this._tokenService.getJwtToken()!)

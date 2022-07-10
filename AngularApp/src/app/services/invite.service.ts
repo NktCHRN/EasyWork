@@ -8,7 +8,7 @@ import { ProcessHTTPMsgService } from './process-httpmsg.service';
 @Injectable({
   providedIn: 'root'
 })
-export class InvitesService extends BaseService {
+export class InviteService extends BaseService {
   override serviceBaseURL: string = this.baseURL + 'Invites/';
 
   constructor(private _http: HttpClient,

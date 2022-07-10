@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InvitesService } from 'src/app/services/invites.service';
+import { InviteService } from 'src/app/services/invite.service';
 import { TokenService } from 'src/app/services/token.service';
 import { BooleanContainer } from 'src/app/shared/other/booleancontainer';
 import { createIsServerErrorValidator, createNotWhitespaceValidator } from 'src/app/customvalidators';
@@ -34,7 +34,7 @@ export class ProjectJoinComponent implements OnInit {
 
   constructor(private _fb: FormBuilder,
     private _router: Router,
-    private _invitesService: InvitesService,
+    private _invitesService: InviteService,
     private _tokenService: TokenService) {
       this.createForm();
      }

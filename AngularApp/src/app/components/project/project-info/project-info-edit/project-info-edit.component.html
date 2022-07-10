@@ -1,0 +1,19 @@
+<form fxLayout="column" class="container w-100" novalidate method="POST" [formGroup]="form" #uform="ngForm" fxFlex>
+    <p>
+        <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" (focusout)="onSubmit($event)">
+            <mat-error *ngIf="formErrors.name">{{formErrors.name}}</mat-error>
+        </mat-form-field>
+    </p>
+    <p>
+        <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Description</mat-label>
+            <textarea matInput
+                      formControlName="description"
+                      cdkTextareaAutosize
+                      #descriptionAutosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="10" (focusout)="onSubmit($event)"></textarea>
+        </mat-form-field>
+    </p>
+</form>

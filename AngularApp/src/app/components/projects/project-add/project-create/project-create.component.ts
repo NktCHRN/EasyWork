@@ -2,7 +2,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { Component, EventEmitter, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProjectsService } from 'src/app/services/projects.service';
+import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { take } from 'rxjs';
@@ -15,7 +15,6 @@ import { AddProjectModel } from 'src/app/shared/project/add-project.model';
 })
 export class ProjectCreateComponent implements OnInit {
   loading: boolean = false;
-  hide = true;
   form: FormGroup = null!;
   @ViewChild('cform') formDirective: any;
   errorMessage: string | null | undefined
@@ -36,7 +35,7 @@ export class ProjectCreateComponent implements OnInit {
 
   constructor(private _fb: FormBuilder,
     private _router: Router,
-    private _projectsService: ProjectsService,
+    private _projectsService: ProjectService,
     private _tokenService: TokenService,
     private _ngZone: NgZone) {
       this.createForm();

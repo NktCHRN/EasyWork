@@ -11,21 +11,21 @@ export function createNotWhitespaceValidator(): ValidatorFn {
 
         const isWhitespace = control.value.trim().length === 0;
 
-        return !isWhitespace ? null: {notWhitespace:true};
+        return !isWhitespace ? null: {notWhitespace:false};
     }
 }
 
 export function createIsDusplicateValidator(isDuplicate: BooleanContainer): ValidationErrors
 {
     return (control:AbstractControl) : ValidationErrors | null => {
-        return !isDuplicate.value ? null : {notDuplicate : true};
+        return !isDuplicate.value ? null : {notDuplicate : false};
     }
 }
 
 export function createIsServerErrorValidator(isServerError: BooleanContainer): ValidationErrors
 {
     return (control:AbstractControl) : ValidationErrors | null => {
-        return !isServerError.value ? null : {notServerError : true};
+        return !isServerError.value ? null : {notServerError : false};
     }
 }
 
@@ -83,5 +83,12 @@ export function createIsEqualToValidator(matchTo: string): ValidatorFn {
         value === control.parent.get(matchTo)!.value
         ? null
         : {matches: false}
+    }
+}
+
+export function createIsEqualToValueValidator(value: string): ValidatorFn {
+    return (control:AbstractControl) : ValidationErrors | null => {
+        const myValue = control.value;
+        return myValue == value ? null : {matchesToValue: false}
     }
 }

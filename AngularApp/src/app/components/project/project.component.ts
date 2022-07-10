@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { ProjectsService } from 'src/app/services/projects.service';
+import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
 import { UserOnProjectRole } from 'src/app/shared/project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
@@ -18,7 +18,7 @@ export class ProjectComponent implements OnInit {
   me: UserOnProjectReducedModel = undefined!;
   userOnProjectRoles = UserOnProjectRole;
   
-  constructor(private _route: ActivatedRoute, private _projectService: ProjectsService, private _tokenService: TokenService, private _dialog: MatDialog) { }
+  constructor(private _route: ActivatedRoute, private _projectService: ProjectService, private _tokenService: TokenService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
     this._route.paramMap.subscribe(params => {
@@ -45,6 +45,12 @@ export class ProjectComponent implements OnInit {
     component.projectId = this.projectId;
     component.projectName = this.projectName;
     component.me = this.me;
-    component.userOnProjectRoles = this.userOnProjectRoles
-} 
+    component.userOnProjectRoles = this.userOnProjectRoles;
+    component.projectNameChange?.subscribe((result: string) => this.onProjectNameChange(result));
+  } 
+
+  onProjectNameChange(name: string): void 
+  {
+    this.projectName = name;
+  }
 }
