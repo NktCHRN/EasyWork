@@ -45,7 +45,7 @@ namespace WebAPI
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<User, UserProfileDTO>()
                 .ForMember(u => u.LastSeen,
-                    m => m.MapFrom<DateTimeOffset?>(usr => (usr.LastSeen == DateTimeOffset.MinValue) ? null : usr.LastSeen))
+                    m => m.MapFrom(usr => (usr.LastSeen == DateTimeOffset.MinValue) ? null : usr.LastSeen))
                 .ForMember(u => u.MIMEAvatarType, m => m.Ignore())
                 .ForMember(u => u.Projects, m => m.Ignore())
                 .ForMember(u => u.TasksDone, m => m.Ignore())
@@ -64,8 +64,10 @@ namespace WebAPI
                 .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
             CreateMap<ProjectModel, ProjectReducedDTO>();
             CreateMap<ProjectModel, ProjectDTO>();
+            CreateMap<ProjectModel, InviteCodeDTO>();
             CreateMap<UpdateProjectDTO, ProjectModel>();
-            CreateMap<UpdateInviteCodeStatusDTO, ProjectModel>();
+            CreateMap<UpdateInviteCodeStatusDTO, ProjectModel>()
+                .ForMember(d => d.IsInviteCodeActive, sc => sc.MapFrom(s => s.IsActive));
             CreateMap<ReleaseModel, ReleaseDTO>();
             CreateMap<AddReleaseDTO, ReleaseModel>();
             CreateMap<TagModel, TagDTO>();

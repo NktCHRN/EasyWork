@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("{inviteCode}")]
-        public async Task<IActionResult> ProceedInviteCode(string inviteCode)
+        public async Task<IActionResult> ProcessInviteCode(string inviteCode)
         {
             var project = await _projectService.GetProjectByActiveInviteCodeAsync(inviteCode);
             if (project is null)
@@ -53,9 +53,7 @@ namespace WebAPI.Controllers
                 return BadRequest(exc.Message);
             }
             catch (DbUpdateException)
-            {
-                return BadRequest("You are already added to this project");
-            }
+            {   }
             return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{uop.UserId}", _mapper.Map<UserOnProjectDTO>(uop));
         }
     }

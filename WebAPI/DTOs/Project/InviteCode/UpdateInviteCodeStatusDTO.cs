@@ -5,6 +5,6 @@ namespace WebAPI.DTOs.Project.InviteCode
     public record UpdateInviteCodeStatusDTO
     {
         [Required]
-        public bool? IsInviteCodeActive { get; init; }
+        public bool? IsActive { get; init; }
     }
 }

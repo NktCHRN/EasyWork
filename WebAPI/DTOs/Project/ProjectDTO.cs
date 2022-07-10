@@ -10,9 +10,5 @@
 
         public DateTimeOffset StartDate { get; init; }
 
-        public Guid? InviteCode { get; init; }
-
-        public bool IsInviteCodeActive { get; init; }
-
     }
 }

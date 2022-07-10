@@ -236,6 +236,20 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
+        [HttpGet("{id}/invite")]
+        public async Task<IActionResult> GetInviteCodeById(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(project.Id, userId.Value))
+                return Forbid();
+            return Ok(_mapper.Map<InviteCodeDTO>(project));
+        }
+
         [HttpPost("{id}/invite")]
         public async Task<IActionResult> GenerateNewInviteCode(int id)
         {
