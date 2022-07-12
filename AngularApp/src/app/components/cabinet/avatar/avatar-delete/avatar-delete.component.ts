@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AccountService } from 'src/app/services/account.service';
+import { TokenService } from 'src/app/services/token.service';
 import { UserinfoService } from 'src/app/services/userinfo.service';
 
 @Component({
@@ -16,25 +17,26 @@ export class AvatarDeleteComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<AvatarDeleteComponent>,
     private _accountService: AccountService,
-    private _userInfoService: UserinfoService) { }
+    private _userInfoService: UserinfoService,
+    private _tokenService: TokenService) {
+      this._dialogRef.afterClosed()
+      .subscribe(() => {
+        if (this.success)
+          this.closeOuter.emit();
+      });
+  }
 
   ngOnInit(): void {
   }
 
-  closeAll(): void {
-    this._dialogRef.close();
-    this.closeOuter.emit();
-  }
-
   onSubmit() : void {
     this.loading = true;
-    this._accountService.deleteAvatar(localStorage.getItem('jwt')!).subscribe(
+    this._accountService.deleteAvatar(this._tokenService.getJwtToken()!).subscribe(
       {
         next: () => {
           this.success = true;
           this._userInfoService.updateLastUser();
           this.loading = false;
-          this._dialogRef.disableClose = true;
         },
         error: error => {
           this.errorMessage = error.error ?? error.message ?? error;

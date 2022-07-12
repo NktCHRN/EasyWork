@@ -1,0 +1,15 @@
+.table-avatar {
+    width: 35px;
+    margin-right: 10px;
+}
+
+a {
+    text-decoration: none !important;
+    color: orange !important;
+}
+
+$padding-size: 3px;
+td {
+    padding-left: $padding-size !important;
+    padding-right: $padding-size !important;
+}

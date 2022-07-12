@@ -76,6 +76,10 @@ import { ProjectInviteComponent } from './components/project/invite/project-invi
 import { MatSlideToggleModule} from '@angular/material/slide-toggle'; 
 import {ClipboardModule} from '@angular/cdk/clipboard';
 import { ProjectInviteRegenerateComponent } from './components/project/invite/project-invite-regenerate/project-invite-regenerate.component'; 
+import {MatTableModule} from '@angular/material/table'; 
+import {MatTooltipModule} from '@angular/material/tooltip'; 
+import { ProjectRoleService } from './services/project-role.service';
+import { ProjectLeaveComponent } from './components/project/project-participants/project-leave/project-leave.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -116,7 +120,8 @@ export function tokenGetter() {
     ProjectInfoEditComponent,
     ProjectInfoDeleteComponent,
     ProjectInviteComponent,
-    ProjectInviteRegenerateComponent
+    ProjectInviteRegenerateComponent,
+    ProjectLeaveComponent
   ],
   imports: [
     BrowserModule,
@@ -151,7 +156,9 @@ export function tokenGetter() {
     MatCardModule,
     MatButtonToggleModule,
     MatSlideToggleModule,
-    ClipboardModule
+    ClipboardModule,
+    MatTableModule,
+    MatTooltipModule
   ],
   providers: [
     GeneralinfoService,
@@ -181,7 +188,8 @@ export function tokenGetter() {
     UserService,
     TaskService,
     ProjectService,
-    InviteService
+    InviteService,
+    ProjectRoleService
   ],
   bootstrap: [AppComponent]
 })

@@ -27,7 +27,7 @@
             <h3>The project {{projectName}} has been successfully deleted</h3>
         </div>
         <div>
-            <button mat-flat-button (click)="closeAll()">Close</button>
+            <button mat-flat-button [mat-dialog-close]="true">Close</button>
         </div>
     </div>
     <div *ngIf="errorMessage">

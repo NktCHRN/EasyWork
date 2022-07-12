@@ -33,13 +33,18 @@ export class ProjectInfoDeleteComponent implements OnInit {
   };
 
   constructor(private _dialogRef: MatDialogRef<ProjectInfoComponent>, 
-    @Inject(MAT_DIALOG_DATA) private data: ProjectMiniModel, private _router: Router,
+    @Inject(MAT_DIALOG_DATA) public data: ProjectMiniModel, private _router: Router,
     private _projectService: ProjectService,
     private _tokenService: TokenService,
     private _fb: FormBuilder) { 
     this._projectId = data.id;
     this.projectName = data.name;
     this.createForm();
+    this._dialogRef.afterClosed()
+    .subscribe(() => {
+      if (this.success)
+        this._router.navigate(['projects']);
+    });
   }
 
   ngOnInit(): void {
@@ -78,11 +83,6 @@ export class ProjectInfoDeleteComponent implements OnInit {
     }
   }
 
-  closeAll() : void {
-    this._dialogRef.close();
-    this._router.navigate(['projects']);
-  }
-
   onSubmit() : void {
     this.loading = true;
     if (this.form.valid)
@@ -92,7 +92,6 @@ export class ProjectInfoDeleteComponent implements OnInit {
         next: () => {
           this.success = true;
           this.loading = false;
-          this._dialogRef.disableClose = true;
         },
         error: error => {
           this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
