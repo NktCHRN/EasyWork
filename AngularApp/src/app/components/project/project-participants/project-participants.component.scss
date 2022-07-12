@@ -13,3 +13,8 @@ td {
     padding-left: $padding-size !important;
     padding-right: $padding-size !important;
 }
+
+.table-container {
+    width: 100%;
+    overflow-x: scroll;
+}
