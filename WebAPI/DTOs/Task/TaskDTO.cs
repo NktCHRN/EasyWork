@@ -17,5 +17,7 @@
         public string Status { get; set; } = string.Empty;
 
         public string? Priority { get; set; }
+
+        public int ProjectId { get; set; }
     }
 }
