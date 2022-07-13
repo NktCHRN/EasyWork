@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business.Algorithms;
 using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
@@ -41,11 +42,13 @@ namespace WebAPI.Controllers
             if (search is not null)
             {
                 search = search.ToLowerInvariant();
-                users = users.Where(u => u.Id.ToString() == search
-                || u.Email.ToLowerInvariant().Contains(search)
+                users = users.Where(u => u.Email.ToLowerInvariant().Contains(search)
                 || search.Contains(u.FirstName.ToLowerInvariant()) 
-                || (u.LastName != null && (search.Contains(u.LastName.ToLowerInvariant()) 
-                    || u.LastName.ToLowerInvariant().Contains(search))));
+                || u.FirstName.ToLowerInvariant().Contains(search)
+                || (!string.IsNullOrEmpty(u.LastName) && (search.Contains(u.LastName.ToLowerInvariant()) 
+                    || u.LastName.ToLowerInvariant().Contains(search))))
+                    .OrderBy(u => LevenshteinDistance.Calculate(search, u.Email.ToLowerInvariant())
+                    + LevenshteinDistance.Calculate(search, $"{u.FirstName} {u.LastName}".TrimEnd().ToLowerInvariant()));
             }
             var profiles = new List<UserProfileReducedDTO>();
             foreach (var user in users)
