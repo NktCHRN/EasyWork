@@ -1,6 +1,7 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
+import { UserProfileReducedModel } from '../shared/user/user-profile-reduced.model';
 import { UserModel } from '../shared/user/user.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
@@ -16,7 +17,7 @@ export class UserService extends BaseService {
     super();
   }
 
-  public get(id: number) : Observable<UserModel>
+  public getById(id: number) : Observable<UserModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -32,5 +33,22 @@ export class UserService extends BaseService {
     if (lastName)
         fullName += ' ' + lastName;
     return fullName;
+  }
+
+  public get(search: string | null | undefined): Observable<UserProfileReducedModel[]>
+  {
+    let params = new HttpParams()
+    if (search)
+    {
+      params = params.append('search', search);
+    }
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      }),
+      params: params
+    };
+    return this._http.get<UserProfileReducedModel[]>(this.serviceBaseURL, httpOptions)
+    .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

@@ -41,15 +41,31 @@
             <ng-container matColumnDef="actions" *ngIf="me.role >= userOnProjectRoles.Manager">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let element" fxLayoutGap="15px">
-                    <button mat-flat-button color="accent" *ngIf="me.role == userOnProjectRoles.Owner && element.user.id != me.userId" [matTooltip]="'Edit'"><mat-icon>edit</mat-icon></button>
-                    <button mat-flat-button color="warn" *ngIf="element.isKickable && element.user.id != me.userId" [matTooltip]="'Kick'"><mat-icon>person_remove</mat-icon></button>
+                    <button 
+                      mat-flat-button 
+                      color="accent" 
+                      *ngIf="me.role == userOnProjectRoles.Owner && element.user.id != me.userId" 
+                      [matTooltip]="'Edit'" 
+                      class="table-actions-btn"
+                      (click)="openEditDialog(element.user.id)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button 
+                      mat-flat-button 
+                      color="warn" 
+                      *ngIf="element.isKickable && element.user.id != me.userId" 
+                      [matTooltip]="'Kick'" 
+                      class="table-actions-btn"
+                      (click)="openKickDialog(element.user.id)">
+                      <mat-icon>person_remove</mat-icon>
+                    </button>
                 </td>
               </ng-container>
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
           </table>
         </div>
-          <button mat-flat-button color="primary" *ngIf="me.role >= userOnProjectRoles.Manager">Add</button>
+          <button mat-flat-button color="primary" *ngIf="me.role >= userOnProjectRoles.Manager" (click)="openAddDialog()">Add</button>
         <div style="padding-top: 20px;">
             <app-project-invite [projectId]="projectId" [me]="me"></app-project-invite>
         </div>

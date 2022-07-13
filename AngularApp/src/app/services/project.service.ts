@@ -6,7 +6,7 @@ import { InviteCodeStatusModel } from '../shared/project/invite/invite-code-stat
 import { InviteCodeModel } from '../shared/project/invite/invite-code.model';
 import { ProjectReducedModel } from '../shared/project/project-reduced.model';
 import { ProjectModel } from '../shared/project/project.model';
-import { UserOnProjectRole } from '../shared/project/role/user-on-project-role';
+import { UserOnProjectRole } from '../shared/project/user-on-project/role/user-on-project-role';
 import { UpdateProjectModel } from '../shared/project/update-project.model';
 import { UserOnProjectExtendedRawModel } from '../shared/project/user-on-project/user-on-project-extended-raw.model';
 import { UserOnProjectExtendedModel } from '../shared/project/user-on-project/user-on-project-extended.model';
@@ -15,6 +15,10 @@ import { UserOnProjectReducedModel } from '../shared/project/user-on-project/use
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
 import { ProjectRoleService } from './project-role.service';
+import { UpdateUserOnProjectModel } from '../shared/project/user-on-project/edit/update-user-on-project.model';
+import { UserOnProjectQueryParametersModel } from '../shared/project/user-on-project/user-on-project-query-parameters.model';
+import { AddUserOnProjectModel } from '../shared/project/user-on-project/add/add-user-on-project.model';
+import { UserOnProjectModel } from '../shared/project/user-on-project/user-on-project.model';
 
 @Injectable({
   providedIn: 'root'
@@ -186,6 +190,42 @@ export class ProjectService extends BaseService {
       })
     };
     return this._http.delete(this.serviceBaseURL + id + "/leave", httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public kick(token: string, queryParams: UserOnProjectQueryParametersModel) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + queryParams.id + "/users/" + queryParams.userId, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public updateUser(token: string, queryParams: UserOnProjectQueryParametersModel, model: UpdateUserOnProjectModel) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.put(this.serviceBaseURL + queryParams.id + "/users/" + queryParams.userId, model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public addUser(token: string, id: number, model: AddUserOnProjectModel) : Observable<UserOnProjectModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.post<UserOnProjectModel>(this.serviceBaseURL + id + "/users/", model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

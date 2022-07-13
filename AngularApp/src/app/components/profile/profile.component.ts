@@ -18,7 +18,7 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this._route.paramMap.subscribe(params => {
       const id : number = parseInt(params.get('id')!);
-      this.usersService.get(id)
+      this.usersService.getById(id)
       .subscribe({
         next: user => 
         {

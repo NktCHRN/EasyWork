@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
 import { InviteCodeModel } from 'src/app/shared/project/invite/invite-code.model';
-import { UserOnProjectRole } from 'src/app/shared/project/role/user-on-project-role';
+import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import {Clipboard} from "@angular/cdk/clipboard"
 import { MatSnackBar } from '@angular/material/snack-bar';

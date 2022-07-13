@@ -1,0 +1,64 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title class="orange">Add a new user</h1>
+<mat-dialog-content>
+    <div fxLayout="column" fxLayoutGap="30px" *ngIf="!newUser && !loading && !errorMessage">
+        <div fxLayout="column">
+            <form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="form" (ngSubmit)="onSubmit()" #aform="ngForm" fxFlex fxLayoutGap="20px">
+                <div class="w-100">
+                <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>User</mat-label>
+                    <mat-select formControlName="user">
+                      <mat-option>
+                        <ngx-mat-select-search [formControl]="usersFilteringCtrl" [searching]="searching" [placeholderLabel]="'Find a user...'" [noEntriesFoundLabel]="'No matching users found.'"></ngx-mat-select-search>
+                      </mat-option>
+                      <mat-option *ngFor="let user of users | async" [value]="user">
+                        <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="avatar search-avatar">{{user.fullName}} <span class="text-muted">{{user.email}}</span>
+                      </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="formErrors.user">{{formErrors.user}}</mat-error>
+                  </mat-form-field>
+                </div>
+                  <div class="w-100">
+                <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>Role</mat-label>
+                    <mat-select formControlName="role">
+                      <mat-option *ngFor="let role of roles" [value]="roleService.roleToString(role.role)">
+                        {{roleService.roleToString(role.role)}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <p class="text-muted">{{selectedRole.description}}</p>
+                </div>
+                  <div fxLayoutGap="30px">
+                    <button mat-flat-button type="button" [mat-dialog-close]="true">Go back</button>
+                    <button mat-flat-button type="submit" color="primary" (click)="onSubmit()" [disabled]="form.invalid">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div *ngIf="newUser">
+        <div class="header-container">
+            <h3>You have successfully added the new user 
+                <span class="orange">{{newUser.user.fullName}}</span> to the 
+                <span class="deep-orange">{{roleService.roleToString(newUser.role)}}</span> role
+            </h3>
+        </div>
+        <div>
+            <button mat-flat-button [mat-dialog-close]="true">Close</button>
+        </div>
+    </div>
+    <div *ngIf="errorMessage">
+        <div class="header-container">
+            <h3 class="red">An error occured: {{errorMessage}}<br>
+            Try again later</h3>
+        </div>
+        <div>
+            <button mat-flat-button [mat-dialog-close]="true">Close</button>
+        </div>
+    </div>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</mat-dialog-content>

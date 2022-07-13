@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
-import { UserOnProjectRole } from 'src/app/shared/project/role/user-on-project-role';
+import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 

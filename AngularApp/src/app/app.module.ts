@@ -80,6 +80,11 @@ import {MatTableModule} from '@angular/material/table';
 import {MatTooltipModule} from '@angular/material/tooltip'; 
 import { ProjectRoleService } from './services/project-role.service';
 import { ProjectLeaveComponent } from './components/project/project-participants/project-leave/project-leave.component';
+import { ProjectKickComponent } from './components/project/project-participants/project-kick/project-kick.component';
+import { ProjectUserEditComponent } from './components/project/project-participants/project-user-edit/project-user-edit.component';
+import {MatSelectModule} from '@angular/material/select';
+import { ProjectUserAddComponent } from './components/project/project-participants/project-user-add/project-user-add.component'; 
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -121,7 +126,10 @@ export function tokenGetter() {
     ProjectInfoDeleteComponent,
     ProjectInviteComponent,
     ProjectInviteRegenerateComponent,
-    ProjectLeaveComponent
+    ProjectLeaveComponent,
+    ProjectKickComponent,
+    ProjectUserEditComponent,
+    ProjectUserAddComponent
   ],
   imports: [
     BrowserModule,
@@ -158,7 +166,9 @@ export function tokenGetter() {
     MatSlideToggleModule,
     ClipboardModule,
     MatTableModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule,
+    NgxMatSelectSearchModule
   ],
   providers: [
     GeneralinfoService,

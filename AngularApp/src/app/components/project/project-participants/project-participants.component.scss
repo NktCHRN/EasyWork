@@ -8,13 +8,18 @@ a {
     color: orange !important;
 }
 
-$padding-size: 3px;
+$offset-size: 3px;
 td {
-    padding-left: $padding-size !important;
-    padding-right: $padding-size !important;
+    padding-left: $offset-size !important;
+    padding-right: $offset-size !important;
 }
 
 .table-container {
     width: 100%;
     overflow-x: scroll;
+}
+
+.table-actions-btn {
+    margin-top: $offset-size !important;
+    margin-bottom: $offset-size !important;
 }

@@ -1,5 +1,5 @@
 import { UserMiniWithAvatarModel } from "../../user/user-mini-with-avatar.model";
-import { UserOnProjectRole } from "../role/user-on-project-role";
+import { UserOnProjectRole } from "./role/user-on-project-role";
 
 export interface UserOnProjectExtendedModel {
     user: UserMiniWithAvatarModel;
