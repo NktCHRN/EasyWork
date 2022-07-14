@@ -20,6 +20,7 @@ import { UserOnProjectQueryParametersModel } from '../shared/project/user-on-pro
 import { AddUserOnProjectModel } from '../shared/project/user-on-project/add/add-user-on-project.model';
 import { UserOnProjectModel } from '../shared/project/user-on-project/user-on-project.model';
 import { ProjectLimitsModel } from '../shared/project/limits/project-limits.model';
+import { TasksModel } from '../shared/project/tasks/tasks.model';
 
 @Injectable({
   providedIn: 'root'
@@ -251,6 +252,18 @@ export class ProjectService extends BaseService {
       })
     };
     return this._http.put(this.serviceBaseURL + id + "/limits", limits, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public getTasks(token: string, id: number) : Observable<TasksModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<TasksModel>(this.serviceBaseURL + id + "/tasks", httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

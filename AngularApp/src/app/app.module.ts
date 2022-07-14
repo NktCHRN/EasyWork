@@ -85,7 +85,8 @@ import { ProjectUserEditComponent } from './components/project/project-participa
 import {MatSelectModule} from '@angular/material/select';
 import { ProjectUserAddComponent } from './components/project/project-participants/project-user-add/project-user-add.component'; 
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import {MatExpansionModule} from '@angular/material/expansion'; 
+import {MatExpansionModule} from '@angular/material/expansion';
+import { TaskReducedComponent } from './components/project/project-tasks/task-reduced/task-reduced.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -130,7 +131,8 @@ export function tokenGetter() {
     ProjectLeaveComponent,
     ProjectKickComponent,
     ProjectUserEditComponent,
-    ProjectUserAddComponent
+    ProjectUserAddComponent,
+    TaskReducedComponent
   ],
   imports: [
     BrowserModule,

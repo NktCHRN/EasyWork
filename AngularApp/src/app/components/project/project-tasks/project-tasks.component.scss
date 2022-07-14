@@ -32,6 +32,7 @@ $min-height-phone: calc(100vh - $footer-height - $heaher-phone-height);
 
 .column {
     min-height: $min-height;
+    margin-bottom: 50px;
 }
 
 $padding-size: 5px;
@@ -56,4 +57,9 @@ $padding-size: 5px;
     $padding-size: 35px;
     padding-left: $padding-size;
     padding-right: $padding-size;
+}
+
+.task-card {
+    width: 90%;
+    display: block;
 }

@@ -6,6 +6,7 @@ import { createNumberOrUnlimitedValidator } from 'src/app/customvalidators';
 import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
+import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 
@@ -20,6 +21,12 @@ export class ProjectTasksComponent implements OnInit {
   me: UserOnProjectReducedModel = undefined!;
   userOnProjectRoles = UserOnProjectRole;
   limits: ProjectLimitsModel = undefined!;
+  tasks: TasksModel = {
+    toDo: [],
+    inProgress: [],
+    validate: [],
+    done: []
+  };
 
   form: FormGroup = null!;
   @ViewChild('lform') formDirective: any;
@@ -69,13 +76,22 @@ export class ProjectTasksComponent implements OnInit {
           validateControl.setValue(result.maxValidate);
       },
       error: error => 
-      this._snackBar.open("The max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
+      this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
     });
     if (this.me.role < this.userOnProjectRoles.Manager)
     {
       const controls = [toDoControl, inProgressControl, validateControl];
       controls.forEach(control => control.disable());
     }
+    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId)
+    .subscribe({
+      next: result => 
+      {
+        this.tasks = result;
+      },
+      error: error => 
+      this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
+    });
   }
 
   public changeLimit(data: any): string
@@ -146,13 +162,13 @@ export class ProjectTasksComponent implements OnInit {
       .subscribe({
         next: () => {
           this.limits = newLimits;
-          this._snackBar.open("The max quantities were updated successfully", "Close", {
+          this._snackBar.open("Max quantities were updated successfully", "Close", {
             duration: 1000,
             panelClass: "snackbar-orange"
           });
         },
         error: error => { 
-          this._snackBar.open(`The max quantities were not updated: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
+          this._snackBar.open(`Max quantities were not updated: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
             duration: 5000,
           });
         }

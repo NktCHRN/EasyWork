@@ -6,7 +6,7 @@
         </div>
         <div>
             <form fxLayout="row" novalidate method="POST" [formGroup]="form" #lform="ngForm">
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="to-do column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
@@ -21,8 +21,9 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
+                    <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task"></app-task-reduced>
                 </div>
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="in-progress column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
@@ -37,8 +38,9 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
+                    <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task"></app-task-reduced>
                 </div>    
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="validate column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
@@ -53,8 +55,9 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
+                    <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task"></app-task-reduced>
                 </div>      
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="complete column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
@@ -68,6 +71,7 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
+                    <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task"></app-task-reduced>
                 </div>
             </form>
         </div>
