@@ -31,6 +31,18 @@ namespace Tests.BLLTests
             {
                 Name = "TooLongNameMoreThan20characters"
             },
+            new TagModel()      // 2
+            {
+                Name = "all"
+            },
+            new TagModel()      // 3
+            {
+                Name = "ALL"
+            },
+            new TagModel()      // 4
+            {
+                Name = "All"
+            },
         };
 
         private readonly IEnumerable<TagModel> _validTags = new TagModel[]
@@ -170,6 +182,9 @@ namespace Tests.BLLTests
         [Test]
         [TestCase(0)]
         [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
         public void IsValidTest_InvalidModel_ReturnsFalseWithError(int modelNumber)
         {
             // Arrange

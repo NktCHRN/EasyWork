@@ -74,7 +74,14 @@ namespace Business.Services
         public bool IsValid(TagModel model, out string? firstErrorMessage)
         {
             var result = IModelValidator<TagModel>.IsValidByDefault(model, out firstErrorMessage);
-            return result;
+            if (!result)
+                return false;
+            if (model.Name.ToLowerInvariant() == "all")
+            {
+                firstErrorMessage = "Tag name cannot be \"All\" case-insensitively";
+                return false;
+            }
+            return true;
         }
 
         public async Task UpdateAsync(TagModel model)
