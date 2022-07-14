@@ -215,7 +215,7 @@ namespace Business.Services
             return (task is null) ? new List<User>() : task.Executors;
         }
 
-        const int _maxExecutorsCount = 10;
+        const int _maxExecutorsCount = 5;
 
         public async Task AddExecutorToTaskAsync(int taskId, int userId)
         {

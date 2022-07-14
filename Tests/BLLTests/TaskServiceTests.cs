@@ -1275,7 +1275,7 @@ namespace Tests.BLLTests
                 Executors = new List<User>(),
                 ProjectId = 1
             };
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
                 task.Executors.Add(new User() { FirstName=$"User{i+1}"});
             _context.Tasks.Add(task);
             _context.SaveChanges();
