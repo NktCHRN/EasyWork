@@ -86,7 +86,10 @@ import {MatSelectModule} from '@angular/material/select';
 import { ProjectUserAddComponent } from './components/project/project-participants/project-user-add/project-user-add.component'; 
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import {MatExpansionModule} from '@angular/material/expansion';
-import { TaskReducedComponent } from './components/project/project-tasks/task-reduced/task-reduced.component'; 
+import { TaskReducedComponent } from './components/project/project-tasks/task-reduced/task-reduced.component';
+import { ScrollableDirective } from './directives/scrollable.directive'; 
+import {MatChipsModule} from '@angular/material/chips';
+import { ProjectTagDeleteComponent } from './components/project/project-tasks/project-tag-delete/project-tag-delete.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -132,7 +135,9 @@ export function tokenGetter() {
     ProjectKickComponent,
     ProjectUserEditComponent,
     ProjectUserAddComponent,
-    TaskReducedComponent
+    TaskReducedComponent,
+    ScrollableDirective,
+    ProjectTagDeleteComponent
   ],
   imports: [
     BrowserModule,
@@ -172,7 +177,8 @@ export function tokenGetter() {
     MatTooltipModule,
     MatSelectModule,
     NgxMatSelectSearchModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatChipsModule
   ],
   providers: [
     GeneralinfoService,

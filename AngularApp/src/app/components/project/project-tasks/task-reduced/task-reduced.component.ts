@@ -20,4 +20,8 @@ export class TaskReducedComponent implements OnInit {
     .subscribe(result => this.executors = result);
   }
 
+  openDialog()
+  {
+    console.log("The dialog should have been opened");
+  }
 }

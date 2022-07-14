@@ -63,3 +63,21 @@ $padding-size: 5px;
     width: 90%;
     display: block;
 }
+
+.tag-container {
+    $padding-size: 8px;
+    padding-top: $padding-size;
+    padding-bottom: $padding-size;
+}
+
+.list{
+    overflow: hidden;
+    width: 100%;
+  }
+
+::ng-deep {
+    .mat-chip-list-wrapper {
+        flex-wrap: nowrap !important;
+        flex-shrink: 0;
+      }
+}

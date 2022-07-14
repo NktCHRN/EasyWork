@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { createNumberOrUnlimitedValidator } from 'src/app/customvalidators';
@@ -9,6 +10,8 @@ import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits
 import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
+import { TagModel } from 'src/app/shared/tag/tag.model';
+import { ProjectTagDeleteComponent } from './project-tag-delete/project-tag-delete.component';
 
 @Component({
   selector: 'app-project-tasks',
@@ -22,11 +25,19 @@ export class ProjectTasksComponent implements OnInit {
   userOnProjectRoles = UserOnProjectRole;
   limits: ProjectLimitsModel = undefined!;
   tasks: TasksModel = {
-    toDo: [],
-    inProgress: [],
-    validate: [],
-    done: []
+    toDo: undefined!,
+    inProgress: undefined!,
+    validate: undefined!,
+    done: undefined!
   };
+  loadError: boolean = false;
+  tags: TagModel[] = [
+    {
+      id: 0,
+      name: "All"
+    }
+  ];
+  selectedTag: TagModel;
 
   form: FormGroup = null!;
   @ViewChild('lform') formDirective: any;
@@ -54,8 +65,9 @@ export class ProjectTasksComponent implements OnInit {
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, 
   private _fb: FormBuilder, private _snackBar: MatSnackBar, private _projectService: ProjectService,
-  private _tokenService: TokenService) { 
+  private _tokenService: TokenService, private _dialog: MatDialog) { 
     this.createForm();
+    this.selectedTag = this.tags[0];
   }
 
   ngOnInit(): void {
@@ -83,14 +95,29 @@ export class ProjectTasksComponent implements OnInit {
       const controls = [toDoControl, inProgressControl, validateControl];
       controls.forEach(control => control.disable());
     }
-    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId, null)
     .subscribe({
       next: result => 
       {
         this.tasks = result;
       },
       error: error => 
-      this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
+      {
+        this.loadError = true;
+        this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
+      }
+    });
+    this._projectService.getTags(this._tokenService.getJwtToken()!, this.projectId)
+    .subscribe({
+      next: result => 
+      {
+        this.tags = this.tags.concat(result);
+      },
+      error: error => 
+      {
+        this.loadError = true;
+        this._snackBar.open("Tags have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
+      }
     });
   }
 
@@ -174,5 +201,43 @@ export class ProjectTasksComponent implements OnInit {
         }
       });
     }
+  }
+
+  changeSelectedTag(tag: TagModel): void {
+    const id = tag.id == 0 ? null : tag.id;
+    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId, id)
+    .subscribe({
+      next: result => 
+      {
+        this.tasks = result;
+        this.selectedTag = tag;
+      },
+      error: error => 
+      {
+        this.loadError = true;
+        this._snackBar.open("Tasks with chosen tag have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
+      }
+    });
+  }
+
+  openRemoveTagDialog(tag: TagModel): void {
+    if (tag.id == 0)
+    return;
+    const dialogRef = this._dialog.open(ProjectTagDeleteComponent, {
+      panelClass: "dialog-responsive",
+      data: {
+        tag: tag,
+        projectId: this.projectId
+      }
+    });
+    dialogRef.afterClosed()
+    .subscribe(() => {
+      if (dialogRef.componentInstance.success)
+      {
+          this.tags.splice(this.tags.indexOf(tag), 1);
+          if (this.selectedTag == tag)
+            this.changeSelectedTag(this.tags[0]);
+      };
+    });
   }
 }

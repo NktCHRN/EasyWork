@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
 import { AddProjectModel } from '../shared/project/add-project.model';
@@ -21,6 +21,7 @@ import { AddUserOnProjectModel } from '../shared/project/user-on-project/add/add
 import { UserOnProjectModel } from '../shared/project/user-on-project/user-on-project.model';
 import { ProjectLimitsModel } from '../shared/project/limits/project-limits.model';
 import { TasksModel } from '../shared/project/tasks/tasks.model';
+import { TagModel } from '../shared/tag/tag.model';
 
 @Injectable({
   providedIn: 'root'
@@ -255,7 +256,25 @@ export class ProjectService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public getTasks(token: string, id: number) : Observable<TasksModel>
+  public getTasks(token: string, id: number, tagId: number | null | undefined) : Observable<TasksModel>
+  {
+    let params = new HttpParams()
+    if (tagId)
+    {
+      params = params.append('tagId', tagId);
+    }
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      }),
+      params: params
+    };
+    return this._http.get<TasksModel>(this.serviceBaseURL + id + "/tasks/", httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public getTags(token: string, id: number) : Observable<TagModel[]>
   {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -263,7 +282,19 @@ export class ProjectService extends BaseService {
         'Authorization': 'Bearer ' + token
       })
     };
-    return this._http.get<TasksModel>(this.serviceBaseURL + id + "/tasks", httpOptions)
+    return this._http.get<TagModel[]>(this.serviceBaseURL + id + "/tags", httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public deleteTag(token: string, id: number, tagId: number) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + id + "/tags/" + tagId, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

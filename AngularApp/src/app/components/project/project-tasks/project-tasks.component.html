@@ -1,7 +1,22 @@
 <div class="container">
     <div fxHide fxShow.gt-sm fxLayout="column">
         <div class="row">
-            <div fxFlex="80" fxLayoutAlign="start center">tags</div>
+            <div fxFlex="80" fxLayoutAlign="start center" class="tag-container" fxLayoutGap="5px">
+                <button mat-icon-button *ngIf="list.isOverflow" [disabled]="!list.canScrollStart" (click)="list.scroll(-1)">
+                    <mat-icon>arrow_back_ios</mat-icon>
+                </button>
+                <mat-chip-list aria-orientation="horizontal" fxLayout="row" fxLayoutGap="30px" appScrollable #list="appScrollable" [scrollUnit]="150" class="list">
+                    <mat-chip [removable]="tag.id != 0" selectable="false" *ngFor="let tag of tags" [selected]="tag==selectedTag" (click)="changeSelectedTag(tag)" (removed)="openRemoveTagDialog(tag)">
+                        {{tag.name}}
+                        <button matChipRemove *ngIf="tag.id != 0">
+                            <mat-icon>cancel</mat-icon>
+                        </button>
+                    </mat-chip>
+                  </mat-chip-list>
+                <button mat-icon-button *ngIf="list.isOverflow"  [disabled]="!list.canScrollEnd" (click)="list.scroll(1)">
+                    <mat-icon>arrow_forward_ios</mat-icon>
+                </button>
+            </div>
             <div fxFlex="20" fxLayoutAlign="end center">avatars</div>
         </div>
         <div>
@@ -21,7 +36,12 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task"></app-task-reduced>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task"></app-task-reduced>
+                    </div>
+                    <div *ngIf="!tasks.toDo && !loadError">
+                        <mat-spinner></mat-spinner>
+                    </div>
                 </div>
                 <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="in-progress column-header">
@@ -38,7 +58,12 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task"></app-task-reduced>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task"></app-task-reduced>
+                    </div>
+                    <div *ngIf="!tasks.inProgress && !loadError">
+                        <mat-spinner></mat-spinner>
+                    </div>
                 </div>    
                 <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="validate column-header">
@@ -55,7 +80,12 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task"></app-task-reduced>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task"></app-task-reduced>
+                    </div>
+                    <div *ngIf="!tasks.validate && !loadError">
+                        <mat-spinner></mat-spinner>
+                    </div>
                 </div>      
                 <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
                     <mat-expansion-panel class="complete column-header">
@@ -71,7 +101,12 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task"></app-task-reduced>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.done">
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task"></app-task-reduced>
+                    </div>
+                    <div *ngIf="!tasks.done && !loadError">
+                        <mat-spinner></mat-spinner>
+                    </div>
                 </div>
             </form>
         </div>
