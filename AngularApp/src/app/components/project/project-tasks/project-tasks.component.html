@@ -1,1 +1,78 @@
-<p>project-tasks works!</p>
+<div class="container">
+    <div fxHide fxShow.gt-sm fxLayout="column">
+        <div class="row">
+            <div fxFlex="80" fxLayoutAlign="start center">tags</div>
+            <div fxFlex="20" fxLayoutAlign="end center">avatars</div>
+        </div>
+        <div>
+            <form fxLayout="row" novalidate method="POST" [formGroup]="form" #lform="ngForm">
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                    <mat-expansion-panel class="to-do column-header">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title fxLayoutAlign="center center">
+                                <h1 class="mb-0">To Do</h1>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
+                            <mat-form-field appearance="outline" class="w-60">
+                                <mat-label>Max quantity</mat-label>
+                                <input matInput class="black" formControlName="toDo" (blur)="onSubmit($event)">
+                                <mat-error *ngIf="formErrors.toDo">{{formErrors.toDo}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+                </div>
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                    <mat-expansion-panel class="in-progress column-header">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title fxLayoutAlign="center center">
+                                <h1 class="mb-0">In Progress</h1>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
+                            <mat-form-field appearance="outline" class="w-60">
+                                <mat-label>Max quantity</mat-label>
+                                <input matInput class="black" formControlName="inProgress" (blur)="onSubmit($event)">
+                                <mat-error *ngIf="formErrors.inProgress">{{formErrors.inProgress}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+                </div>    
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                    <mat-expansion-panel class="validate column-header">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title fxLayoutAlign="center center">
+                                <h1 class="mb-0">Validate</h1>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
+                            <mat-form-field appearance="outline" class="w-60">
+                                <mat-label>Max quantity</mat-label>
+                                <input matInput class="black" formControlName="validate" (blur)="onSubmit($event)">
+                                <mat-error *ngIf="formErrors.validate">{{formErrors.validate}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+                </div>      
+                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column">
+                    <mat-expansion-panel class="complete column-header">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title fxLayoutAlign="center center">
+                                <h1 class="mb-0">Complete</h1>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
+                            <mat-form-field appearance="outline" class="w-60">
+                                <mat-label>Max quantity</mat-label>
+                                <input matInput disabled value="unlimited" class="black">
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div fxShow fxHide.gt-sm>
+        <p>project-tasks (phone) works!</p>
+    </div>
+</div>

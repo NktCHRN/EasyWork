@@ -1,0 +1,59 @@
+@import '../../../../variables';
+
+$min-height: calc(100vh - $footer-height - $heaher-height);
+$min-height-phone: calc(100vh - $footer-height - $heaher-phone-height);
+
+.container {
+    width: 100%;
+    min-height: $min-height;
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        min-height: $min-height-phone;
+    }
+}
+
+.to-do {
+    background-color: rgba(yellow, 0.25);
+}
+
+.in-progress {
+    background-color: rgba(orange, 0.25);
+}
+
+.validate {
+    background-color: rgba(#D84315, 0.25);
+}
+
+.complete {
+    background-color: rgba(green, 0.25);
+}
+
+.column {
+    min-height: $min-height;
+}
+
+$padding-size: 5px;
+.column-header {
+    padding-top: $padding-size;
+    padding-bottom: $padding-size;
+    width: 100%;
+}
+
+.column-header>h1 {
+    margin: 0;
+    margin-bottom: $padding-size;
+}
+
+@media screen and (max-width: 600px) {
+    .column {
+        min-height: $min-height-phone;
+    }
+}
+
+.row {
+    $padding-size: 35px;
+    padding-left: $padding-size;
+    padding-right: $padding-size;
+}

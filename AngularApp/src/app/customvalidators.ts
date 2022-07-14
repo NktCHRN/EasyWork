@@ -15,6 +15,22 @@ export function createNotWhitespaceValidator(): ValidatorFn {
     }
 }
 
+export function createNumberOrUnlimitedValidator(): ValidatorFn {
+    return (control:AbstractControl) : ValidationErrors | null => {
+        const value = control.value;
+
+        if (!value) {
+            return null;
+        }
+
+        const isUnlimited = value == 'unlimited';
+        const parsed = parseInt(value);
+        const isNumber = parsed >= 0 && parsed <= 2147483647 && parsed.toString() == value;
+
+        return isUnlimited || isNumber ? null: {numberOrUnlimited:false};
+    }
+}
+
 export function createIsDusplicateValidator(isDuplicate: BooleanContainer): ValidationErrors
 {
     return (control:AbstractControl) : ValidationErrors | null => {

@@ -40,7 +40,7 @@ export class ProjectRoleService {
         {
           role: UserOnProjectRole.Manager,
           description: 'Manager has all user\'s abilities and also ' +
-          'can update an invite-code and its\' status, add users, kick participants with role "User" and change tasks\' limits'
+          'can update an invite-code and its\' status, add users, kick participants with role "User", delete tags of the whole project and change tasks\' limits'
         },
         {
           role: UserOnProjectRole.Owner,

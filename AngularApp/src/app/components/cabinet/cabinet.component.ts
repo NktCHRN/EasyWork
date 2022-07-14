@@ -69,7 +69,7 @@ export class CabinetComponent implements OnInit {
   public changeNumber(event: any)
   {
     let target = event.target;
-    target.value = target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+    target.value = target.value.replace(/[^0-9.]/g, '');
   }
 
   createForm() {

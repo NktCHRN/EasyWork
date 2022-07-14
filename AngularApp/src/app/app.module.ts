@@ -85,6 +85,7 @@ import { ProjectUserEditComponent } from './components/project/project-participa
 import {MatSelectModule} from '@angular/material/select';
 import { ProjectUserAddComponent } from './components/project/project-participants/project-user-add/project-user-add.component'; 
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import {MatExpansionModule} from '@angular/material/expansion'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -168,7 +169,8 @@ export function tokenGetter() {
     MatTableModule,
     MatTooltipModule,
     MatSelectModule,
-    NgxMatSelectSearchModule
+    NgxMatSelectSearchModule,
+    MatExpansionModule
   ],
   providers: [
     GeneralinfoService,
