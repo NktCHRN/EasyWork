@@ -22,6 +22,8 @@ import { UserOnProjectModel } from '../shared/project/user-on-project/user-on-pr
 import { ProjectLimitsModel } from '../shared/project/limits/project-limits.model';
 import { TasksModel } from '../shared/project/tasks/tasks.model';
 import { TagModel } from '../shared/tag/tag.model';
+import { AddTaskModel } from '../shared/task/add-task.model';
+import { TaskModel } from '../shared/task/task.model';
 
 @Injectable({
   providedIn: 'root'
@@ -295,6 +297,18 @@ export class ProjectService extends BaseService {
       })
     };
     return this._http.delete(this.serviceBaseURL + id + "/tags/" + tagId, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public addTask(token: string, id: number, model: AddTaskModel) : Observable<TaskModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.post<TaskModel>(this.serviceBaseURL + id + "/tasks/", model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

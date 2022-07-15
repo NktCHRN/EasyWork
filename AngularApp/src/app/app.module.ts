@@ -89,7 +89,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import { TaskReducedComponent } from './components/project/project-tasks/task-reduced/task-reduced.component';
 import { ScrollableDirective } from './directives/scrollable.directive'; 
 import {MatChipsModule} from '@angular/material/chips';
-import { ProjectTagDeleteComponent } from './components/project/project-tasks/project-tag-delete/project-tag-delete.component'; 
+import { ProjectTagDeleteComponent } from './components/project/project-tasks/project-tag-delete/project-tag-delete.component';
+import { TaskAddComponent } from './components/project/project-tasks/task-add/task-add.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -137,7 +138,8 @@ export function tokenGetter() {
     ProjectUserAddComponent,
     TaskReducedComponent,
     ScrollableDirective,
-    ProjectTagDeleteComponent
+    ProjectTagDeleteComponent,
+    TaskAddComponent
   ],
   imports: [
     BrowserModule,

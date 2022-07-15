@@ -11,6 +11,8 @@ import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { TagModel } from 'src/app/shared/tag/tag.model';
+import { TaskStatus } from 'src/app/shared/task/status/task-status';
+import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { ProjectTagDeleteComponent } from './project-tag-delete/project-tag-delete.component';
 
 @Component({
@@ -38,6 +40,7 @@ export class ProjectTasksComponent implements OnInit {
     }
   ];
   selectedTag: TagModel;
+  taskStatuses = TaskStatus;
 
   form: FormGroup = null!;
   @ViewChild('lform') formDirective: any;
@@ -239,5 +242,15 @@ export class ProjectTasksComponent implements OnInit {
             this.changeSelectedTag(this.tags[0]);
       };
     });
+  }
+
+  addTask(task: TaskReducedModel, where: TaskStatus) {
+    let modifiedWhere: string
+    if (where == TaskStatus.Complete)
+      modifiedWhere = 'done';
+    else
+      modifiedWhere = where.charAt(0).toLowerCase() + where.slice(1);
+    type ObjectKey = keyof typeof this.tasks;
+    this.tasks[modifiedWhere as ObjectKey].push(task);
   }
 }
