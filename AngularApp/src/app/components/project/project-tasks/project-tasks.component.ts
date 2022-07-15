@@ -12,6 +12,7 @@ import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/u
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { TagModel } from 'src/app/shared/tag/tag.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
+import { TaskStatusWithDescription } from 'src/app/shared/task/status/task-status-with-description.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { ProjectTagDeleteComponent } from './project-tag-delete/project-tag-delete.component';
 
@@ -41,6 +42,26 @@ export class ProjectTasksComponent implements OnInit {
   ];
   selectedTag: TagModel;
   taskStatuses = TaskStatus;
+  selectedStatus: TaskStatus = TaskStatus.ToDo;
+  readonly statusesWithDescription: TaskStatusWithDescription[] = 
+  [
+    {
+      status: TaskStatus.ToDo,
+      description: "To Do"
+    },
+    {
+      status: TaskStatus.InProgress,
+      description: "In Progress"
+    },
+    {
+      status: TaskStatus.Validate,
+      description: "Validate"
+    },
+    {
+      status: TaskStatus.Complete,
+      description: "Done"
+    },
+  ];
 
   form: FormGroup = null!;
   @ViewChild('lform') formDirective: any;

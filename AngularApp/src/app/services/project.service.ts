@@ -24,6 +24,7 @@ import { TasksModel } from '../shared/project/tasks/tasks.model';
 import { TagModel } from '../shared/tag/tag.model';
 import { AddTaskModel } from '../shared/task/add-task.model';
 import { TaskModel } from '../shared/task/task.model';
+import { TaskReducedModel } from '../shared/task/task-reduced.model';
 
 @Injectable({
   providedIn: 'root'
@@ -309,6 +310,18 @@ export class ProjectService extends BaseService {
       })
     };
     return this._http.post<TaskModel>(this.serviceBaseURL + id + "/tasks/", model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public getArchivedTasks(token: string, id: number) : Observable<TaskReducedModel[]>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<TaskReducedModel[]>(this.serviceBaseURL + id + "/archive/", httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

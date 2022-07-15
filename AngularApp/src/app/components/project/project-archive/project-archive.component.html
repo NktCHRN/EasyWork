@@ -1,1 +1,9 @@
-<p>project-archive works!</p>
+<div class="container" style="overflow-x: hidden">
+    <h1 class="text-center" style="font-size: 20pt">Archive</h1>
+    <div *ngIf="tasks" fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutGap="35px" fxLayoutGap.gt-sm="35px grid" style="overflow-x: hidden">
+        <app-task-reduced [ngClass.gt-sm]="'task-card'" *ngFor="let task of tasks" [model]="task"></app-task-reduced>
+    </div>
+    <div *ngIf="!tasks && !loadError">
+        <mat-spinner></mat-spinner>
+      </div>
+</div>
