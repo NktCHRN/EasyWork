@@ -1,0 +1,25 @@
+$size: 45px;
+
+.saved-icon {
+    font-size: $size;
+    height: $size;
+    width: $size;
+}
+
+$text-size: calc($size * 1.5);
+.saved-text {
+    width: $text-size;
+    text-align: center;
+}
+
+.header-text {
+    max-width: calc(100% - $text-size);
+    width: calc(100% - $text-size);
+    $font-size: 18pt;
+    font-size: $font-size;
+    line-height: $font-size;
+}
+
+.header-textonly {
+    width: calc(100% - 40px);
+}

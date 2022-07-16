@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
 import { TaskPriority } from '../shared/task/priority/task-priority';
+import { TaskModel } from '../shared/task/task.model';
 import { UserTaskModel } from '../shared/task/user-task.model';
 import { UserMiniWithAvatarModel } from '../shared/user/user-mini-with-avatar.model';
 import { BaseService } from './base.service';
@@ -36,6 +37,19 @@ export class TaskService extends BaseService {
         return array;
       }), catchError(this._processHTTPMsgService.handleError));
   }
+
+  public getById(token: string, id: number) : Observable<TaskModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<TaskModel>(this.serviceBaseURL + id, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
 
   public getExecutors(token: string, id: number) : Observable<UserMiniWithAvatarModel[]>
   {

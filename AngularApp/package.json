@@ -10,6 +10,8 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-material-components/datetime-picker": "^7.0.1",
+    "@angular-material-components/moment-adapter": "^7.0.0",
     "@angular/animations": "~13.3.0",
     "@angular/cdk": "^13.3.9",
     "@angular/common": "~13.3.0",
@@ -24,6 +26,7 @@
     "@auth0/angular-jwt": "^5.0.2",
     "angularx-social-login": "^4.1.0",
     "font-awesome": "^4.7.0",
+    "moment": "^2.29.4",
     "ngx-image-cropper": "^6.2.1",
     "ngx-mat-select-search": "^4.2.0",
     "rxjs": "~7.5.0",

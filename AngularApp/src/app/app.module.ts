@@ -22,7 +22,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { NotfoundComponent } from './components/notfound/notfound.component';
 import { RegistrationComponent } from './components/registration/registration.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatNativeDateModule} from '@angular/material/core';
+import {MatNativeDateModule, MAT_DATE_LOCALE} from '@angular/material/core';
 import {MatFormFieldModule} from '@angular/material/form-field'; 
 import { MatInputModule } from '@angular/material/input';
 import { AccountService } from './services/account.service';
@@ -90,7 +90,19 @@ import { TaskReducedComponent } from './components/project/project-tasks/task-re
 import { ScrollableDirective } from './directives/scrollable.directive'; 
 import {MatChipsModule} from '@angular/material/chips';
 import { ProjectTagDeleteComponent } from './components/project/project-tasks/project-tag-delete/project-tag-delete.component';
-import { TaskAddComponent } from './components/project/project-tasks/task-add/task-add.component'; 
+import { TaskAddComponent } from './components/project/project-tasks/task-add/task-add.component';
+import { TaskComponent } from './components/project/project-tasks/task/task.component'; 
+import {
+  NgxMatDateAdapter,
+  NgxMatDatetimePickerModule, 
+  NgxMatNativeDateModule, 
+  NgxMatTimepickerModule, 
+  NGX_MAT_DATE_FORMATS
+} from '@angular-material-components/datetime-picker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { CustomNgxDatetimeAdapter } from './shared/other/custom-date-adapter';
+import { NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular-material-components/moment-adapter';
+import { CUSTOM_DATE_FORMATS} from './shared/constants/date-formats';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -139,7 +151,8 @@ export function tokenGetter() {
     TaskReducedComponent,
     ScrollableDirective,
     ProjectTagDeleteComponent,
-    TaskAddComponent
+    TaskAddComponent,
+    TaskComponent
   ],
   imports: [
     BrowserModule,
@@ -180,7 +193,11 @@ export function tokenGetter() {
     MatSelectModule,
     NgxMatSelectSearchModule,
     MatExpansionModule,
-    MatChipsModule
+    MatChipsModule,
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
+    MatDatepickerModule
   ],
   providers: [
     GeneralinfoService,
@@ -211,7 +228,13 @@ export function tokenGetter() {
     TaskService,
     ProjectService,
     InviteService,
-    ProjectRoleService
+    ProjectRoleService,
+    {
+      provide: NgxMatDateAdapter,
+      useClass: CustomNgxDatetimeAdapter,
+      deps: [MAT_DATE_LOCALE, NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS]
+    },
+    { provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS }
   ],
   bootstrap: [AppComponent]
 })

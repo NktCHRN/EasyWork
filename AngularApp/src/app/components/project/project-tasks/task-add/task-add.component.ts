@@ -37,7 +37,6 @@ export class TaskAddComponent implements OnInit {
     },
   };
 
-
   constructor(private _projectService: ProjectService, private _tokenService: TokenService, 
     private _fb: FormBuilder, private _ngZone: NgZone, private _snackBar: MatSnackBar) { 
       this.createForm();

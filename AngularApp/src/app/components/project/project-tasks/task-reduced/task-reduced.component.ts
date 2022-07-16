@@ -1,8 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
+import { TaskComponent } from '../task/task.component';
 
 @Component({
   selector: 'app-task-reduced',
@@ -14,7 +16,7 @@ export class TaskReducedComponent implements OnInit {
   executors: UserMiniWithAvatarModel[] = [];
   prioritiesWithColors: any;
 
-  constructor(private _taskService: TaskService, private _tokenService: TokenService) { }
+  constructor(private _taskService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.prioritiesWithColors = this._taskService.getPrioritiesWithColors();
@@ -24,6 +26,10 @@ export class TaskReducedComponent implements OnInit {
 
   openDialog()
   {
-    console.log("The dialog should have been opened");
+    const dialogRef = this._dialog.open(TaskComponent, {
+      panelClass: "dialog-responsive",
+      data: this.model.id
+    });
+    // UPDATE ON CHANGE!!! (with emitter(s) or a dialogRef)
   }
 }

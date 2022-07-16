@@ -1,0 +1,72 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<form novalidate method="POST" [formGroup]="form" (ngSubmit)="onSubmit()" #tform="ngForm" *ngIf="task">
+    <h1 mat-dialog-title fxLayout="row" fxLayoutAlign="space-between center">
+        <div class="header-text">
+            <div *ngIf="!editName">
+                <span class="orange">{{task.name}}</span>
+                <button mat-icon-button (click)="toggleEditName()"><mat-icon>edit</mat-icon></button>
+            </div>
+            <div class="w-100" *ngIf="editName" fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field *ngIf="editName" class="header-textonly">
+                    <mat-label>Name</mat-label>
+                    <textarea matInput
+                            cdkTextareaAutosize
+                            #nameAutosize="cdkTextareaAutosize"
+                            (blur)="onSubmit()"
+                            formControlName="name"></textarea>
+                    <mat-error *ngIf="formErrors.name">{{formErrors.name}}</mat-error>
+                </mat-form-field>
+                <button mat-icon-button (click)="toggleEditName()"><mat-icon>cancel</mat-icon></button>
+            </div>
+        </div>
+        <div fxLayout="column" fxLayoutAlign="center center" *ngIf="savedIconState" [ngStyle]="{'color': savedIconColors[savedIconState]}">
+            <mat-icon class="saved-icon">save</mat-icon>
+            <span class="text-xs mb-0 saved-text">
+            <p *ngIf="savedIconState == iconStates.Fail">Error<br>The changes were not saved</p>
+            <p *ngIf="savedIconState == iconStates.Loading">Saving...</p>
+            <p *ngIf="savedIconState == iconStates.Success">Saved</p>
+            </span>
+        </div>
+    </h1>
+    <mat-dialog-content>
+        <div fxLayout="column" fxLayoutGap="30px">
+            <div fxLayout="column" fxLayout.gt-sm="row" fxLayoutGap="30px">
+                <div fxFlex="65" fxLayoutGap="30px">
+                    <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>description</mat-icon><span>&nbsp;Description</span></h2>
+                    <mat-form-field class="w-100" appearance="outline">
+                        <textarea matInput
+                                cdkTextareaAutosize
+                                #descriptionAutosize="cdkTextareaAutosize"
+                                (blur)="onSubmit()"
+                                formControlName="description"
+                                cdkAutosizeMinRows="3"></textarea>
+                    </mat-form-field>
+                    <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>event</mat-icon><span>&nbsp;Dates</span></h2>
+                    <p class="text-muted">Start date: {{task.startDate | date:'d MMM y, HH:mm'}}</p>
+                    <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>Deadline</mat-label>
+                        <input matInput [ngxMatDatetimePicker]="deadlinePicker" formControlName="deadline"
+                        (dateChange)="onSubmit()" [min]="task.startDate">
+                        <mat-datepicker-toggle matSuffix [for]="$any(deadlinePicker)"></mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #deadlinePicker [touchUi]="true"></ngx-mat-datetime-picker>
+                      </mat-form-field>
+                      <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>End date</mat-label>
+                        <input matInput [ngxMatDatetimePicker]="endDatePicker" formControlName="endDate"
+                        (dateChange)="onSubmit()" [min]="task.startDate">
+                        <mat-datepicker-toggle matSuffix [for]="$any(endDatePicker)"></mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #endDatePicker [touchUi]="true"></ngx-mat-datetime-picker>
+                      </mat-form-field>
+                </div>
+                <div fxFlex="35" fxLayoutGap="30px">
+                    BLOCK 2 (executors & tags & files)
+                </div>
+            </div>
+            <div fxLayoutGap="30px">
+                BLOCK 3 (messages)
+            </div>
+        </div>
+    </mat-dialog-content>
+</form>
