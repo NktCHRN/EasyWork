@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
 import { InviteCodeModel } from 'src/app/shared/project/invite/invite-code.model';
@@ -24,7 +24,7 @@ export class ProjectInviteComponent implements OnInit {
   inviteCode: InviteCodeModel = undefined!;
 
   constructor(private _tokenService: TokenService, private _projectService: ProjectService, private _clipboard: Clipboard,
-    private _snackBar: MatSnackBar, private _dialog: MatDialog) { }
+    private _snackBar: MatSnackBar, private _dialog: MatDialog, @Inject('appURL') private _appURL: string) { }
 
   ngOnInit(): void {
     this._projectService.getInviteCode(this._tokenService.getJwtToken()!, this.projectId)
@@ -34,13 +34,10 @@ export class ProjectInviteComponent implements OnInit {
     });
   }
 
-  copy(): void {
-    if (this.inviteCode.inviteCode)
-    {
-      this._clipboard.copy(this.inviteCode.inviteCode);
+  copy(text: string): void {
+      this._clipboard.copy(text);
       this.successCopy = true;
       setTimeout(() => this.successCopy = false, 5000);
-    }
   }
 
   toggleStatus(): void {
@@ -71,5 +68,9 @@ export class ProjectInviteComponent implements OnInit {
         setTimeout(() => this.successRegeneration = false, 5000);
       }
     );
+  }
+
+  public get link(): string {
+    return this._appURL + 'invite/' + this.inviteCode.inviteCode;
   }
 }

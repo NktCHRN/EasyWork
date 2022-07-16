@@ -7,8 +7,11 @@
         </mat-card-subtitle>
         <mat-card-content class="text-md">
             <p class="mb-0" *ngIf="inviteCode && !errorMessage" [ngClass]="{'text-muted' : !inviteCode.isInviteCodeActive}">{{inviteCode.inviteCode}}
-                <button mat-icon-button (click)="copy()">
+                <button mat-icon-button (click)="copy(inviteCode.inviteCode!)" matTooltip="Copy">
                     <mat-icon>content_copy</mat-icon>
+                </button>
+                <button mat-icon-button (click)="copy(link)" matTooltip="Copy a link">
+                    <mat-icon>link</mat-icon>
                 </button>
             </p>
             <p *ngIf="successCopy" class="text-muted text-sm">Copied</p>
