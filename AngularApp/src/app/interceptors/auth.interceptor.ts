@@ -29,8 +29,20 @@ export class AuthInterceptor implements HttpInterceptor {
         && error.status === 401) {
         return this.handle401Error(authReq, next);
       }
+      else if (error instanceof HttpErrorResponse 
+        && error.status === 403 && error?.error === "You are banned") {
+        return this.handleBannedError(error);
+      }
       return throwError(() => error);
     }));
+  }
+
+  private handleBannedError(error: HttpErrorResponse) : Observable<HttpEvent<any>> {
+    this._accountService.logout();
+    this._accountService.sendAuthStateChangeNotification(false);
+    this._router.navigate(["login"]); 
+    console.log(error);
+    return throwError(() => error);
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
