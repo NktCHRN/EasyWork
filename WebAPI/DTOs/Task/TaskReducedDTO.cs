@@ -12,6 +12,8 @@
 
         public DateTimeOffset? EndDate { get; init; }
 
+        public string? Priority { get; init; }
+
         public int MessagesCount { get; init; }
 
         public int FilesCount { get; init; }

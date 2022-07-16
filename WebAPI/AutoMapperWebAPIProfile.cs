@@ -73,7 +73,8 @@ namespace WebAPI
             CreateMap<TagModel, TagDTO>();
             CreateMap<TaskModel, TaskReducedDTO>()
                 .ForMember(t => t.MessagesCount, m => m.MapFrom(tsk => tsk.MessagesIds.Count))
-                .ForMember(t => t.FilesCount, m => m.MapFrom(tsk => tsk.FilesIds.Count));
+                .ForMember(t => t.FilesCount, m => m.MapFrom(tsk => tsk.FilesIds.Count))
+                .ForMember(t => t.Priority, m => m.MapFrom(tsk => (tsk.Priority == null) ? null : tsk.Priority.Value.ToString()));
             CreateMap<TaskModel, TaskDTO>()
                 .ForMember(t => t.Status, m => m.MapFrom(tsk => tsk.Status.ToString()))
                 .ForMember(t => t.Priority, m => m.MapFrom(tsk => (tsk.Priority == null) ? null : tsk.Priority.Value.ToString()));
