@@ -7,6 +7,7 @@ using Business.Services;
 using Data;
 using Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -14,8 +15,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System.Security.Claims;
 using System.Text;
 using WebAPI;
+using WebAPI.Authorization;
 using WebAPI.Data;
 using WebAPI.TokenProviders;
 
@@ -74,6 +77,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true
         };
     });
+builder.Services.AddTransient<IAuthorizationHandler, NotBannedHandler>();
+builder.Services.AddAuthorization(options => {
+    var userAuthPolicyBuilder = new AuthorizationPolicyBuilder();
+    options.DefaultPolicy = userAuthPolicyBuilder
+                                    .RequireAuthenticatedUser()
+                                    .RequireClaim(ClaimTypes.NameIdentifier)
+                                    .AddRequirements(new NotBannedRequirement())
+                                    .Build();
+});
+
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, NotBannedAuthorizationMiddlewareResultHandler>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped);
