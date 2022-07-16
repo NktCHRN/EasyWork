@@ -126,7 +126,7 @@ namespace Business.Services
             var result = IModelValidator<TaskModel>.IsValidByDefault(model, out firstErrorMessage);
             if (!result)
                 return false;
-            if ((model.Deadline is not null && model.Deadline <= model.StartDate) 
+            if ((model.Deadline is not null && model.Deadline < model.StartDate) 
                 || (model.EndDate is not null && model.EndDate < model.StartDate))
             {
                 firstErrorMessage = "Something wrong with start date, deadline or end date";
