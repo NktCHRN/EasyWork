@@ -12,6 +12,8 @@ namespace WebAPI.DTOs.Task
 
         public DateTimeOffset? Deadline { get; set; }
 
+        public DateTimeOffset? EndDate { get; init; }
+
         [Required(AllowEmptyStrings = false)]
         public string Status { get; set; } = string.Empty;
 

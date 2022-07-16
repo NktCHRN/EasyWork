@@ -24,8 +24,6 @@ using WebAPI.TokenProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -161,6 +159,6 @@ var seeder = new DataSeeder()
     UserManager = serviceScope.ServiceProvider.GetService<UserManager<User>>()!
 };
 await seeder.SeedRoles();
-await seeder.SeedUsers();           // delete on production !!!
+await seeder.SeedUsers();
 
 app.Run();

@@ -699,25 +699,6 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task UpdateAsyncTest_FromCompleteToLower_UpdatesModelAndSetNullToEndDate()
-        {
-            // Arrange
-            SeedData();
-            var id = 5;
-            var model = _mapper.Map<TaskModel>(await _context.Tasks.SingleAsync(t => t.Id == id));
-            model.Status = TaskStatuses.ToDo;
-            var expectedName = model.Name;
-            
-            // Act
-            await _service.UpdateAsync(model);
-
-            // Assert
-            var actual = await _context.Tasks.Include(t => t.Tags).SingleAsync(r => r.Id == model.Id);
-            Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
-            Assert.IsNull(actual.EndDate);
-        }
-
-        [Test]
         public async Task UpdateAsyncTest_NotChangedStatus_UpdatesEntity()
         {
             // Arrange

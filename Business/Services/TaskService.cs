@@ -174,10 +174,6 @@ namespace Business.Services
             var existingModel = await GetNotMappedByIdAsync(model.Id);
             if (model.ProjectId != existingModel.ProjectId)
                 throw new ArgumentException("Project id cannot be changed", nameof(model));
-            if (model.Status == TaskStatuses.Complete && existingModel.Status < TaskStatuses.Complete)
-                model.EndDate = DateTimeOffset.UtcNow;
-            else if (model.Status < TaskStatuses.Complete)
-                model.EndDate = null;
             if (model.Status != existingModel.Status)
                 await CheckStatus(model);
             existingModel = _mapper.Map(model, existingModel);
