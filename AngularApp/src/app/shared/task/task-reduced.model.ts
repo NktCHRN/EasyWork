@@ -1,13 +1,17 @@
+import { TaskPriority } from "./priority/task-priority";
+
 export interface TaskReducedModel {
-    id: number
+    id: number;
 
-    name: string
+    name: string;
 
-    startDate: string
+    startDate: string;
 
     deadline: string | null | undefined
 
-    endDate: string | null | undefined
+    endDate: string | null | undefined;
+
+    priority: TaskPriority | null | undefined;
 
     messagesCount: number;
 

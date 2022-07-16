@@ -12,10 +12,12 @@ import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avat
 export class TaskReducedComponent implements OnInit {
   @Input() model: TaskReducedModel = undefined!;
   executors: UserMiniWithAvatarModel[] = [];
+  prioritiesWithColors: any;
 
   constructor(private _taskService: TaskService, private _tokenService: TokenService) { }
 
   ngOnInit(): void {
+    this.prioritiesWithColors = this._taskService.getPrioritiesWithColors();
     this._taskService.getExecutors(this._tokenService.getJwtToken()!, this.model.id)
     .subscribe(result => this.executors = result);
   }

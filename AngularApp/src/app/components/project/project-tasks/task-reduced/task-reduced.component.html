@@ -2,6 +2,7 @@
         <mat-card-title class="orange"><a title="{{model.name}}" (click)="openDialog()">{{model.name}}</a></mat-card-title>
         <mat-card-subtitle>Started: {{model.startDate | date:'d MMM y, HH:mm'}}</mat-card-subtitle>
         <mat-card-content>
+            <p *ngIf="model.priority"><strong>Priority: </strong><span [ngStyle]="{'color': prioritiesWithColors[model.priority]}">{{model.priority}}</span></p>
             <p *ngIf="model.deadline"><strong class="deep-orange">Deadline:</strong> {{model.deadline | date:'d MMM y, HH:mm'}}</p>
             <p *ngIf="model.endDate"><strong>Ended:</strong> {{model.endDate | date:'d MMM y, HH:mm'}}</p>
             <p fxLayoutAlign="start center" fxLayoutGap="30px">
