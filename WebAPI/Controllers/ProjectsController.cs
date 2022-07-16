@@ -11,7 +11,6 @@ using WebAPI.DTOs.Project.Gantt;
 using WebAPI.DTOs.Project.InviteCode;
 using WebAPI.DTOs.Project.Limits;
 using WebAPI.DTOs.Project.Tasks;
-using WebAPI.DTOs.ProjectRelease;
 using WebAPI.DTOs.Tag;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.User;
@@ -33,19 +32,16 @@ namespace WebAPI.Controllers
 
         private readonly IUserOnProjectService _userOnProjectService;
 
-        private readonly IReleaseService _releaseService;
-
         private readonly ITagService _tagService;
 
         private readonly ITaskService _taskService;
 
         private readonly IMapper _mapper;
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
         {
             _projectService = projectService;
             _mapper = mapper;
             _userOnProjectService = userOnProjectService;
-            _releaseService = releaseService;
             _tagService = tagService;
             _userManager = userManager;
             _fileManager = fileManager;
@@ -272,42 +268,6 @@ namespace WebAPI.Controllers
                 return BadRequest(exc.Message);
             }
             return Created($"{this.GetApiUrl()}Invites/{project.InviteCode}", project.InviteCode);
-        }
-
-        [HttpGet("{id}/releases")]
-        public async Task<IActionResult> GetProjectReleases(int id)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
-                return Forbid();
-            return Ok(_mapper.Map<IEnumerable<ReleaseDTO>>(_releaseService.GetProjectReleases(id)));
-        }
-
-        [HttpPost("{id}/releases")]
-        public async Task<IActionResult> AddRelease(int id, [FromBody]AddReleaseDTO dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
-                return Forbid();
-            var release = _mapper.Map<ReleaseModel>(dto);
-            release.Date = DateTimeOffset.UtcNow;
-            release.ProjectId = id;
-            try
-            {
-                await _releaseService.AddAsync(release);
-            }
-            catch (ArgumentException exc)
-            {
-                return BadRequest(exc.Message);
-            }
-            return Created($"{this.GetApiUrl()}Releases/{release.Id}", _mapper.Map<ReleaseDTO>(release));
         }
 
         [HttpGet("{id}/tags")]

@@ -16,8 +16,6 @@ namespace Business
             CreateMap<Project, ProjectModel>()
                 .ForMember(e => e.TeamMembersIds,
                 m => m.MapFrom(pm => pm.TeamMembers.Select(t => ValueTuple.Create(t.ProjectId, t.UserId))))
-                .ForMember(e => e.ReleasesIds,
-                m => m.MapFrom(pm => pm.Releases.Select(r => r.Id)))
                 .ForMember(e => e.TasksIds,
                 m => m.MapFrom(pm => pm.Tasks.Select(t => t.Id)))
                 .ForMember(e => e.Limits,
@@ -35,7 +33,6 @@ namespace Business
                 .ForMember(d => d.MaxValidate,
                 s => s.MapFrom(m => m.Limits.MaxValidate));
             CreateMap<ProjectLimitsModel, Project>();
-            CreateMap<Release, ReleaseModel>().ReverseMap();
             CreateMap<Data.Entities.Task, TaskModel>()
                 .ForMember(e => e.FilesIds,
                 m => m.MapFrom(tm => tm.Files.Select(f => f.Id)))

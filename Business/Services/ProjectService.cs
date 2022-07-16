@@ -73,7 +73,6 @@ namespace Business.Services
             var model = await _context.Projects
                 .Include(m => m.TeamMembers)
                 .Include(m => m.Tasks)
-                .Include(m => m.Releases)
                 .SingleOrDefaultAsync(m => m.Id == id);
             return _mapper.Map<ProjectModel?>(model);
         }

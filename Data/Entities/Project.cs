@@ -26,7 +26,6 @@ namespace Data.Entities
 
         public bool IsInviteCodeActive { get; set; }
 
-        public ICollection<Release> Releases { get; set; } = new List<Release>();
         public ICollection<UserOnProject> TeamMembers { get; set; } = new List<UserOnProject>();
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
     }

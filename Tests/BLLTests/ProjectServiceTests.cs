@@ -709,7 +709,6 @@ namespace Tests.BLLTests
 
             // Assert
             Assert.AreEqual(id, actual!.Id, "Method returns wrong element");
-            Assert.AreNotEqual(null, actual!.ReleasesIds, "Method does not load releases ids");
             Assert.AreNotEqual(null, actual!.TasksIds, "Method does not load tasks ids");
             Assert.AreNotEqual(null, actual!.TeamMembersIds, "Method does not load team members ids");
         }

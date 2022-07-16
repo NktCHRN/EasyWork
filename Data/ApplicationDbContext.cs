@@ -15,8 +15,6 @@ namespace Data
 
         public DbSet<Project> Projects => Set<Project>();
 
-        public DbSet<Release> Releases => Set<Release>();
-
         public DbSet<Entities.Task> Tasks => Set<Entities.Task>();
 
         public DbSet<UserOnProject> UsersOnProjects => Set<UserOnProject>();
@@ -50,11 +48,6 @@ namespace Data
             builder.Entity<Entities.Task>()
             .HasOne(t => t.Project)
             .WithMany(p => p.Tasks)
-            .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<Release>()
-            .HasOne(r => r.Project)
-            .WithMany(p => p.Releases)
             .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<UserOnProject>()
