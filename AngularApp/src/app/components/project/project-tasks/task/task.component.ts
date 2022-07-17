@@ -1,7 +1,7 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { Component, Inject, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
@@ -16,6 +16,7 @@ import { TaskModel } from 'src/app/shared/task/task.model';
 import { UpdateTaskModel } from 'src/app/shared/task/update-task.model';
 import { EventEmitter } from '@angular/core';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
+import { TaskDeleteComponent } from '../task-delete/task-delete.component';
 
 @Component({
   selector: 'app-task',
@@ -41,7 +42,9 @@ export class TaskComponent implements OnInit {
   readonly statusesWithDescription: TaskStatusWithDescriptionModel[];
   readonly priorities: (TaskPriority | TaskPriorityNone)[];
   @Output() updatedTask: EventEmitter<UpdateTaskModel> = new EventEmitter<UpdateTaskModel>();
+  @Output() deletedTask: EventEmitter<number> = new EventEmitter<number>();
   errorMessage: string | null | undefined;
+  readonly taskStatuses = TaskStatus;
 
   formErrors : any = {
     'name': '',
@@ -57,7 +60,7 @@ export class TaskComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskDialogSettingsModel, 
   private _taskService: TaskService, private _tokenService: TokenService, private _snackBar: MatSnackBar, 
-  private _fb: FormBuilder, private _router: Router) { 
+  private _fb: FormBuilder, private _router: Router, private _dialog: MatDialog) { 
     this._taskId = data.taskId;
     this.showToProject = data.showToProjectButton;
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(true);
@@ -168,6 +171,21 @@ export class TaskComponent implements OnInit {
         }
       });
     }
+  }
+
+  openDeleteDialog() {
+    const dialogRef = this._dialog.open(TaskDeleteComponent, {
+      panelClass: "dialog-responsive",
+      data: {
+        ...this.task
+      }
+    });
+    dialogRef.afterClosed()
+    .subscribe(() => {
+      if (dialogRef.componentInstance.success)
+        this._dialogRef.close();
+        this.deletedTask.emit(this.task.id);
+    });
   }
 
   switchToLoadingMode() {

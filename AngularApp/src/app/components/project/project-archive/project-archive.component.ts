@@ -50,10 +50,14 @@ export class ProjectArchiveComponent implements OnInit {
   }
 
   onMovedFromArchive(event: TaskReducedWithStatusModel): void {
-    const index = this.tasks.findIndex(t => t.id == event.id);
+    this.onDeletedTask(event.id);
+    this.subscribeToTask(event.id);
+  }
+
+  onDeletedTask(id: number): void {
+    const index = this.tasks.findIndex(t => t.id == id);
     if (index != -1)
       this.tasks.splice(index, 1);
-    this.subscribeToTask(event.id);
   }
 
   private subscribeToTask(taskId: number) {

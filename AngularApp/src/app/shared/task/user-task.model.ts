@@ -1,8 +1,6 @@
-export interface UserTaskModel {
-    id: number;
+import { TaskExtraReducedModel } from "./task-extra-reduced.model";
 
-    name: string;
-
+export interface UserTaskModel extends TaskExtraReducedModel {
     startDate: string;
 
     deadline: string | null | undefined;

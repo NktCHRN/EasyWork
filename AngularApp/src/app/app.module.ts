@@ -103,6 +103,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { CustomNgxDatetimeAdapter } from './shared/other/custom-date-adapter';
 import { NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular-material-components/moment-adapter';
 import { CUSTOM_DATE_FORMATS} from './shared/constants/date-formats';
+import { TaskDeleteComponent } from './components/project/project-tasks/task-delete/task-delete.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -152,7 +153,8 @@ export function tokenGetter() {
     ScrollableDirective,
     ProjectTagDeleteComponent,
     TaskAddComponent,
-    TaskComponent
+    TaskComponent,
+    TaskDeleteComponent
   ],
   imports: [
     BrowserModule,

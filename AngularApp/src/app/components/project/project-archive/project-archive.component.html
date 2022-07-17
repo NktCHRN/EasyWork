@@ -2,7 +2,7 @@
     <h1 class="text-center" style="font-size: 20pt">Archive</h1>
     <div *ngIf="tasks" fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutGap="35px" fxLayoutGap.gt-sm="35px grid" style="overflow-x: hidden">
         <app-task-reduced [ngClass.gt-sm]="'task-card'" *ngFor="let task of tasks" [model]="task" [status]="taskStatuses.Archived"
-        (movedToArchived)="onMovedToArchive($event)" (movedFromArchived)="onMovedFromArchive($event)"></app-task-reduced>
+        (movedToArchived)="onMovedToArchive($event)" (movedFromArchived)="onMovedFromArchive($event)" (deleted)="onDeletedTask($event)"></app-task-reduced>
     </div>
     <div *ngIf="!tasks && !loadError">
         <mat-spinner></mat-spinner>

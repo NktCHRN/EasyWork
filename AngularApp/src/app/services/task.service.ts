@@ -63,7 +63,19 @@ export class TaskService extends BaseService {
         'Authorization': 'Bearer ' + token
       })
     };
-    return this._http.put<UpdateTaskModel>(this.serviceBaseURL + id, model, httpOptions)
+    return this._http.put(this.serviceBaseURL + id, model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public delete(token: string, id: number) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + id, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

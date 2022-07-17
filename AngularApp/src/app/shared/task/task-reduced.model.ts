@@ -1,10 +1,7 @@
 import { TaskPriority } from "./priority/task-priority";
+import { TaskExtraReducedModel } from "./task-extra-reduced.model";
 
-export interface TaskReducedModel {
-    id: number;
-
-    name: string;
-
+export interface TaskReducedModel extends TaskExtraReducedModel {
     startDate: string;
 
     deadline: string | null | undefined

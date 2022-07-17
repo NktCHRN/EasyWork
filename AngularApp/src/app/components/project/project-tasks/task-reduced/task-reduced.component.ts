@@ -22,6 +22,7 @@ export class TaskReducedComponent implements OnInit {
   @Output() updatedStatus: EventEmitter<TaskStatusChangeModel> = new EventEmitter<TaskStatusChangeModel>();
   @Output() movedFromArchived: EventEmitter<TaskReducedWithStatusModel> = new EventEmitter<TaskReducedWithStatusModel>();
   @Output() movedToArchived: EventEmitter<TaskReducedModel> = new EventEmitter<TaskReducedModel>();
+  @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
 
   constructor(private _taskService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog) { }
 
@@ -63,6 +64,9 @@ export class TaskReducedComponent implements OnInit {
           this.status = task.status
         }
       }
+    );
+    dialogRef.componentInstance.deletedTask.subscribe(
+      id => this.deleted.emit(id)
     );
     // add update for a files/messages quantity change
   }
