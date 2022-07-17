@@ -38,7 +38,7 @@
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
                         <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task" [status]="taskStatuses.ToDo" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
+                        <app-task-add *ngIf="(!limits.maxToDo && limits.maxToDo != 0) || limits.maxToDo > tasks.toDo.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.toDo && !loadError">
                         <mat-spinner></mat-spinner>
@@ -61,7 +61,7 @@
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
                         <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task" [status]="taskStatuses.InProgress" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
+                        <app-task-add *ngIf="(!limits.maxInProgress && limits.maxInProgress != 0) || limits.maxInProgress > tasks.inProgress.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.inProgress && !loadError">
                         <mat-spinner></mat-spinner>
@@ -84,7 +84,7 @@
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
                         <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task" [status]="taskStatuses.Validate" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
+                        <app-task-add *ngIf="(!limits.maxValidate && limits.maxValidate != 0) || limits.maxValidate > tasks.validate.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.validate && !loadError">
                         <mat-spinner></mat-spinner>
@@ -160,7 +160,7 @@
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
                         <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task" [status]="taskStatuses.ToDo" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
+                        <app-task-add *ngIf="(!limits.maxToDo && limits.maxToDo != 0) || limits.maxToDo > tasks.toDo.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.toDo && !loadError">
                         <mat-spinner></mat-spinner>
@@ -183,7 +183,7 @@
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
                         <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task" [status]="taskStatuses.InProgress" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
+                        <app-task-add *ngIf="(!limits.maxInProgress && limits.maxInProgress != 0) || limits.maxInProgress > tasks.inProgress.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.inProgress && !loadError">
                         <mat-spinner></mat-spinner>
@@ -206,7 +206,7 @@
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
                         <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task" [status]="taskStatuses.Validate" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
+                        <app-task-add *ngIf="(!limits.maxValidate && limits.maxValidate != 0) || limits.maxValidate > tasks.validate.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.validate && !loadError">
                         <mat-spinner></mat-spinner>
