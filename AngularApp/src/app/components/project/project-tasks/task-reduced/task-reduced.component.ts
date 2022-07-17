@@ -68,6 +68,8 @@ export class TaskReducedComponent implements OnInit {
     dialogRef.componentInstance.deletedTask.subscribe(
       id => this.deleted.emit(id)
     );
-    // add update for a files/messages quantity change
+    dialogRef.componentInstance.addedMessage.subscribe(() => this.model.messagesCount++);
+    dialogRef.componentInstance.deletedMessage.subscribe(() => this.model.messagesCount--);
+    // add an update for a files quantity change
   }
 }

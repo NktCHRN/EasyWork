@@ -1,0 +1,53 @@
+<div *ngIf="messages" fxLayout="column" fxLayoutGap="20px">
+    <mat-card>
+        <form novalidate method="POST" [formGroup]="form" (ngSubmit)="onSubmit()" #aform="ngForm">
+            <mat-card-header>
+                <img 
+                mat-card-avatar 
+                src="{{me.avatarURL ? me.avatarURL : '../../assets/default-avatar.png'}}" 
+                alt="{{me.fullName}}'s avatar">
+                <mat-card-title fxShow fxHide.gt-sm>
+                    <h2 class="orange">{{me.fullName}}</h2>
+                </mat-card-title>
+                <mat-form-field appearance="fill" class="w-100 text-sm" fxHide fxShow.gt-sm>
+                    <mat-label>New message...</mat-label>
+                    <textarea matInput cdkTextareaAutosize
+                    #textAutosize="cdkTextareaAutosize"
+                    formControlName="text"
+                    cdkAutosizeMinRows="3"></textarea>
+                    <mat-error *ngIf="formErrors.text">{{formErrors.text}}</mat-error>
+                </mat-form-field>
+            </mat-card-header>
+            <mat-card-content fxShow fxHide.gt-sm class="mb-0">
+                <mat-form-field appearance="fill" class="w-100 text-sm">
+                    <mat-label>New message...</mat-label>
+                    <textarea matInput cdkTextareaAutosize
+                    #textAutosize="cdkTextareaAutosize"
+                    formControlName="text"
+                    cdkAutosizeMinRows="3"></textarea>
+                    <mat-error *ngIf="formErrors.text">{{formErrors.text}}</mat-error>
+                </mat-form-field>
+            </mat-card-content>
+            <mat-card-actions class="pt-0" fxLayout="row" fxLayoutAlign="end center">
+                <button mat-button type="submit"><span class="orange">Send&nbsp;&nbsp;</span><mat-icon color="primary">send</mat-icon></button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+    <app-task-message 
+    *ngFor="let message of messages" 
+    [message]="message" 
+    [meOnProject]="meOnProject" 
+    (closeDialog)="onCloseDialog()" 
+    (deletedMessage)="onDeletedMessage($event)"
+    (switchedToLoading)="switchedToLoading.emit()"
+    (switchedToSuccess)="switchedToSuccess.emit()"
+    (switchedToFail)="switchedToFail.emit()"
+    (closeOther)="closeOther($event)"
+    ></app-task-message>
+</div>
+<div *ngIf="loading">
+    <mat-spinner></mat-spinner>
+</div>
+<div *ngIf="errorMessage">
+    <h1 class="red" mat-dialog-title>{{errorMessage}}</h1>
+</div>

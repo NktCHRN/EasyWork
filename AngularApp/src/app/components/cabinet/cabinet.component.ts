@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AccountService } from '../../services/account.service';
-import { UserinfoService } from '../../services/userinfo.service';
+import { UserInfoService } from '../../services/userinfo.service';
 import { createNotWhitespaceValidator } from '../../customvalidators';
 import { UpdateUserModel } from '../../shared/user/update-user.model';
 import { UserCabinetModel } from '../../shared/user/cabinet/user-cabinet.model';
@@ -45,7 +45,7 @@ export class CabinetComponent implements OnInit {
     }
   };
 
-  constructor(private _fb: FormBuilder, private _userInfoService: UserinfoService, private _accountService: AccountService,
+  constructor(private _fb: FormBuilder, private _userInfoService: UserInfoService, private _accountService: AccountService,
     private _snackBar: MatSnackBar, private _dialog: MatDialog) { 
     this.createForm();
   }

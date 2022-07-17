@@ -59,4 +59,15 @@ export class TokenService extends BaseService {
     localStorage.setItem("jwt", tokens.accessToken);
     localStorage.setItem("refreshToken", tokens.refreshToken); 
   }
+
+  public getMyId(): number | null | undefined {
+    const token = this.getJwtToken();
+    let id = undefined;
+    if (token)
+    {
+      const decoded = this._jwtService.decodeToken();
+      id = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+    }
+    return id;
+  }
 }

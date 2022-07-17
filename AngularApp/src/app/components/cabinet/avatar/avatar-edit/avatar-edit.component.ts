@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { base64ToFile, CropperPosition, ImageCroppedEvent, ImageCropperComponent, ImageTransform } from 'ngx-image-cropper';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
 import { AccountService } from 'src/app/services/account.service';
-import { UserinfoService } from 'src/app/services/userinfo.service';
+import { UserInfoService } from 'src/app/services/userinfo.service';
 import { AvatarPageMode } from 'src/app/shared/user/cabinet/avatar-page-mode';
 
 @Component({
@@ -35,7 +35,7 @@ export class AvatarEditComponent implements OnInit {
   width: number = 0;
   height: number = 0;
   
-  constructor(private _dialog: MatDialog, private _accountService: AccountService, private _userInfoService: UserinfoService) { }
+  constructor(private _dialog: MatDialog, private _accountService: AccountService, private _userInfoService: UserInfoService) { }
 
   ngOnInit(): void {  }
 

@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AccountService } from 'src/app/services/account.service';
 import { TokenService } from 'src/app/services/token.service';
-import { UserinfoService } from 'src/app/services/userinfo.service';
+import { UserInfoService } from 'src/app/services/userinfo.service';
 
 @Component({
   selector: 'app-avatar-delete',
@@ -17,7 +17,7 @@ export class AvatarDeleteComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<AvatarDeleteComponent>,
     private _accountService: AccountService,
-    private _userInfoService: UserinfoService,
+    private _userInfoService: UserInfoService,
     private _tokenService: TokenService) {
       this._dialogRef.afterClosed()
       .subscribe(() => {

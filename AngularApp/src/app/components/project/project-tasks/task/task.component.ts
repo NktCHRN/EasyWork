@@ -45,6 +45,8 @@ export class TaskComponent implements OnInit {
   @Output() deletedTask: EventEmitter<number> = new EventEmitter<number>();
   errorMessage: string | null | undefined;
   readonly taskStatuses = TaskStatus;
+  @Output() addedMessage = new EventEmitter();
+  @Output() deletedMessage = new EventEmitter();
 
   formErrors : any = {
     'name': '',
@@ -199,5 +201,9 @@ export class TaskComponent implements OnInit {
 
   switchToFailMode() {
     this.savedIconState = this.iconStates.Fail;
+  }
+
+  close() {
+    this._dialogRef.close();
   }
 }

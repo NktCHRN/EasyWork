@@ -87,30 +87,33 @@ export class TaskAddComponent implements OnInit {
   }
 
   onSubmit() {
-    this.loading = true;
-    const model: AddTaskModel = {
-      name: this.form.get('name')?.value,
-      status: this.taskStatus
-    };
-    this._projectService.addTask(this._tokenService.getJwtToken()!, this.projectId, model)
-    .subscribe({
-      next: result => {
-        this.loading = false;
-        const reducedResult: TaskReducedModel = {
-          filesCount: 0,
-          messagesCount: 0,
-          ...result
-        };
-        this.added.emit(reducedResult);
-        this.form.reset();
-        this.isOpened = false;
-      },
-      error: error => {
-        this.loading = false;
-        this._snackBar.open(`Task has not been added: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
-          duration: 5000,
-        });
-      }
-    });
+    if (this.form.valid)
+    {
+      this.loading = true;
+      const model: AddTaskModel = {
+        name: this.form.get('name')?.value,
+        status: this.taskStatus
+      };
+      this._projectService.addTask(this._tokenService.getJwtToken()!, this.projectId, model)
+      .subscribe({
+        next: result => {
+          this.loading = false;
+          const reducedResult: TaskReducedModel = {
+            filesCount: 0,
+            messagesCount: 0,
+            ...result
+          };
+          this.added.emit(reducedResult);
+          this.form.reset();
+          this.isOpened = false;
+        },
+        error: error => {
+          this.loading = false;
+          this._snackBar.open(`Task has not been added: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
+            duration: 5000,
+          });
+        }
+      });
+    }
   }
 }

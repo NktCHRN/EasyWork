@@ -1,6 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
+import { AddMessageModel } from '../shared/message/add-message.model';
+import { MessageModel } from '../shared/message/message.model';
 import { TaskPriority } from '../shared/task/priority/task-priority';
 import { TaskPriorityNone } from '../shared/task/priority/task-priority-none';
 import { TaskStatus } from '../shared/task/status/task-status';
@@ -88,6 +90,30 @@ export class TaskService extends BaseService {
       })
     };
     return this._http.get<UserMiniWithAvatarModel[]>(this.serviceBaseURL + id + '/users', httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public getMessages(token: string, id: number) : Observable<MessageModel[]>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<MessageModel[]>(this.serviceBaseURL + id + '/messages', httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public addMessage(token: string, id: number, model: AddMessageModel) : Observable<MessageModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.post<MessageModel>(this.serviceBaseURL + id + '/messages', model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

@@ -8,7 +8,7 @@ import { ProcessHTTPMsgService } from './process-httpmsg.service';
 @Injectable({
   providedIn: 'root'
 })
-export class UserinfoService extends BaseService {
+export class UserInfoService extends BaseService {
 
   constructor(private http: HttpClient,
     private processHTTPMsgService: ProcessHTTPMsgService) {

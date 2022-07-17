@@ -100,7 +100,15 @@
             </div>
             <mat-divider fxShow fxHide.gt-sm></mat-divider>
             <div fxLayoutGap="10px" fxLayout="column">
-                BLOCK 3 (messages)
+                <app-task-messages 
+                [taskId]="task.id" 
+                [projectId]="task.projectId" 
+                (closeDialog)="close()"
+                (switchedToLoading)="switchToLoadingMode()"
+                (switchedToSuccess)="switchToSuccessMode()"
+                (switchedToFail)="switchToFailMode()"
+                (addedMessage)="addedMessage.emit()"
+                (deletedMessage)="deletedMessage.emit()"></app-task-messages>
             </div>
         </div>
     </mat-dialog-content>

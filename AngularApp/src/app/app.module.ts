@@ -35,7 +35,7 @@ import { LoginComponent } from './components/login/login.component';
 import { CabinetComponent } from './components/cabinet/cabinet.component';
 import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
 import { GoogleLoginProvider } from 'angularx-social-login';
-import { UserinfoService } from './services/userinfo.service';
+import { UserInfoService } from './services/userinfo.service';
 import { TokenGuardService } from './services/token-guard.service';
 import {MatBadgeModule} from '@angular/material/badge';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
@@ -104,6 +104,10 @@ import { CustomNgxDatetimeAdapter } from './shared/other/custom-date-adapter';
 import { NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular-material-components/moment-adapter';
 import { CUSTOM_DATE_FORMATS} from './shared/constants/date-formats';
 import { TaskDeleteComponent } from './components/project/project-tasks/task-delete/task-delete.component';
+import { TaskMessagesComponent } from './components/project/project-tasks/task/task-messages/task-messages.component';
+import { TaskMessageComponent } from './components/project/project-tasks/task/task-messages/task-message/task-message.component';
+import { TaskMessageDeleteComponent } from './components/project/project-tasks/task/task-messages/task-message-delete/task-message-delete.component';
+import { MessageService } from './services/message.service';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -154,7 +158,10 @@ export function tokenGetter() {
     ProjectTagDeleteComponent,
     TaskAddComponent,
     TaskComponent,
-    TaskDeleteComponent
+    TaskDeleteComponent,
+    TaskMessagesComponent,
+    TaskMessageComponent,
+    TaskMessageDeleteComponent
   ],
   imports: [
     BrowserModule,
@@ -223,7 +230,7 @@ export function tokenGetter() {
         ],
       } as SocialAuthServiceConfig
     },
-    UserinfoService,
+    UserInfoService,
     TokenGuardService,
     authInterceptor,
     UserService,
@@ -236,7 +243,8 @@ export function tokenGetter() {
       useClass: CustomNgxDatetimeAdapter,
       deps: [MAT_DATE_LOCALE, NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS]
     },
-    { provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS }
+    { provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS },
+    MessageService
   ],
   bootstrap: [AppComponent]
 })

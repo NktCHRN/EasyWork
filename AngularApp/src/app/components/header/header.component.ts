@@ -4,7 +4,7 @@ import { SocialAuthService } from 'angularx-social-login';
 import { UserReducedModel } from 'src/app/shared/user/user-reduced.model';
 import { AccountService } from '../../services/account.service';
 import { TokenService } from '../../services/token.service';
-import { UserinfoService } from '../../services/userinfo.service';
+import { UserInfoService } from '../../services/userinfo.service';
 import { RevokeTokenModel } from '../../shared/token/revoke-token.model';
 
 @Component({
@@ -33,7 +33,7 @@ export class HeaderComponent implements OnInit {
   constructor(private _accountService: AccountService,
     private _socialAuthService: SocialAuthService,
     private _router: Router,
-    private _userInfoService: UserinfoService,
+    private _userInfoService: UserInfoService,
     private _tokenService: TokenService) { }
 
   ngOnInit(): void {  

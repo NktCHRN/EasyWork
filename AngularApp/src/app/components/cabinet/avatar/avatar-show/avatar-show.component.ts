@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { UserinfoService } from 'src/app/services/userinfo.service';
+import { UserInfoService } from 'src/app/services/userinfo.service';
 import { AvatarPageMode } from 'src/app/shared/user/cabinet/avatar-page-mode';
 import { AvatarDeleteComponent } from '../avatar-delete/avatar-delete.component';
 
@@ -14,7 +14,7 @@ export class AvatarShowComponent implements OnInit {
   @Output() closeOuter = new EventEmitter();
   @Output() changeMode = new EventEmitter<AvatarPageMode>();
 
-  constructor(private _userInfoService: UserinfoService, private _dialog: MatDialog) { }
+  constructor(private _userInfoService: UserInfoService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
     this._userInfoService.lastUser.subscribe(user => this.linkToAvatar = user?.avatarURL);
