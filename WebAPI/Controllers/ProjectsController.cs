@@ -578,7 +578,7 @@ namespace WebAPI.Controllers
             {
                 var startDate = (task.StartDate >= from) ? task.StartDate : from;
                 var endDate = (task.EndDate is not null && task.EndDate <= to) ? task.EndDate.Value : to;
-                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : endDate;
+                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : to;
                 mappedTasks.Add(new GanttTaskDTO()
                 {
                     Id = task.Id,
