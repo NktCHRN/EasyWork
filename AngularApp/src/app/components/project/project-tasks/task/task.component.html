@@ -92,3 +92,12 @@
         </div>
     </mat-dialog-content>
 </form>
+<div *ngIf="!task && !errorMessage">
+    <h1 mat-dialog-title>Loading...</h1>
+    <mat-dialog-content>
+        <mat-spinner></mat-spinner>
+    </mat-dialog-content>
+</div>
+<div *ngIf="errorMessage">
+    <h1 class="red" mat-dialog-title>{{errorMessage}}</h1>
+</div>

@@ -4,6 +4,7 @@ import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
+import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskComponent } from '../task/task.component';
@@ -19,6 +20,8 @@ export class TaskReducedComponent implements OnInit {
   executors: UserMiniWithAvatarModel[] = [];
   prioritiesWithColors: any;
   @Output() updatedStatus: EventEmitter<TaskStatusChangeModel> = new EventEmitter<TaskStatusChangeModel>();
+  @Output() movedFromArchived: EventEmitter<TaskReducedWithStatusModel> = new EventEmitter<TaskReducedWithStatusModel>();
+  @Output() movedToArchived: EventEmitter<TaskReducedModel> = new EventEmitter<TaskReducedModel>();
 
   constructor(private _taskService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog) { }
 
@@ -45,7 +48,13 @@ export class TaskReducedComponent implements OnInit {
         this.model.priority = task.priority;
         if (this.status != task.status)
         {
-          console.log("emitted");
+          if (this.status == TaskStatus.Archived)
+            this.movedFromArchived.emit({
+              ...this.model,
+              status: task.status
+            });
+          if (task.status == TaskStatus.Archived)
+            this.movedToArchived.emit(this.model);
           this.updatedStatus.emit({
             old: this.status,
             new: task.status,

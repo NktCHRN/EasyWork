@@ -15,6 +15,7 @@ import { TagModel } from 'src/app/shared/tag/tag.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
+import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { ProjectTagDeleteComponent } from './project-tag-delete/project-tag-delete.component';
 import { TaskReducedComponent } from './task-reduced/task-reduced.component';
@@ -267,20 +268,35 @@ export class ProjectTasksComponent implements OnInit {
   }
 
   onTaskStatusUpdate(event: TaskStatusChangeModel): void {
+    if (event.old == TaskStatus.Archived)
+      return;
     const oldTasks = this.getTasksColumnByStatus(event.old);
-    const found = oldTasks.find(t => t.id == event.id);
+    const found = oldTasks?.find(t => t.id == event.id);
     if (found)
     {
       const oldIndex = oldTasks.indexOf(found);
       if (oldIndex != -1)
         oldTasks.splice(oldIndex, 1);
       if (event.new != TaskStatus.Archived)
-      {
-        const newTasks = this.getTasksColumnByStatus(event.new);
-        newTasks.splice(this._taskService.getInsertAtIndexByTaskId(event.id, newTasks), 0, found);
-        const foundViewTask = this.viewTasks.find(t => t.model.id == event.id);
-        foundViewTask?.updatedStatus.subscribe(m => this.onTaskStatusUpdate(m));
-      };
+        this.addExistingTask(found, event.new);
+      this.subscribeToTask(found.id);
     }
+  }
+
+  private addExistingTask(task: TaskReducedModel, where: TaskStatus): void {
+    const newTasks = this.getTasksColumnByStatus(where);
+    newTasks.splice(this._taskService.getInsertAtIndexByTaskId(task.id, newTasks), 0, task);
+  }
+
+  private subscribeToTask(taskId: number): void {
+    const foundViewTask = this.viewTasks.find(t => t.model.id == taskId);
+    foundViewTask?.updatedStatus.subscribe(m => this.onTaskStatusUpdate(m));
+    foundViewTask?.movedFromArchived.subscribe(m => this.onAddFromArchive(m));
+  }
+
+  onAddFromArchive(task: TaskReducedWithStatusModel): void
+  {
+    this.addExistingTask(task, task.status);
+    this.subscribeToTask(task.id);
   }
 }

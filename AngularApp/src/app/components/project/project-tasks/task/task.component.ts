@@ -41,6 +41,7 @@ export class TaskComponent implements OnInit {
   readonly statusesWithDescription: TaskStatusWithDescriptionModel[];
   readonly priorities: (TaskPriority | TaskPriorityNone)[];
   @Output() updatedTask: EventEmitter<UpdateTaskModel> = new EventEmitter<UpdateTaskModel>();
+  errorMessage: string | null | undefined;
 
   formErrors : any = {
     'name': '',
@@ -106,7 +107,9 @@ export class TaskComponent implements OnInit {
         this.form.controls['priority'].setValue(this._taskService.PriorityOrNullToExtendedPriority(this.task.priority));
       },
       error: error => {
-        this._snackBar.open("Task has not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
+        const messageStart: string = "Task has not been loaded. Error: ";
+        this._snackBar.open(messageStart + JSON.stringify(error), "Close", {duration: 5000});
+        this.errorMessage = `${messageStart}${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
       }
     });
   }
