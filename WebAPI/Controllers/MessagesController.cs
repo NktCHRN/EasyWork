@@ -120,7 +120,14 @@ namespace WebAPI.Controllers
             if (model is null)
                 return NotFound();
             if (model.SenderId != userId.Value)
-                return Forbid();
+            {
+                var task = await _taskService.GetByIdAsync(model.TaskId);
+                if (task is null)
+                    return Forbid();
+                var role = await _userOnProjectService.GetRoleOnProjectAsync(task.ProjectId, userId.Value);
+                if (role is null || role < UserOnProjectRoles.Manager)
+                    return Forbid();
+            }
             try
             {
                 await _messageService.DeleteByIdAsync(id);
