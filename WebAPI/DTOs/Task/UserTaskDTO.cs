@@ -10,6 +10,8 @@
 
         public DateTimeOffset? Deadline { get; init; }
 
+        public DateTimeOffset? EndDate { get; init; }
+
         public string Status { get; set; } = string.Empty;
     }
 }
