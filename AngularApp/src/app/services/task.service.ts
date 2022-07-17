@@ -2,7 +2,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
 import { TaskPriority } from '../shared/task/priority/task-priority';
+import { TaskPriorityNone } from '../shared/task/priority/task-priority-none';
+import { TaskStatus } from '../shared/task/status/task-status';
+import { TaskStatusWithDescriptionModel } from '../shared/task/status/task-status-with-description.model';
+import { TaskReducedModel } from '../shared/task/task-reduced.model';
 import { TaskModel } from '../shared/task/task.model';
+import { UpdateTaskModel } from '../shared/task/update-task.model';
 import { UserTaskModel } from '../shared/task/user-task.model';
 import { UserMiniWithAvatarModel } from '../shared/user/user-mini-with-avatar.model';
 import { BaseService } from './base.service';
@@ -50,6 +55,17 @@ export class TaskService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
+  public update(token: string, id: number, model: UpdateTaskModel) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.put<UpdateTaskModel>(this.serviceBaseURL + id, model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
 
   public getExecutors(token: string, id: number) : Observable<UserMiniWithAvatarModel[]>
   {
@@ -72,5 +88,59 @@ export class TaskService extends BaseService {
       [TaskPriority.High] : "#D84315",
       [TaskPriority.Highest] : "red"
     };
+  }
+
+  public getStatusesWithDescriptions(addArchived: boolean) : TaskStatusWithDescriptionModel[] {
+    const statuses:TaskStatusWithDescriptionModel[] = [
+      {
+        status: TaskStatus.ToDo,
+        description: "To Do"
+      },
+      {
+        status: TaskStatus.InProgress,
+        description: "In Progress"
+      },
+      {
+        status: TaskStatus.Validate,
+        description: "Validate"
+      },
+      {
+        status: TaskStatus.Complete,
+        description: "Done"
+      },
+    ];
+    if (addArchived)
+      statuses.push({
+        status: TaskStatus.Archived,
+        description: "Archived"
+      });
+    return statuses;
+  }
+
+  public getSortedPriorities() : (TaskPriority | TaskPriorityNone)[] {
+    const priorities: (TaskPriority | TaskPriorityNone)[] = [
+      TaskPriorityNone.None,
+      TaskPriority.Lowest,
+      TaskPriority.Low,
+      TaskPriority.Middle,
+      TaskPriority.High,
+      TaskPriority.Highest
+    ];
+    return priorities;
+  }
+
+  public ExtendedPriorityToPriorityOrNull(priority: TaskPriority | TaskPriorityNone) : TaskPriority | null | undefined {
+    return (priority in TaskPriority) ? <TaskPriority>priority : null;
+  }
+
+  public PriorityOrNullToExtendedPriority(priority: TaskPriority | null | undefined) : TaskPriority | TaskPriorityNone {
+    return priority ? priority : TaskPriorityNone.None;
+  }
+
+  getInsertAtIndexByTaskId(taskId: number, tasks: TaskReducedModel[]): number {
+    let i = 0;
+    while (i < tasks.length && tasks[i].id < taskId)
+      ++i;
+    return i;
   }
 }

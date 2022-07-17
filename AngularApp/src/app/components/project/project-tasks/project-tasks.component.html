@@ -37,7 +37,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task" [status]="taskStatuses.ToDo" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.toDo && !loadError">
@@ -60,7 +60,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task" [status]="taskStatuses.InProgress" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.inProgress && !loadError">
@@ -83,7 +83,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task" [status]="taskStatuses.Validate" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.validate && !loadError">
@@ -105,7 +105,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.done">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task" [status]="taskStatuses.Complete" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Complete" (added)="addTask($event, taskStatuses.Complete)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.done && !loadError">
@@ -159,7 +159,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task" [status]="taskStatuses.ToDo" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.toDo && !loadError">
@@ -182,7 +182,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task" [status]="taskStatuses.InProgress" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.inProgress && !loadError">
@@ -205,7 +205,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task" [status]="taskStatuses.Validate" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.validate && !loadError">
@@ -227,7 +227,7 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.done">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task"></app-task-reduced>
+                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task" [status]="taskStatuses.Complete" (updatedStatus)="onTaskStatusUpdate($event)"></app-task-reduced>
                         <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Complete" (added)="addTask($event, taskStatuses.Complete)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.done && !loadError">

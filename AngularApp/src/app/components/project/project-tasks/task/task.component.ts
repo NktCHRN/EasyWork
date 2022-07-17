@@ -1,13 +1,21 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { Component, Inject, NgZone, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
+import { TaskPriority } from 'src/app/shared/task/priority/task-priority';
+import { TaskPriorityNone } from 'src/app/shared/task/priority/task-priority-none';
 import { SavedIconState } from 'src/app/shared/task/save/saved-icon-state';
+import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
+import { TaskDialogSettingsModel } from 'src/app/shared/task/task-dialog-settings.model';
 import { TaskModel } from 'src/app/shared/task/task.model';
+import { UpdateTaskModel } from 'src/app/shared/task/update-task.model';
+import { EventEmitter } from '@angular/core';
+import { TaskStatus } from 'src/app/shared/task/status/task-status';
 
 @Component({
   selector: 'app-task',
@@ -29,23 +37,39 @@ export class TaskComponent implements OnInit {
   };
   form: FormGroup = null!;
   @ViewChild('tform') formDirective: any;
+  showToProject: boolean;
+  readonly statusesWithDescription: TaskStatusWithDescriptionModel[];
+  readonly priorities: (TaskPriority | TaskPriorityNone)[];
+  @Output() updatedTask: EventEmitter<UpdateTaskModel> = new EventEmitter<UpdateTaskModel>();
 
   formErrors : any = {
     'name': '',
+    'deadline': ''
   };
 
   validationMessages : any = {
     'name': {
       'required':      'Name is required.',
       'notWhitespace':      'Name cannot be whitespace-only.'
-    },
+    }
   };
 
-  constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: number, 
+  constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskDialogSettingsModel, 
   private _taskService: TaskService, private _tokenService: TokenService, private _snackBar: MatSnackBar, 
-  private _fb: FormBuilder) { 
-    this._taskId = data;
+  private _fb: FormBuilder, private _router: Router) { 
+    this._taskId = data.taskId;
+    this.showToProject = data.showToProjectButton;
+    this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(true);
+    this.priorities = this._taskService.getSortedPriorities();
     this.createForm();
+  }
+
+  toProject(): void {
+    if(this?.task?.projectId)
+    {
+      this._dialogRef.close();
+      this._router.navigate(['/projects', this.task.projectId]);
+    }
   }
 
   toggleEditName(): void {
@@ -57,7 +81,9 @@ export class TaskComponent implements OnInit {
       name: ['', [Validators.required, createNotWhitespaceValidator()] ],
       description: '',
       deadline: '',
-      endDate: ''
+      endDate: '',
+      status: undefined,
+      priority: null
     });
 
     this.form.valueChanges
@@ -76,6 +102,8 @@ export class TaskComponent implements OnInit {
         this.form.controls['description'].setValue(this.task.description);
         this.form.controls['deadline'].setValue(this.task.deadline);
         this.form.controls['endDate'].setValue(this.task.endDate);
+        this.form.controls['status'].setValue(this.task.status);
+        this.form.controls['priority'].setValue(this._taskService.PriorityOrNullToExtendedPriority(this.task.priority));
       },
       error: error => {
         this._snackBar.open("Task has not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
@@ -94,6 +122,7 @@ export class TaskComponent implements OnInit {
         const control = form.get(field);
         if (control && control.dirty && !control.valid) {
           const messages = this.validationMessages[field];
+          if (messages)
           for (const key in control.errors) {
             if (control.errors.hasOwnProperty(key)) {
               this.formErrors[field] += messages[key] + ' ';
@@ -104,7 +133,50 @@ export class TaskComponent implements OnInit {
     }
   }
 
-  onSubmit() {
-    console.log(this.form.value);
+  onSubmit(event: any) {
+    const callerName:string = event.target.attributes.getNamedItem('ng-reflect-name').value;
+    type ObjectKey = keyof typeof this.task;
+    const callerNameAsKey = callerName as ObjectKey;
+    if ((this.task[callerNameAsKey]) != event.target.value)
+      this.send();
+  }
+
+  send(): void {
+    if (this.form.valid)
+    {
+      this.switchToLoadingMode();
+      this.task = {
+        ...this.task,
+        ...this.form.value,
+        priority: this._taskService.ExtendedPriorityToPriorityOrNull(this.form.get('priority')?.value)
+      };
+      const updateModel: UpdateTaskModel = {
+        ...this.task
+      };
+      this._taskService.update(this._tokenService.getJwtToken()!, this.task.id, updateModel)
+      .subscribe({
+        next: () => {
+          this.updatedTask.emit(updateModel);
+          this.switchToSuccessMode();
+        },
+        error: error => {
+          this.switchToFailMode();
+          console.log(error);
+        }
+      });
+    }
+  }
+
+  switchToLoadingMode() {
+    this.savedIconState = this.iconStates.Loading;
+  }
+
+  switchToSuccessMode() {
+    this.savedIconState = this.iconStates.Success;
+    setTimeout(() => this.savedIconState = null, 1000);
+  }
+
+  switchToFailMode() {
+    this.savedIconState = this.iconStates.Fail;
   }
 }

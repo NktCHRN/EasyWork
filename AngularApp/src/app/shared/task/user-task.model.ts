@@ -1,11 +1,13 @@
 export interface UserTaskModel {
-    id: number
+    id: number;
 
-    name: string
+    name: string;
 
-    startDate: string
+    startDate: string;
 
-    deadline: string | null | undefined
+    deadline: string | null | undefined;
 
-    status: string
+    endDate: string | null | undefined;
+
+    status: string;
 }

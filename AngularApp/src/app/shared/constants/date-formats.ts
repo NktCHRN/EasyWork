@@ -2,7 +2,7 @@ import { NgxMatDateFormats } from "@angular-material-components/datetime-picker"
 
 export const CUSTOM_DATE_FORMATS: NgxMatDateFormats = {
     parse: {
-      dateInput: 'l, LTS'
+      dateInput: 'DD.MM.YYYY, HH:mm:ss'
     },
     display: {
       dateInput: 'DD.MM.YYYY, HH:mm:ss',
@@ -11,4 +11,3 @@ export const CUSTOM_DATE_FORMATS: NgxMatDateFormats = {
       monthYearA11yLabel: 'MMMM YYYY',
     }
   };
-  

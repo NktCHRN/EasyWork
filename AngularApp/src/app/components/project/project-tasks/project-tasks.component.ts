@@ -1,10 +1,11 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { createNumberOrUnlimitedValidator } from 'src/app/customvalidators';
 import { ProjectService } from 'src/app/services/project.service';
+import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
@@ -12,9 +13,11 @@ import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/u
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { TagModel } from 'src/app/shared/tag/tag.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
-import { TaskStatusWithDescription } from 'src/app/shared/task/status/task-status-with-description.model';
+import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
+import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { ProjectTagDeleteComponent } from './project-tag-delete/project-tag-delete.component';
+import { TaskReducedComponent } from './task-reduced/task-reduced.component';
 
 @Component({
   selector: 'app-project-tasks',
@@ -43,28 +46,11 @@ export class ProjectTasksComponent implements OnInit {
   selectedTag: TagModel;
   taskStatuses = TaskStatus;
   selectedStatus: TaskStatus = TaskStatus.ToDo;
-  readonly statusesWithDescription: TaskStatusWithDescription[] = 
-  [
-    {
-      status: TaskStatus.ToDo,
-      description: "To Do"
-    },
-    {
-      status: TaskStatus.InProgress,
-      description: "In Progress"
-    },
-    {
-      status: TaskStatus.Validate,
-      description: "Validate"
-    },
-    {
-      status: TaskStatus.Complete,
-      description: "Done"
-    },
-  ];
+  readonly statusesWithDescription: TaskStatusWithDescriptionModel[];
 
   form: FormGroup = null!;
   @ViewChild('lform') formDirective: any;
+  @ViewChildren(TaskReducedComponent) viewTasks: QueryList<TaskReducedComponent> = undefined!;
 
   formErrors : any = {
     'toDo': '',
@@ -89,7 +75,8 @@ export class ProjectTasksComponent implements OnInit {
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, 
   private _fb: FormBuilder, private _snackBar: MatSnackBar, private _projectService: ProjectService,
-  private _tokenService: TokenService, private _dialog: MatDialog) { 
+  private _tokenService: TokenService, private _dialog: MatDialog, private _taskService: TaskService) { 
+    this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(false);
     this.createForm();
     this.selectedTag = this.tags[0];
   }
@@ -144,7 +131,7 @@ export class ProjectTasksComponent implements OnInit {
       }
     });
   }
-
+  
   public changeLimit(data: any): string
   {
     return data.toString().replace(/\s+$/g, '');
@@ -265,13 +252,35 @@ export class ProjectTasksComponent implements OnInit {
     });
   }
 
-  addTask(task: TaskReducedModel, where: TaskStatus) {
-    let modifiedWhere: string
-    if (where == TaskStatus.Complete)
-      modifiedWhere = 'done';
+  getTasksColumnByStatus(status: TaskStatus): TaskReducedModel[] {
+    let modifiedStatus: string
+    if (status == TaskStatus.Complete)
+      modifiedStatus = 'done';
     else
-      modifiedWhere = where.charAt(0).toLowerCase() + where.slice(1);
+      modifiedStatus = status.charAt(0).toLowerCase() + status.slice(1);
     type ObjectKey = keyof typeof this.tasks;
-    this.tasks[modifiedWhere as ObjectKey].push(task);
+    return this.tasks[modifiedStatus as ObjectKey]
+  }
+
+  addTask(task: TaskReducedModel, where: TaskStatus) {
+    this.getTasksColumnByStatus(where).push(task);
+  }
+
+  onTaskStatusUpdate(event: TaskStatusChangeModel): void {
+    const oldTasks = this.getTasksColumnByStatus(event.old);
+    const found = oldTasks.find(t => t.id == event.id);
+    if (found)
+    {
+      const oldIndex = oldTasks.indexOf(found);
+      if (oldIndex != -1)
+        oldTasks.splice(oldIndex, 1);
+      if (event.new != TaskStatus.Archived)
+      {
+        const newTasks = this.getTasksColumnByStatus(event.new);
+        newTasks.splice(this._taskService.getInsertAtIndexByTaskId(event.id, newTasks), 0, found);
+        const foundViewTask = this.viewTasks.find(t => t.model.id == event.id);
+        foundViewTask?.updatedStatus.subscribe(m => this.onTaskStatusUpdate(m));
+      };
+    }
   }
 }

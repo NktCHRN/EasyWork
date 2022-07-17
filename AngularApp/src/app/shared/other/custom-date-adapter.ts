@@ -232,7 +232,6 @@ export class CustomNgxDatetimeAdapter extends NgxMatDateAdapter<Moment> {
     locale?: string,
   ): Moment {
     const { strict, useUtc }: NgxMatMomentDateAdapterOptions = this._options || {};
-
     return useUtc
       ? moment.utc(date, format, locale, strict)
       : moment(date, format, locale, strict);

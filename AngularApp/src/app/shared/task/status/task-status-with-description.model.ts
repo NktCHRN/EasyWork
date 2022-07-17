@@ -1,6 +1,6 @@
 import { TaskStatus } from "./task-status";
 
-export interface TaskStatusWithDescription {
+export interface TaskStatusWithDescriptionModel {
     status: TaskStatus;
     description: string;
 }
