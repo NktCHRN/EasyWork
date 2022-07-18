@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
 using Business.Services;
@@ -554,7 +555,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void AddAsyncTest_ExceedsToDo_ThrowsInvalidOperationException()
+        public void AddAsyncTest_ExceedsToDo_ThrowsLimitsExceededException()
         {
             // Arrange
             var tempProject = new Project()             // id 2
@@ -580,11 +581,11 @@ namespace Tests.BLLTests
             };
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
-        public void AddAsyncTest_ExceedsInProgress_ThrowsInvalidOperationException()
+        public void AddAsyncTest_ExceedsInProgress_ThrowsLimitsExceededException()
         {
             // Arrange
             var tempProject = new Project()             // id 2
@@ -610,11 +611,11 @@ namespace Tests.BLLTests
             };
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
-        public void AddAsyncTest_ExceedsValidate_ThrowsInvalidOperationException()
+        public void AddAsyncTest_ExceedsValidate_ThrowsLimitsExceededExceptionException()
         {
             // Arrange
             var tempProject = new Project()             // id 2
@@ -640,7 +641,7 @@ namespace Tests.BLLTests
             };
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
@@ -735,7 +736,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task UpdateAsyncTest_ExceedsToDo_ThrowsInvalidOperationException()
+        public async Task UpdateAsyncTest_ExceedsToDo_ThrowsLimitsExceededException()
         {
             // Arrange
             SeedData();
@@ -764,11 +765,11 @@ namespace Tests.BLLTests
             }
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.UpdateAsync(model));
         }
 
         [Test]
-        public async Task UpdateAsyncTest_ExceedsInProgress_ThrowsInvalidOperationException()
+        public async Task UpdateAsyncTest_ExceedsInProgress_ThrowsLimitsExceededException()
         {
             // Arrange
             SeedData();
@@ -797,11 +798,11 @@ namespace Tests.BLLTests
             }
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.UpdateAsync(model));
         }
 
         [Test]
-        public async Task UpdateAsyncTest_ExceedsValidate_ThrowsInvalidOperationException()
+        public async Task UpdateAsyncTest_ExceedsValidate_ThrowsLimitsExceededException()
         {
             // Arrange
             SeedData();
@@ -830,7 +831,7 @@ namespace Tests.BLLTests
             }
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.UpdateAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.UpdateAsync(model));
         }
 
         [Test]

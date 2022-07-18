@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
 using Data;
@@ -149,19 +150,19 @@ namespace Business.Services
                     if (project.MaxToDo is not null &&
                         _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.ToDo).Count()
                         >= project.MaxToDo)
-                        throw new InvalidOperationException("You cannot exceed the \"ToDo\" tasks limit");
+                        throw new LimitsExceededException("ToDo");
                     break;
                 case TaskStatuses.InProgress:
                     if (project.MaxInProgress is not null &&
                         _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.InProgress).Count()
                         >= project.MaxInProgress)
-                        throw new InvalidOperationException("You cannot exceed the \"InProgress\" tasks limit");
+                        throw new LimitsExceededException("InProgress");
                     break;
                 case TaskStatuses.Validate:
                     if (project.MaxValidate is not null &&
                         _context.Tasks.Where(t => t.ProjectId == model.ProjectId && t.Status == TaskStatuses.Validate).Count()
                         >= project.MaxValidate)
-                        throw new InvalidOperationException("You cannot exceed the \"Validate\" tasks limit");
+                        throw new LimitsExceededException("Validate");
                     break;
             }
         }

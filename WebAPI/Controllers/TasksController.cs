@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
@@ -106,6 +107,10 @@ namespace WebAPI.Controllers
             {
                 await _taskService.UpdateAsync(model);
             }
+            catch (LimitsExceededException exc)
+            {
+                return BadRequest(exc.Message);
+            }
             catch (InvalidOperationException)
             {
                 return NotFound();
@@ -172,7 +177,7 @@ namespace WebAPI.Controllers
             {
                 try
                 {
-                    var tag = new Business.Models.TagModel
+                    var tag = new TagModel
                     {
                         Name = dto.Name
                     };

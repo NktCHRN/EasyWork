@@ -8,6 +8,6 @@ namespace WebAPI.DTOs.Task
         public string Name { get; init; } = string.Empty;
 
         [Required(AllowEmptyStrings = false)]
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; init; } = string.Empty;
     }
 }
