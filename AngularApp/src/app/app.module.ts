@@ -108,6 +108,7 @@ import { TaskMessagesComponent } from './components/project/project-tasks/task/t
 import { TaskMessageComponent } from './components/project/project-tasks/task/task-messages/task-message/task-message.component';
 import { TaskMessageDeleteComponent } from './components/project/project-tasks/task/task-messages/task-message-delete/task-message-delete.component';
 import { MessageService } from './services/message.service';
+import { LinkyModule } from 'ngx-linky';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -206,7 +207,8 @@ export function tokenGetter() {
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    LinkyModule
   ],
   providers: [
     GeneralinfoService,

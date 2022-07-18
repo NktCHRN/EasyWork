@@ -13,7 +13,7 @@
         <mat-card-subtitle class="mb-0">{{message.date | date:'d MMM y, HH:mm'}}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content class="mb-0">
-            <p *ngIf="mode == modes.Show" class="formatted">{{message.text}}</p>
+            <p *ngIf="mode == modes.Show" class="formatted" [innerHTML]="message.text | linky"></p>
             <mat-form-field *ngIf="mode == modes.Edit" appearance="fill" class="w-100 text-sm">
                 <textarea matInput cdkTextareaAutosize
                 #textAutosize="cdkTextareaAutosize"
