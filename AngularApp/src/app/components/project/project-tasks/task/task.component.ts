@@ -1,5 +1,5 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { Component, Inject, NgZone, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, Inject, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -17,6 +17,9 @@ import { UpdateTaskModel } from 'src/app/shared/task/update-task.model';
 import { EventEmitter } from '@angular/core';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskDeleteComponent } from '../task-delete/task-delete.component';
+import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
+import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
+import { ProjectService } from 'src/app/services/project.service';
 
 @Component({
   selector: 'app-task',
@@ -47,6 +50,8 @@ export class TaskComponent implements OnInit {
   readonly taskStatuses = TaskStatus;
   @Output() addedMessage = new EventEmitter();
   @Output() deletedMessage = new EventEmitter();
+  limits: ProjectLimitsModel = undefined!;
+  tasksCount: TasksCountModel = undefined!;
 
   formErrors : any = {
     'name': '',
@@ -62,12 +67,24 @@ export class TaskComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskDialogSettingsModel, 
   private _taskService: TaskService, private _tokenService: TokenService, private _snackBar: MatSnackBar, 
-  private _fb: FormBuilder, private _router: Router, private _dialog: MatDialog) { 
+  private _fb: FormBuilder, private _router: Router, private _dialog: MatDialog, private _projectService: ProjectService) { 
     this._taskId = data.taskId;
     this.showToProject = data.showToProjectButton;
+    this.limits = data.limits;
+    this.tasksCount = data.tasksCount;
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(true);
     this.priorities = this._taskService.getSortedPriorities();
     this.createForm();
+  }
+
+  exceedsLimits(status: TaskStatus): boolean {
+    if (status == TaskStatus.Archived || status == TaskStatus.Complete || status == this.task.status)
+      return false;
+    let modifiedStatus: string = status.charAt(0).toLowerCase() + status.substring(1);
+    const count: number = this.tasksCount[modifiedStatus as keyof typeof this.tasksCount];
+    modifiedStatus = "max" + status;
+    const limit: number | null | undefined = this.limits[modifiedStatus as keyof typeof this.limits];;
+    return limit != null && limit != undefined && limit <= count;
   }
 
   toProject(): void {
@@ -110,6 +127,7 @@ export class TaskComponent implements OnInit {
         this.form.controls['endDate'].setValue(this.task.endDate);
         this.form.controls['status'].setValue(this.task.status);
         this.form.controls['priority'].setValue(this._taskService.PriorityOrNullToExtendedPriority(this.task.priority));
+        this.checkLimitsAndTasks();
       },
       error: error => {
         const messageStart: string = "Task has not been loaded. Error: ";
@@ -117,6 +135,43 @@ export class TaskComponent implements OnInit {
         this.errorMessage = `${messageStart}${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
       }
     });
+  }
+
+  private checkLimitsAndTasks(): void {
+    if (!this.limits) {
+      this._projectService.getLimits(this._tokenService.getJwtToken()!, this.task.projectId)
+      .subscribe({
+        next: result => 
+        {
+          this.limits = result;
+        },
+        error: error => 
+        this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
+      });
+      // Also subscribe to limits changes in this if after the SignalR implementation
+    }
+    if (!this.tasksCount) {
+      this._projectService.getTasks(this._tokenService.getJwtToken()!, this.task.projectId, null)
+      .subscribe({
+        next: result => 
+        {
+          this.tasksCount = {
+            toDo: undefined!,
+            inProgress: undefined!,
+            validate: undefined!,
+            done: undefined!
+          };
+          for (let key in result)
+          {
+            const objectKey = key as keyof typeof result;
+            this.tasksCount[objectKey] = result[objectKey].length;
+          };
+        },
+        error: error => 
+          this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
+      });
+      // Also subscribe to task add/delete changes in this if after the SignalR implementation
+    }
   }
 
   onValueChanged(data?: any) {

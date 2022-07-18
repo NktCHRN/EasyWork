@@ -2,6 +2,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
+import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
+import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
@@ -23,6 +25,8 @@ export class TaskReducedComponent implements OnInit {
   @Output() movedFromArchived: EventEmitter<TaskReducedWithStatusModel> = new EventEmitter<TaskReducedWithStatusModel>();
   @Output() movedToArchived: EventEmitter<TaskReducedModel> = new EventEmitter<TaskReducedModel>();
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
+  @Input() limits: ProjectLimitsModel = undefined!;
+  @Input() tasksCount: TasksCountModel = undefined!;
 
   constructor(private _taskService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog) { }
 
@@ -38,7 +42,9 @@ export class TaskReducedComponent implements OnInit {
       panelClass: "dialog-responsive",
       data: {
         taskId: this.model.id,
-        showToProjectButton: false
+        showToProjectButton: false,
+        tasksCount: this.tasksCount,
+        limits: this.limits
       }
     });
     dialogRef.componentInstance.updatedTask.subscribe(

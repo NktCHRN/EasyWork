@@ -70,7 +70,10 @@
                         <mat-form-field class="w-100" appearance="outline">
                             <mat-label>Status</mat-label>
                             <mat-select matInput formControlName="status" (selectionChange)="send()">
-                                <mat-option *ngFor="let status of statusesWithDescription" [value]="status.status">{{status.description}}</mat-option>
+                                <mat-option 
+                                *ngFor="let status of statusesWithDescription" 
+                                [value]="status.status"
+                                [disabled]="limits && tasksCount && exceedsLimits(status.status)">{{status.description}}</mat-option>
                               </mat-select>
                         </mat-form-field>
                         <mat-form-field class="w-100" appearance="outline">

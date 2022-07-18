@@ -4,6 +4,8 @@ import { Title } from '@angular/platform-browser';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
+import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
+import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
@@ -25,6 +27,17 @@ export class ProjectArchiveComponent implements OnInit {
   loadError: boolean = false;
   @ViewChildren(TaskReducedComponent) viewTasks: QueryList<TaskReducedComponent> = undefined!;
   taskStatuses = TaskStatus;
+  limits: ProjectLimitsModel = {
+    maxToDo: undefined!,
+    maxInProgress: undefined!,
+    maxValidate: undefined!
+  };
+  tasksCount: TasksCountModel = {
+    toDo: undefined!,
+    inProgress: undefined!,
+    validate: undefined!,
+    done: undefined!
+  }
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string,
   private _tokenService: TokenService, private _projectService: ProjectService, private _snackBar: MatSnackBar,
@@ -41,6 +54,29 @@ export class ProjectArchiveComponent implements OnInit {
         this.loadError = true;
         this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
       }
+    });
+    this._projectService.getLimits(this._tokenService.getJwtToken()!, this.projectId)
+    .subscribe({
+      next: result => 
+      {
+        for (let key in result)
+        {
+          const objectKey = key as keyof typeof result;
+          this.limits[objectKey] = result[objectKey];
+        }
+      },
+      error: error => 
+      this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
+    });
+    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId, null)
+    .subscribe({
+      next: result => 
+      {
+        for (let key in result)
+          this.tasksCount[key as keyof TasksCountModel] = result[key as keyof typeof result].length;
+      },
+      error: error => 
+        this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
     });
   }
 

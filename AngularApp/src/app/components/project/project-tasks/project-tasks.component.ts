@@ -8,6 +8,7 @@ import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
+import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
@@ -37,6 +38,12 @@ export class ProjectTasksComponent implements OnInit {
     validate: undefined!,
     done: undefined!
   };
+  tasksCount: TasksCountModel = {
+    toDo: undefined!,
+    inProgress: undefined!,
+    validate: undefined!,
+    done: undefined!
+  }
   loadError: boolean = false;
   tags: TagModel[] = [
     {
@@ -112,6 +119,8 @@ export class ProjectTasksComponent implements OnInit {
       next: result => 
       {
         this.tasks = result;
+        for (let key in result)
+          this.tasksCount[key as keyof TasksCountModel] = this.tasks[key as keyof TasksModel].length;
       },
       error: error => 
       {
@@ -253,30 +262,51 @@ export class ProjectTasksComponent implements OnInit {
     });
   }
 
-  getTasksColumnByStatus(status: TaskStatus): TaskReducedModel[] {
+  convertStatusToString(status: TaskStatus): string {
     let modifiedStatus: string
     if (status == TaskStatus.Complete)
       modifiedStatus = 'done';
     else
       modifiedStatus = status.charAt(0).toLowerCase() + status.slice(1);
+    return modifiedStatus;
+  }
+
+  getTasksColumnByStatus(status: string): TaskReducedModel[] {
     type ObjectKey = keyof typeof this.tasks;
-    return this.tasks[modifiedStatus as ObjectKey]
+    return this.tasks[status as ObjectKey]
+  }
+
+  changeCountByStatus(status: string, toAdd: number) {
+    type ObjectKey = keyof TasksCountModel;
+    this.tasksCount[status as ObjectKey] += toAdd;
   }
 
   addTask(task: TaskReducedModel, where: TaskStatus) {
-    this.getTasksColumnByStatus(where).push(task);
+    const convertedWhere: string = this.convertStatusToString(where);
+    this.getTasksColumnByStatus(convertedWhere).push(task);
+    this.changeCountByStatus(convertedWhere, 1);
+  }
+
+  onAddedWithTagError(where: TaskStatus) {
+    this.changeCountByStatus(this.convertStatusToString(where), 1);
   }
 
   onTaskStatusUpdate(event: TaskStatusChangeModel): void {
     if (event.old == TaskStatus.Archived)
       return;
-    const oldTasks = this.getTasksColumnByStatus(event.old);
+    const convertedOld: string = this.convertStatusToString(event.old);
+    const oldTasks = this.getTasksColumnByStatus(convertedOld);
     const found = oldTasks?.find(t => t.id == event.id);
     if (found)
     {
       const oldIndex = oldTasks.indexOf(found);
       if (oldIndex != -1)
+      {
+        this.changeCountByStatus(convertedOld, -1);
         oldTasks.splice(oldIndex, 1);
+      }
+      else if (this.selectedTag.id != 0)
+        this.changeCountByStatus(convertedOld, -1);
       if (event.new != TaskStatus.Archived)
         this.addExistingTask(found, event.new);
       this.subscribeToTask(found.id);
@@ -284,7 +314,9 @@ export class ProjectTasksComponent implements OnInit {
   }
 
   private addExistingTask(task: TaskReducedModel, where: TaskStatus): void {
-    const newTasks = this.getTasksColumnByStatus(where);
+    const convertedWhere: string = this.convertStatusToString(where);
+    const newTasks = this.getTasksColumnByStatus(convertedWhere);
+    this.changeCountByStatus(convertedWhere, 1);
     newTasks.splice(this._taskService.getInsertAtIndexByTaskId(task.id, newTasks), 0, task);
   }
 

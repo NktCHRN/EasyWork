@@ -24,7 +24,6 @@ export class TasksComponent implements OnInit {
         return [object.status.toString(), object.description];
       }),
     );
-    console.log(this.statuses);
    }
 
   ngOnInit(): void {

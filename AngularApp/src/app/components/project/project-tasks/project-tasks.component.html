@@ -1,7 +1,7 @@
 <div class="container">
-    <div fxHide fxShow.gt-sm fxLayout="column">
-        <div class="row">
-            <div fxFlex="80" fxLayoutAlign="start center" class="tag-container" fxLayoutGap="5px">
+    <div fxLayout="column">
+        <div fxLayout="column" fxLayout.gt-sm="row" [ngClass.gt-sm]="'row'">
+            <div fxFlex.gt-sm="80" fxLayoutAlign="start center" class="tag-container" fxLayoutGap="5px"  [ngClass]="'row'" [ngClass.gt-sm]="''">
                 <button mat-icon-button *ngIf="list.isOverflow" [disabled]="!list.canScrollStart" (click)="list.scroll(-1)">
                     <mat-icon>arrow_back_ios</mat-icon>
                 </button>
@@ -17,15 +17,23 @@
                     <mat-icon>arrow_forward_ios</mat-icon>
                 </button>
             </div>
-            <div fxFlex="20" fxLayoutAlign="end center">avatars</div>
+            <div fxFlex.gt-sm="20" fxLayoutAlign="end center"  [ngClass]="'row'" [ngClass.gt-sm]="''">avatars</div>
+            <div fxLayout="row" fxLayoutAlign="center center" fxShow fxHide.gt-sm [ngClass]="'row'">
+                <mat-form-field appearance="outline">
+                    <mat-label>Category</mat-label>
+                    <mat-select [(value)]="selectedStatus">
+                      <mat-option *ngFor="let status of statusesWithDescription" value="{{status.status}}">{{status.description}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+            </div>
         </div>
         <div>
             <form fxLayout="row" novalidate method="POST" [formGroup]="form" #lform="ngForm">
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
+                <div fxFlex="100" fxFlex.gt-sm="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" [fxShow]="selectedStatus == taskStatuses.ToDo" fxShow.gt-sm>
                     <mat-expansion-panel class="to-do column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">To Do</h1>
+                                <h1 class="mb-0">To Do ({{tasksCount.toDo}}<span *ngIf="selectedTag.id != 0">, with tag: {{tasks.toDo.length}}</span>)</h1>
                             </mat-panel-title>
                         </mat-expansion-panel-header>
                         <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
@@ -36,19 +44,34 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task" [status]="taskStatuses.ToDo" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add *ngIf="(!limits.maxToDo && limits.maxToDo != 0) || limits.maxToDo > tasks.toDo.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo && limits">
+                        <app-task-reduced 
+                        class="task-card" 
+                        *ngFor="let task of tasks.toDo" 
+                        [model]="task" 
+                        [limits]="limits" 
+                        [tasksCount]="tasksCount" 
+                        [status]="taskStatuses.ToDo" 
+                        (updatedStatus)="onTaskStatusUpdate($event)" 
+                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        <app-task-add 
+                        *ngIf="(!limits.maxToDo && limits.maxToDo != 0) || limits.maxToDo > tasksCount.toDo" 
+                        class="task-card" 
+                        [tagName]="selectedTag.id == 0 ? null : selectedTag.name" 
+                        [projectId]="projectId" 
+                        [taskStatus]="taskStatuses.ToDo" 
+                        (added)="addTask($event, taskStatuses.ToDo)"
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.ToDo)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.toDo && !loadError">
                         <mat-spinner></mat-spinner>
                     </div>
                 </div>
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
+                <div fxFlex="100" fxFlex.gt-sm="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px"  [fxShow]="selectedStatus == taskStatuses.InProgress" fxShow.gt-sm>
                     <mat-expansion-panel class="in-progress column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">In Progress</h1>
+                                <h1 class="mb-0">In Progress ({{tasksCount.inProgress}}<span *ngIf="selectedTag.id != 0">, with tag: {{tasks.inProgress.length}}</span>)</h1>
                             </mat-panel-title>
                         </mat-expansion-panel-header>
                         <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
@@ -59,19 +82,34 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task" [status]="taskStatuses.InProgress" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add *ngIf="(!limits.maxInProgress && limits.maxInProgress != 0) || limits.maxInProgress > tasks.inProgress.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress && limits">
+                        <app-task-reduced 
+                        class="task-card" 
+                        *ngFor="let task of tasks.inProgress" 
+                        [model]="task" 
+                        [limits]="limits" 
+                        [tasksCount]="tasksCount" 
+                        [status]="taskStatuses.InProgress" 
+                        (updatedStatus)="onTaskStatusUpdate($event)" 
+                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        <app-task-add 
+                        *ngIf="(!limits.maxInProgress && limits.maxInProgress != 0) || limits.maxInProgress > tasksCount.inProgress" 
+                        class="task-card" 
+                        [tagName]="selectedTag.id == 0 ? null : selectedTag.name" 
+                        [projectId]="projectId" 
+                        [taskStatus]="taskStatuses.InProgress" 
+                        (added)="addTask($event, taskStatuses.InProgress)"
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.InProgress)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.inProgress && !loadError">
                         <mat-spinner></mat-spinner>
                     </div>
                 </div>    
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
+                <div fxFlex="100" fxFlex.gt-sm="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px"  [fxShow]="selectedStatus == taskStatuses.Validate" fxShow.gt-sm>
                     <mat-expansion-panel class="validate column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">Validate</h1>
+                                <h1 class="mb-0">Validate ({{tasksCount.validate}}<span *ngIf="selectedTag.id != 0">, with tag: {{tasks.validate.length}}</span>)</h1>
                             </mat-panel-title>
                         </mat-expansion-panel-header>
                         <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
@@ -82,19 +120,34 @@
                             </mat-form-field>
                         </div>
                     </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task" [status]="taskStatuses.Validate" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add *ngIf="(!limits.maxValidate && limits.maxValidate != 0) || limits.maxValidate > tasks.validate.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
+                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate && limits">
+                        <app-task-reduced 
+                        class="task-card" 
+                        *ngFor="let task of tasks.validate" 
+                        [model]="task" 
+                        [limits]="limits" 
+                        [tasksCount]="tasksCount" 
+                        [status]="taskStatuses.Validate" 
+                        (updatedStatus)="onTaskStatusUpdate($event)" 
+                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        <app-task-add 
+                        *ngIf="(!limits.maxValidate && limits.maxValidate != 0) || limits.maxValidate > tasksCount.validate" 
+                        class="task-card" 
+                        [tagName]="selectedTag.id == 0 ? null : selectedTag.name" 
+                        [projectId]="projectId" 
+                        [taskStatus]="taskStatuses.Validate" 
+                        (added)="addTask($event, taskStatuses.Validate)"
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.Validate)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.validate && !loadError">
                         <mat-spinner></mat-spinner>
                     </div>
                 </div>      
-                <div fxFlex="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px">
+                <div fxFlex="100" fxFlex.gt-sm="25" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px"  [fxShow]="selectedStatus == taskStatuses.Complete" fxShow.gt-sm>
                     <mat-expansion-panel class="complete column-header">
                         <mat-expansion-panel-header>
                             <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">Complete</h1>
+                                <h1 class="mb-0">Complete ({{tasksCount.done}}<span *ngIf="selectedTag.id != 0">, with tag: {{tasks.done.length}}</span>)</h1>
                             </mat-panel-title>
                         </mat-expansion-panel-header>
                         <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
@@ -105,130 +158,22 @@
                         </div>
                     </mat-expansion-panel>
                     <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.done">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task" [status]="taskStatuses.Complete" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Complete" (added)="addTask($event, taskStatuses.Complete)"></app-task-add>
-                    </div>
-                    <div *ngIf="!tasks.done && !loadError">
-                        <mat-spinner></mat-spinner>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div fxShow fxHide.gt-sm fxLayout="column">
-        <div class="row tag-container" fxLayout="row" fxFlex="80" fxLayoutAlign="start center" fxLayoutGap="5px">
-                <button mat-icon-button *ngIf="list.isOverflow" [disabled]="!list.canScrollStart" (click)="list.scroll(-1)">
-                    <mat-icon>arrow_back_ios</mat-icon>
-                </button>
-                <mat-chip-list aria-orientation="horizontal" fxLayout="row" fxLayoutGap="30px" appScrollable #list="appScrollable" [scrollUnit]="150" class="list">
-                    <mat-chip [removable]="tag.id != 0" selectable="false" *ngFor="let tag of tags" [selected]="tag==selectedTag" (click)="changeSelectedTag(tag)" (removed)="openRemoveTagDialog(tag)">
-                        {{tag.name}}
-                        <button matChipRemove *ngIf="tag.id != 0">
-                            <mat-icon>cancel</mat-icon>
-                        </button>
-                    </mat-chip>
-                  </mat-chip-list>
-                <button mat-icon-button *ngIf="list.isOverflow"  [disabled]="!list.canScrollEnd" (click)="list.scroll(1)">
-                    <mat-icon>arrow_forward_ios</mat-icon>
-                </button>
-        </div>
-        <div class="row" fxLayout="row" fxLayoutAlign="end center">avatars</div>
-        <div class="row" fxLayout="row" fxLayoutAlign="center center">
-            <mat-form-field appearance="outline">
-                <mat-label>Category</mat-label>
-                <mat-select [(value)]="selectedStatus">
-                  <mat-option *ngFor="let status of statusesWithDescription" value="{{status.status}}">{{status.description}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-        </div>
-        <div>
-            <form fxLayout="row" novalidate method="POST" [formGroup]="form" #lform="ngForm">
-                <div fxFlex="100" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="selectedStatus == taskStatuses.ToDo">
-                    <mat-expansion-panel class="to-do column-header">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">To Do</h1>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
-                            <mat-form-field appearance="outline" class="w-60">
-                                <mat-label>Max quantity</mat-label>
-                                <input matInput class="black" formControlName="toDo" (blur)="onSubmit($event)">
-                                <mat-error *ngIf="formErrors.toDo">{{formErrors.toDo}}</mat-error>
-                            </mat-form-field>
-                        </div>
-                    </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.toDo">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.toDo" [model]="task" [status]="taskStatuses.ToDo" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add *ngIf="(!limits.maxToDo && limits.maxToDo != 0) || limits.maxToDo > tasks.toDo.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.ToDo" (added)="addTask($event, taskStatuses.ToDo)"></app-task-add>
-                    </div>
-                    <div *ngIf="!tasks.toDo && !loadError">
-                        <mat-spinner></mat-spinner>
-                    </div>
-                </div>
-                <div fxFlex="100" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px"  *ngIf="selectedStatus == taskStatuses.InProgress">
-                    <mat-expansion-panel class="in-progress column-header">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">In Progress</h1>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
-                            <mat-form-field appearance="outline" class="w-60">
-                                <mat-label>Max quantity</mat-label>
-                                <input matInput class="black" formControlName="inProgress" (blur)="onSubmit($event)">
-                                <mat-error *ngIf="formErrors.inProgress">{{formErrors.inProgress}}</mat-error>
-                            </mat-form-field>
-                        </div>
-                    </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.inProgress">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.inProgress" [model]="task" [status]="taskStatuses.InProgress" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add *ngIf="(!limits.maxInProgress && limits.maxInProgress != 0) || limits.maxInProgress > tasks.inProgress.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.InProgress" (added)="addTask($event, taskStatuses.InProgress)"></app-task-add>
-                    </div>
-                    <div *ngIf="!tasks.inProgress && !loadError">
-                        <mat-spinner></mat-spinner>
-                    </div>
-                </div>    
-                <div fxFlex="100" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px"  *ngIf="selectedStatus == taskStatuses.Validate">
-                    <mat-expansion-panel class="validate column-header">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">Validate</h1>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
-                            <mat-form-field appearance="outline" class="w-60">
-                                <mat-label>Max quantity</mat-label>
-                                <input matInput class="black" formControlName="validate" (blur)="onSubmit($event)">
-                                <mat-error *ngIf="formErrors.validate">{{formErrors.validate}}</mat-error>
-                            </mat-form-field>
-                        </div>
-                    </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.validate">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.validate" [model]="task" [status]="taskStatuses.Validate" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add *ngIf="(!limits.maxValidate && limits.maxValidate != 0) || limits.maxValidate > tasks.validate.length" class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Validate" (added)="addTask($event, taskStatuses.Validate)"></app-task-add>
-                    </div>
-                    <div *ngIf="!tasks.validate && !loadError">
-                        <mat-spinner></mat-spinner>
-                    </div>
-                </div>      
-                <div fxFlex="100" class="column" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px"  *ngIf="selectedStatus == taskStatuses.Complete">
-                    <mat-expansion-panel class="complete column-header">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title fxLayoutAlign="center center">
-                                <h1 class="mb-0">Complete</h1>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <div class="w-100" fxLayoutAlign="center center" fxLayout="column">
-                            <mat-form-field appearance="outline" class="w-60">
-                                <mat-label>Max quantity</mat-label>
-                                <input matInput disabled value="unlimited" class="black">
-                            </mat-form-field>
-                        </div>
-                    </mat-expansion-panel>
-                    <div class="w-100" fxLayoutAlign="start center" fxLayout="column" fxLayoutGap="35px" *ngIf="tasks.done">
-                        <app-task-reduced class="task-card" *ngFor="let task of tasks.done" [model]="task" [status]="taskStatuses.Complete" (updatedStatus)="onTaskStatusUpdate($event)" (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
-                        <app-task-add class="task-card" [projectId]="projectId" [taskStatus]="taskStatuses.Complete" (added)="addTask($event, taskStatuses.Complete)"></app-task-add>
+                        <app-task-reduced 
+                        class="task-card" 
+                        *ngFor="let task of tasks.done" 
+                        [model]="task" 
+                        [limits]="limits" 
+                        [tasksCount]="tasksCount" 
+                        [status]="taskStatuses.Complete" 
+                        (updatedStatus)="onTaskStatusUpdate($event)" 
+                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        <app-task-add 
+                        class="task-card" 
+                        [tagName]="selectedTag.id == 0 ? null : selectedTag.name" 
+                        [projectId]="projectId" 
+                        [taskStatus]="taskStatuses.Complete" 
+                        (added)="addTask($event, taskStatuses.Complete)"
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.Complete)"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.done && !loadError">
                         <mat-spinner></mat-spinner>
