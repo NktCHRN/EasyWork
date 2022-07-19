@@ -139,7 +139,7 @@ onSubmit()
       this.loading = false;
       let errorMessage = error.error ?? error.message ?? JSON.stringify(error);
       if (errorMessage == "The max length of the avatar is 8 MB")
-        errorMessage += ". Your file size was " + Math.ceil(file.size / 1024) + " MB";
+        errorMessage += ". Your file size was " + (Math.ceil(file.size / Math.pow(1024, 2) * 100) / 100).toFixed(2) + " MB";
       this._dialog.open(ErrorDialogComponent, {
         panelClass: "mini-dialog-responsive",
         data: errorMessage
