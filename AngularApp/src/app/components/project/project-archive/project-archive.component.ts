@@ -68,7 +68,7 @@ export class ProjectArchiveComponent implements OnInit {
       error: error => 
       this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
     });
-    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId, null)
+    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId)
     .subscribe({
       next: result => 
       {

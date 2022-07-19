@@ -276,19 +276,13 @@ export class ProjectService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public getTasks(token: string, id: number, tagId: number | null | undefined) : Observable<TasksModel>
+  public getTasks(token: string, id: number) : Observable<TasksModel>
   {
-    let params = new HttpParams()
-    if (tagId)
-    {
-      params = params.append('tagId', tagId);
-    }
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
         'Authorization': 'Bearer ' + token
-      }),
-      params: params
+      })
     };
     return this._http.get<TasksModel>(this.serviceBaseURL + id + "/tasks/", httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));

@@ -104,7 +104,7 @@ export class ProjectTasksComponent implements OnInit {
       const controls = [toDoControl, inProgressControl, validateControl];
       controls.forEach(control => control.disable());
     }
-    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId, null)
+    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId)
     .subscribe({
       next: result => 
       {

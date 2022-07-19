@@ -159,7 +159,7 @@ export class TaskComponent implements OnInit {
       // Also subscribe to limits changes in this if after the SignalR implementation
     }
     if (!this.tasksCount) {
-      this._projectService.getTasks(this._tokenService.getJwtToken()!, this.task.projectId, null)
+      this._projectService.getTasks(this._tokenService.getJwtToken()!, this.task.projectId)
       .subscribe({
         next: result => 
         {
