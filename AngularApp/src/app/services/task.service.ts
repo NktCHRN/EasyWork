@@ -3,8 +3,7 @@ import { Injectable } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
 import { AddMessageModel } from '../shared/message/add-message.model';
 import { MessageModel } from '../shared/message/message.model';
-import { AddTagModel } from '../shared/tag/add-tag.model';
-import { TagModel } from '../shared/tag/tag.model';
+import { AddExecutorModel } from '../shared/task/executor/add-executor.model';
 import { TaskPriority } from '../shared/task/priority/task-priority';
 import { TaskPriorityNone } from '../shared/task/priority/task-priority-none';
 import { TaskStatus } from '../shared/task/status/task-status';
@@ -83,6 +82,30 @@ export class TaskService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
+  public deleteExecutor(token: string, id: number, userId: number) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + id + "/users/" + userId, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public addExecutor(token: string, id: number, model: AddExecutorModel) : Observable<UserMiniWithAvatarModel>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.post<UserMiniWithAvatarModel>(this.serviceBaseURL + id + '/users', model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
   public getExecutors(token: string, id: number) : Observable<UserMiniWithAvatarModel[]>
   {
     const httpOptions = {
@@ -116,18 +139,6 @@ export class TaskService extends BaseService {
       })
     };
     return this._http.post<MessageModel>(this.serviceBaseURL + id + '/messages', model, httpOptions)
-      .pipe(catchError(this._processHTTPMsgService.handleError));
-  }
-
-  public addTag(token: string, id: number, model: AddTagModel) : Observable<TagModel>
-  {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
-      })
-    };
-    return this._http.post<TagModel>(this.serviceBaseURL + id + '/tags', model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

@@ -12,13 +12,11 @@ import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model'
 import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
-import { TagModel } from 'src/app/shared/tag/tag.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
 import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
-import { ProjectTagDeleteComponent } from './project-tag-delete/project-tag-delete.component';
 import { TaskReducedComponent } from './task-reduced/task-reduced.component';
 
 @Component({
@@ -45,13 +43,6 @@ export class ProjectTasksComponent implements OnInit {
     done: undefined!
   }
   loadError: boolean = false;
-  tags: TagModel[] = [
-    {
-      id: 0,
-      name: "All"
-    }
-  ];
-  selectedTag: TagModel;
   taskStatuses = TaskStatus;
   selectedStatus: TaskStatus = TaskStatus.ToDo;
   readonly statusesWithDescription: TaskStatusWithDescriptionModel[];
@@ -86,7 +77,6 @@ export class ProjectTasksComponent implements OnInit {
   private _tokenService: TokenService, private _dialog: MatDialog, private _taskService: TaskService) { 
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(false);
     this.createForm();
-    this.selectedTag = this.tags[0];
   }
 
   ngOnInit(): void {
@@ -126,18 +116,6 @@ export class ProjectTasksComponent implements OnInit {
       {
         this.loadError = true;
         this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
-      }
-    });
-    this._projectService.getTags(this._tokenService.getJwtToken()!, this.projectId)
-    .subscribe({
-      next: result => 
-      {
-        this.tags = this.tags.concat(result);
-      },
-      error: error => 
-      {
-        this.loadError = true;
-        this._snackBar.open("Tags have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
       }
     });
   }
@@ -224,44 +202,6 @@ export class ProjectTasksComponent implements OnInit {
     }
   }
 
-  changeSelectedTag(tag: TagModel): void {
-    const id = tag.id == 0 ? null : tag.id;
-    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId, id)
-    .subscribe({
-      next: result => 
-      {
-        this.tasks = result;
-        this.selectedTag = tag;
-      },
-      error: error => 
-      {
-        this.loadError = true;
-        this._snackBar.open("Tasks with chosen tag have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
-      }
-    });
-  }
-
-  openRemoveTagDialog(tag: TagModel): void {
-    if (tag.id == 0)
-    return;
-    const dialogRef = this._dialog.open(ProjectTagDeleteComponent, {
-      panelClass: "dialog-responsive",
-      data: {
-        tag: tag,
-        projectId: this.projectId
-      }
-    });
-    dialogRef.afterClosed()
-    .subscribe(() => {
-      if (dialogRef.componentInstance.success)
-      {
-          this.tags.splice(this.tags.indexOf(tag), 1);
-          if (this.selectedTag == tag)
-            this.changeSelectedTag(this.tags[0]);
-      };
-    });
-  }
-
   convertStatusToString(status: TaskStatus): string {
     let modifiedStatus: string
     if (status == TaskStatus.Complete)
@@ -305,8 +245,6 @@ export class ProjectTasksComponent implements OnInit {
         this.changeCountByStatus(convertedOld, -1);
         oldTasks.splice(oldIndex, 1);
       }
-      else if (this.selectedTag.id != 0)
-        this.changeCountByStatus(convertedOld, -1);
       if (event.new != TaskStatus.Archived)
         this.addExistingTask(found, event.new);
       this.subscribeToTask(found.id);

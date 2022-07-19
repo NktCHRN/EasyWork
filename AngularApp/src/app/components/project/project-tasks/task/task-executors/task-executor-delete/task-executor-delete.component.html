@@ -1,20 +1,20 @@
 <button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
     <mat-icon class="close-icon">close</mat-icon>
 </button>
-<h1 mat-dialog-title class="deep-orange">Delete {{model.name}}</h1>
+<h1 mat-dialog-title class="deep-orange">Remove {{user.fullName}}</h1>
 <mat-dialog-content>
     <div fxLayout="column" fxLayoutGap="30px" *ngIf="!success && !loading && !errorMessage">
         <div>
-            <h3>Are you sure you want to delete a tag "{{model.name}}" from the whole project?</h3>
+            <h3>Are you sure you want to remove <span class="deep-orange">{{user.fullName}}</span> from this task?</h3>
         </div>
         <div fxLayoutGap="30px">
             <button mat-flat-button [mat-dialog-close]="true">No, go back</button>
-            <button mat-flat-button color="warn" (click)="onSubmit()">Yes, delete it</button>
+            <button mat-flat-button color="warn" (click)="onSubmit()">Yes, kick them</button>
         </div>
     </div>
     <div *ngIf="success">
         <div class="header-container">
-            <h3>You have successfully deleted the tag "{{model.name}}" from the project</h3>
+            <h3>You have successfully removed <span class="deep-orange">{{user.fullName}}</span> from this task</h3>
         </div>
         <div>
             <button mat-flat-button [mat-dialog-close]="true">Close</button>

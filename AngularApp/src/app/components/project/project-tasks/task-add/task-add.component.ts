@@ -10,7 +10,6 @@ import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { take } from 'rxjs';
 import { AddTaskModel } from 'src/app/shared/task/add-task.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AddTagModel } from 'src/app/shared/tag/add-tag.model';
 import { TaskService } from 'src/app/services/task.service';
 
 @Component({
@@ -23,12 +22,10 @@ export class TaskAddComponent implements OnInit {
   @Input() projectId: number = undefined!;
   isOpened: boolean = false;
   @Output() added: EventEmitter<TaskReducedModel> = new EventEmitter<TaskReducedModel>();
-  @Output() addedWithTagError = new EventEmitter();
   loading: boolean = false;
   @ViewChild('nameAutosize') nameAutosize: CdkTextareaAutosize = undefined!;
   form: FormGroup = null!;
   @ViewChild('aform') formDirective: any;
-  @Input() tagName: string | null | undefined;
 
   formErrors : any = {
     'name': '',
@@ -109,24 +106,7 @@ export class TaskAddComponent implements OnInit {
           };
           this.form.reset();
           this.isOpened = false;
-          if (this.tagName)
-          {
-            const tagModel: AddTagModel = {
-              name: this.tagName
-            }
-            this._taskService.addTag(this._tokenService.getJwtToken()!, result.id, tagModel)
-            .subscribe({
-              next: () => this.added.emit(reducedResult),
-              error: error => {
-                this._snackBar.open(`Task has been added, but without a tag (open the "All" section): ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
-                  duration: 5000,
-                });
-                this.addedWithTagError.emit();
-              }
-            });
-          }
-          else
-            this.added.emit(reducedResult);
+          this.added.emit(reducedResult);
         },
         error: error => {
           this.loading = false;

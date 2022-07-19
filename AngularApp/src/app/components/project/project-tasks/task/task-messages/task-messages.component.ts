@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, Input, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
 import { MessageModel } from 'src/app/shared/message/message.model';

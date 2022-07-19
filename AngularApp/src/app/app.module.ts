@@ -87,9 +87,6 @@ import { ProjectUserAddComponent } from './components/project/project-participan
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { TaskReducedComponent } from './components/project/project-tasks/task-reduced/task-reduced.component';
-import { ScrollableDirective } from './directives/scrollable.directive'; 
-import {MatChipsModule} from '@angular/material/chips';
-import { ProjectTagDeleteComponent } from './components/project/project-tasks/project-tag-delete/project-tag-delete.component';
 import { TaskAddComponent } from './components/project/project-tasks/task-add/task-add.component';
 import { TaskComponent } from './components/project/project-tasks/task/task.component'; 
 import {
@@ -109,6 +106,9 @@ import { TaskMessageComponent } from './components/project/project-tasks/task/ta
 import { TaskMessageDeleteComponent } from './components/project/project-tasks/task/task-messages/task-message-delete/task-message-delete.component';
 import { MessageService } from './services/message.service';
 import { LinkyModule } from 'ngx-linky';
+import {MatListModule} from '@angular/material/list';
+import { TaskExecutorsComponent } from './components/project/project-tasks/task/task-executors/task-executors.component';
+import { TaskExecutorDeleteComponent } from './components/project/project-tasks/task/task-executors/task-executor-delete/task-executor-delete.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -155,14 +155,14 @@ export function tokenGetter() {
     ProjectUserEditComponent,
     ProjectUserAddComponent,
     TaskReducedComponent,
-    ScrollableDirective,
-    ProjectTagDeleteComponent,
     TaskAddComponent,
     TaskComponent,
     TaskDeleteComponent,
     TaskMessagesComponent,
     TaskMessageComponent,
-    TaskMessageDeleteComponent
+    TaskMessageDeleteComponent,
+    TaskExecutorsComponent,
+    TaskExecutorDeleteComponent
   ],
   imports: [
     BrowserModule,
@@ -203,12 +203,12 @@ export function tokenGetter() {
     MatSelectModule,
     NgxMatSelectSearchModule,
     MatExpansionModule,
-    MatChipsModule,
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
     MatDatepickerModule,
-    LinkyModule
+    LinkyModule,
+    MatListModule
   ],
   providers: [
     GeneralinfoService,

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProjectTagDeleteComponent } from './project-tag-delete.component';
+import { TaskExecutorsComponent } from './task-executors.component';
 
-describe('ProjectTagDeleteComponent', () => {
-  let component: ProjectTagDeleteComponent;
-  let fixture: ComponentFixture<ProjectTagDeleteComponent>;
+describe('TaskExecutorsComponent', () => {
+  let component: TaskExecutorsComponent;
+  let fixture: ComponentFixture<TaskExecutorsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ProjectTagDeleteComponent ]
+      declarations: [ TaskExecutorsComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ProjectTagDeleteComponent);
+    fixture = TestBed.createComponent(TaskExecutorsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

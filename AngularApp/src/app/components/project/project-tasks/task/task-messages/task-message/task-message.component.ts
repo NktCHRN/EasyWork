@@ -1,7 +1,6 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { MessageService } from 'src/app/services/message.service';
 import { TokenService } from 'src/app/services/token.service';

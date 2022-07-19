@@ -21,10 +21,10 @@ import { AddUserOnProjectModel } from '../shared/project/user-on-project/add/add
 import { UserOnProjectModel } from '../shared/project/user-on-project/user-on-project.model';
 import { ProjectLimitsModel } from '../shared/project/limits/project-limits.model';
 import { TasksModel } from '../shared/project/tasks/tasks.model';
-import { TagModel } from '../shared/tag/tag.model';
 import { AddTaskModel } from '../shared/task/add-task.model';
 import { TaskModel } from '../shared/task/task.model';
 import { TaskReducedModel } from '../shared/task/task-reduced.model';
+import { UserMiniWithAvatarModel } from '../shared/user/user-mini-with-avatar.model';
 
 @Injectable({
   providedIn: 'root'
@@ -183,6 +183,23 @@ export class ProjectService extends BaseService {
       }), catchError(this._processHTTPMsgService.handleError));
   }
 
+  public getUsersWithoutRoles(token: string, id: number): Observable<UserMiniWithAvatarModel[]>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<UserOnProjectExtendedRawModel[]>(this.serviceBaseURL + id + '/users', httpOptions)
+      .pipe(map(response => {
+        let result = response.map(u => {
+          return u.user;
+        });
+        return result;
+      }), catchError(this._processHTTPMsgService.handleError));
+  }
+
   isSingleOwner(users: UserOnProjectExtendedModel[], me: UserOnProjectReducedModel) {
     return me.role == UserOnProjectRole.Owner && users.filter(u => u.role == UserOnProjectRole.Owner).length <= 1;
   }
@@ -274,30 +291,6 @@ export class ProjectService extends BaseService {
       params: params
     };
     return this._http.get<TasksModel>(this.serviceBaseURL + id + "/tasks/", httpOptions)
-      .pipe(catchError(this._processHTTPMsgService.handleError));
-  }
-
-  public getTags(token: string, id: number) : Observable<TagModel[]>
-  {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
-      })
-    };
-    return this._http.get<TagModel[]>(this.serviceBaseURL + id + "/tags", httpOptions)
-      .pipe(catchError(this._processHTTPMsgService.handleError));
-  }
-
-  public deleteTag(token: string, id: number, tagId: number) : Observable<Object>
-  {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
-      })
-    };
-    return this._http.delete(this.serviceBaseURL + id + "/tags/" + tagId, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

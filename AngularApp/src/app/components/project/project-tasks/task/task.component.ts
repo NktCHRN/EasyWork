@@ -20,6 +20,7 @@ import { TaskDeleteComponent } from '../task-delete/task-delete.component';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { ProjectService } from 'src/app/services/project.service';
+import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 
 @Component({
   selector: 'app-task',
@@ -53,6 +54,8 @@ export class TaskComponent implements OnInit {
   @Output() deletedMessage = new EventEmitter();
   limits: ProjectLimitsModel = undefined!;
   tasksCount: TasksCountModel = undefined!;
+  @Output() deletedExecutor: EventEmitter<number> = new EventEmitter<number>();
+  @Output() addedExecutor: EventEmitter<UserMiniWithAvatarModel> = new EventEmitter<UserMiniWithAvatarModel>();
 
   formErrors : any = {
     'name': '',

@@ -95,7 +95,17 @@
                 <div fxFlex="35" fxLayoutGap="10px" fxLayout="column">
                     <button *ngIf="showToProject" mat-flat-button color="accent" class="w-100" type="button" (click)="toProject()">To project</button>
                     <mat-divider *ngIf="showToProject"></mat-divider>
-                    <p>BLOCK 2 (executors & tags & files)</p>
+                    <app-task-executors
+                    [taskId]="task.id"
+                    [projectId]="task.projectId"
+                (closeDialog)="close()"
+                (switchedToLoading)="switchToLoadingMode()"
+                (switchedToSuccess)="switchToSuccessMode()"
+                (switchedToFail)="switchToFailMode()"
+                (deletedExecutor)="this.deletedExecutor.emit($event)"
+                (addedExecutor)="this.addedExecutor.emit($event)"></app-task-executors>
+                    <mat-divider></mat-divider>
+                    <p>BLOCK 2 (executors & files)</p>
                     <mat-divider></mat-divider>
                     <button 
                     mat-flat-button 

@@ -14,7 +14,9 @@
                         <ngx-mat-select-search [formControl]="usersFilteringCtrl" [searching]="searching" [placeholderLabel]="'Find a user...'" [noEntriesFoundLabel]="'No matching users found.'"></ngx-mat-select-search>
                       </mat-option>
                       <mat-option *ngFor="let user of users | async" [value]="user">
-                        <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="avatar search-avatar">{{user.fullName}} <span class="text-muted">{{user.email}}</span>
+                        <span fxLayout="row" fxLayoutAlign="start center">
+                          <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="avatar search-avatar">{{user.fullName}}&nbsp;<span class="text-muted">{{user.email}}</span>
+                        </span>
                       </mat-option>
                     </mat-select>
                     <mat-error *ngIf="formErrors.user">{{formErrors.user}}</mat-error>

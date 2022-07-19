@@ -27,3 +27,15 @@ $text-size: calc($size * 1.5);
 .lh-16 {
     line-height: 16pt;
 }
+
+::ng-deep {
+    @media screen and (max-width: 959px) {
+        $width: 250px;
+        .mat-datepicker-content {
+            width: $width !important;
+        }
+        .mat-calendar {
+            width: $width !important;
+        }
+    }
+}

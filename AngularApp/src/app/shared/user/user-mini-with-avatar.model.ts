@@ -1,5 +1,5 @@
-export interface UserMiniWithAvatarModel {
-    id: number;
-    fullName: string;
+import { UserMiniReducedModel } from "./user-mini-reduced.model";
+
+export interface UserMiniWithAvatarModel extends UserMiniReducedModel {
     avatarURL: string | null | undefined;
 }

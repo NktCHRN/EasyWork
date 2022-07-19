@@ -54,7 +54,7 @@ $padding-size: 5px;
 }
 
 .row {
-    $padding-size: 35px;
+    $padding-size: 50px;
     padding-left: $padding-size;
     padding-right: $padding-size;
 }
@@ -64,7 +64,7 @@ $padding-size: 5px;
     display: block;
 }
 
-.tag-container {
+.header-container {
     $padding-size: 8px;
     padding-top: $padding-size;
     padding-bottom: $padding-size;
@@ -80,4 +80,12 @@ $padding-size: 5px;
         flex-wrap: nowrap !important;
         flex-shrink: 0;
       }
+    .mat-menu-panel {
+        min-width: fit-content !important;
+    }
+    .invite-menu>.mat-menu-content {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    
 }
