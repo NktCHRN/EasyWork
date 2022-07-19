@@ -6,7 +6,7 @@
     <div fxLayout="column" fxLayoutGap="30px" class="mb-30" *ngIf="projects">
         <mat-card *ngFor="let project of projects" class="task-card">
             <mat-card-title class="orange truncate-content"><a class="orange no-decor" title="to project" [routerLink]="[project.id]">{{project.name}}</a></mat-card-title>
-            <mat-card-subtitle class="formatted" [innerHTML]="project.description ?? '' | linky"></mat-card-subtitle>
+            <mat-card-subtitle class="formatted project-description" [innerHTML]="project.description ?? '' | linky"></mat-card-subtitle>
         </mat-card>
     </div>
     <div *ngIf="errorMessage">

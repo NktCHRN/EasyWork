@@ -35,9 +35,16 @@
             <div fxLayout="column" fxLayout.gt-sm="row" fxLayoutGap="20px">
                 <div fxFlex="65" fxLayoutGap="10px" fxLayout="column">
                     <div>
-                        <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>description</mat-icon><span>&nbsp;Description</span></h2>
-                        <mat-form-field class="w-100" appearance="outline">
+                        <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>description</mat-icon><span>&nbsp;Description </span>
+                            <button type="button" mat-icon-button (click)="toggleEditDescription()">
+                                <mat-icon *ngIf="!editDescription">edit</mat-icon>
+                                <mat-icon *ngIf="editDescription">visibility</mat-icon>
+                            </button>
+                        </h2>
+                        <p *ngIf="!editDescription" class="w-100 text-muted text-sm formatted lh-16" [innerHTML]="task.description ?? '' | linky"></p>
+                        <mat-form-field *ngIf="editDescription" class="w-100" appearance="outline">
                             <textarea matInput
+                            class="text-sm"
                                     cdkTextareaAutosize
                                     #descriptionAutosize="cdkTextareaAutosize"
                                     (blur)="onSubmit($event)"

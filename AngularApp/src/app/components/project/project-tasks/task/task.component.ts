@@ -34,6 +34,7 @@ export class TaskComponent implements OnInit {
   @ViewChild('nameAutosize') nameAutosize: CdkTextareaAutosize = undefined!;
   @ViewChild('descriptionAutosize') descriptionAutosize: CdkTextareaAutosize = undefined!;
   editName: boolean = false;
+  editDescription: boolean = false;
   savedIconColors = {
     [SavedIconState.Fail] : "#D84315",
     [SavedIconState.Loading] : "gray",
@@ -97,6 +98,10 @@ export class TaskComponent implements OnInit {
 
   toggleEditName(): void {
     this.editName = !this.editName;
+  }
+
+  toggleEditDescription(): void {
+    this.editDescription = !this.editDescription;
   }
 
   createForm() {
@@ -221,6 +226,7 @@ export class TaskComponent implements OnInit {
         next: () => {
           this.updatedTask.emit(updateModel);
           this.switchToSuccessMode();
+          this.editName = this.editDescription = false;
         },
         error: error => {
           this.switchToFailMode();
