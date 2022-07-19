@@ -89,11 +89,11 @@ export class ProjectTasksComponent implements OnInit {
       next: result => 
       {
         this.limits = result;
-        if (result.maxToDo)
+        if (result.maxToDo || result.maxToDo == 0)
           toDoControl.setValue(result.maxToDo);
-        if (result.maxInProgress)
+        if (result.maxInProgress || result.maxInProgress == 0)
           inProgressControl.setValue(result.maxInProgress);
-        if (result.maxValidate)
+        if (result.maxValidate || result.maxValidate == 0)
           validateControl.setValue(result.maxValidate);
       },
       error: error => 

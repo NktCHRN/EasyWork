@@ -87,7 +87,7 @@ export class TaskComponent implements OnInit {
     let modifiedStatus: string = status.charAt(0).toLowerCase() + status.substring(1);
     const count: number = this.tasksCount[modifiedStatus as keyof typeof this.tasksCount];
     modifiedStatus = "max" + status;
-    const limit: number | null | undefined = this.limits[modifiedStatus as keyof typeof this.limits];;
+    const limit: number | null | undefined = this.limits[modifiedStatus as keyof typeof this.limits];
     return limit != null && limit != undefined && limit <= count;
   }
 
