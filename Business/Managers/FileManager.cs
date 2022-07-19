@@ -7,23 +7,22 @@ namespace Business.Managers
 {
     public class FileManager : IFileManager
     {
-        public static IEnumerable<(string, string)> AllowedImageTypes 
-        { get
-            {
-                return new (string, string)[]
-                {
-                    ("bmp", "bmp"),
-                    ("gif", "gif"),
-                    ("ico", "vnd.microsoft.icon"),
-                    ("jpeg", "jpeg"),
-                    ("jpg", "jpeg"),
-                    ("png", "png"),
-                    ("tif", "tiff"),
-                    ("tiff", "tiff"),
-                    ("webp", "webp")
-                };
-            } 
-        }
+        public IEnumerable<(string, string)> AllowedImageTypes => _allowedImageTypes;
+
+        private readonly IEnumerable<(string, string)> _allowedImageTypes = new (string, string)[]
+        {
+            ("bmp", "bmp"),
+            ("gif", "gif"),
+            ("ico", "vnd.microsoft.icon"),
+            ("jpeg", "jpeg"),
+            ("jpg", "jpeg"),
+            ("png", "png"),
+            ("tif", "tiff"),
+            ("tiff", "tiff"),
+            ("webp", "webp")
+        };
+
+        private const long _maxAvatarLength = 8388608L;              // 8 MB
 
         public string? GetSolutionPath()
         {
@@ -66,17 +65,22 @@ namespace Business.Managers
                 var realType = Path.GetExtension(file.FileName);
                 if (!IsValidImageType(type) || !IsValidImageType(realType))
                     throw new ArgumentException("This extension is not allowed");
-                if (file.Length > 8388608)
+                if (file.Length > _maxAvatarLength)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
                 var data = await Image.IdentifyAsync(file.OpenReadStream());
-                if (data is null)
-                    throw new ArgumentException("Cannot read image data");
-                if (data.Width != data.Height)
-                    throw new ArgumentException("Image should be square");
+                CheckAvatar(data);
             }
             var path = GetPathByEWType(name, ewtype);
             using var fileStream = new FileStream(path, FileMode.Create);
             await file.CopyToAsync(fileStream);
+        }
+
+        private static void CheckAvatar(IImageInfo? avatar)
+        {
+            if (avatar is null)
+                throw new ArgumentException("Cannot read image data");
+            if (avatar.Width != avatar.Height)
+                throw new ArgumentException("Image should be square");
         }
 
         public bool IsValidImageType(string type)
@@ -132,13 +136,10 @@ namespace Business.Managers
                 var type = Path.GetExtension(name);
                 if (!IsValidImageType(type))
                     throw new ArgumentException("This extension is not allowed");
-                if (file.Length > 8388608)              // 8 MB
+                if (file.LongLength > _maxAvatarLength)
                     throw new ArgumentException("The max length of the avatar is 8 MB");
                 var data = Image.Identify(file);
-                if (data is null)
-                    throw new ArgumentException("Cannot read image data");
-                if (data.Width != data.Height)
-                    throw new ArgumentException("Image should be square");
+                CheckAvatar(data);
             }
             var path = GetPathByEWType(name, ewtype);
             using var fileStream = new FileStream(path, FileMode.Create);
