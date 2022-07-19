@@ -119,6 +119,10 @@ export class CabinetComponent implements OnInit {
           panelClass: "snackbar-orange"
         });
         this._userInfoService.updateLastUser();
+        this.user = {
+          ...this.user,
+          ...this.updateUser
+        };
       },
       error: error => { 
         this._snackBar.open(`The user was not updated: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
