@@ -19,8 +19,6 @@ namespace Data
 
         public DbSet<UserOnProject> UsersOnProjects => Set<UserOnProject>();
 
-        public DbSet<Tag> Tags => Set<Tag>();
-
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

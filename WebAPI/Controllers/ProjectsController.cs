@@ -11,7 +11,6 @@ using WebAPI.DTOs.Project.Gantt;
 using WebAPI.DTOs.Project.InviteCode;
 using WebAPI.DTOs.Project.Limits;
 using WebAPI.DTOs.Project.Tasks;
-using WebAPI.DTOs.Tag;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.UserOnProject;
@@ -32,17 +31,14 @@ namespace WebAPI.Controllers
 
         private readonly IUserOnProjectService _userOnProjectService;
 
-        private readonly ITagService _tagService;
-
         private readonly ITaskService _taskService;
 
         private readonly IMapper _mapper;
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
         {
             _projectService = projectService;
             _mapper = mapper;
             _userOnProjectService = userOnProjectService;
-            _tagService = tagService;
             _userManager = userManager;
             _fileManager = fileManager;
             _taskService = taskService;
@@ -270,40 +266,6 @@ namespace WebAPI.Controllers
             return Created($"{this.GetApiUrl()}Invites/{project.InviteCode}", project.InviteCode);
         }
 
-        [HttpGet("{id}/tags")]
-        public async Task<IActionResult> GetProjectTags(int id)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
-                return Forbid();
-            return Ok(_mapper.Map<IEnumerable<TagDTO>>(_tagService.GetProjectTags(id)));
-        }
-
-        [HttpDelete("{id}/tags/{tagId}")]
-        public async Task<IActionResult> DeleteTagFromProject(int id, int tagId)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var project = await _projectService.GetByIdAsync(id);
-            if (project is null)
-                return NotFound();
-            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
-                return Forbid();
-            try
-            {
-                await _tagService.DeleteFromProjectByIdAsync(tagId, id);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            return NoContent();
-        }
-
         [HttpGet("{id}/users")]
         public async Task<IActionResult> GetProjectUsers(int id)
         {
@@ -505,7 +467,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}/tasks")]
-        public async Task<IActionResult> GetTasks(int id, [FromQuery] int? tagId)
+        public async Task<IActionResult> GetTasks(int id)
         {
             var userId = User.GetId();
             if (userId is null)
@@ -518,7 +480,7 @@ namespace WebAPI.Controllers
             var tasks = new List<IEnumerable<TaskModel>>();
             var mappedTasks = new List<List<TaskReducedDTO>>();
             for (short i = 0; i < 4; i++)
-                tasks.Add(_taskService.GetProjectTasksByStatusAndTag(id, (TaskStatuses)i, tagId));
+                tasks.Add(_taskService.GetProjectTasksByStatus(id, (TaskStatuses)i));
             foreach (var tasksElement in tasks)
             {
                 mappedTasks.Add(new List<TaskReducedDTO>());
@@ -549,7 +511,7 @@ namespace WebAPI.Controllers
                 return NotFound();
             if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
                 return Forbid();
-            var tasks = _taskService.GetProjectTasksByStatusAndTag(id, TaskStatuses.Archived);
+            var tasks = _taskService.GetProjectTasksByStatus(id, TaskStatuses.Archived);
             var mappedTasks = new List<TaskReducedDTO>();
             foreach (var task in tasks)
             {

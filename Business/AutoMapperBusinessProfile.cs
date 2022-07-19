@@ -38,14 +38,8 @@ namespace Business
                 m => m.MapFrom(tm => tm.Files.Select(f => f.Id)))
                 .ForMember(e => e.MessagesIds,
                 m => m.MapFrom(tm => tm.Messages.Select(msg => msg.Id)))
-                .ForMember(e => e.TagsIds,
-                m => m.MapFrom(taskm => taskm.Tags.Select(t => t.Id)))
                 .ForMember(e => e.ExecutorsIds,
                 m => m.MapFrom(tm => tm.Executors.Select(ex => ex.Id)))
-                .ReverseMap();
-            CreateMap<Tag, TagModel>()
-                .ForMember(e => e.TasksIds,
-                m => m.MapFrom(tagm => tagm.Tasks.Select(t => t.Id)))
                 .ReverseMap();
             CreateMap<UserOnProject, UserOnProjectModel>().ReverseMap();
             CreateMap<Data.Entities.File, FileModelExtended>()

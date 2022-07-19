@@ -8,7 +8,6 @@ using WebAPI.DTOs.Message;
 using WebAPI.DTOs.Project;
 using WebAPI.DTOs.Project.InviteCode;
 using WebAPI.DTOs.Project.Limits;
-using WebAPI.DTOs.Tag;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.User.Profile;
@@ -67,7 +66,6 @@ namespace WebAPI
             CreateMap<UpdateProjectDTO, ProjectModel>();
             CreateMap<UpdateInviteCodeStatusDTO, ProjectModel>()
                 .ForMember(d => d.IsInviteCodeActive, sc => sc.MapFrom(s => s.IsActive));
-            CreateMap<TagModel, TagDTO>();
             CreateMap<TaskModel, TaskReducedDTO>()
                 .ForMember(t => t.MessagesCount, m => m.MapFrom(tsk => tsk.MessagesIds.Count))
                 .ForMember(t => t.FilesCount, m => m.MapFrom(tsk => tsk.FilesIds.Count))

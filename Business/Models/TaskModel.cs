@@ -32,8 +32,6 @@ namespace Business.Models
 
         public ICollection<int> FilesIds { get; set; } = new List<int>();
 
-        public ICollection<int> TagsIds { get; set; } = new List<int>();
-
         public ICollection<int> ExecutorsIds { get; set; } = new List<int>();
     }
 }

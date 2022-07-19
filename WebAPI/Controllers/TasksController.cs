@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs.File;
 using WebAPI.DTOs.Message;
-using WebAPI.DTOs.Tag;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.Task.Executor;
 using WebAPI.DTOs.User;
@@ -25,8 +24,6 @@ namespace WebAPI.Controllers
 
         private readonly IUserOnProjectService _userOnProjectService;
 
-        private readonly ITagService _tagService;
-
         private readonly ITaskService _taskService;
 
         private readonly IFileService _fileService;
@@ -37,11 +34,10 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITagService tagService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService)
+        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
-            _tagService = tagService;
             _taskService = taskService;
             _mapper = mapper;
             _fileService = fileService;
@@ -141,89 +137,6 @@ namespace WebAPI.Controllers
             catch (InvalidOperationException exc)
             {
                 return BadRequest(exc.Message);
-            }
-            return NoContent();
-        }
-
-        [HttpGet("{id}/tags")]
-        public async Task<IActionResult> GetTaskTags(int id)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var model = await _taskService.GetByIdAsync(id);
-            if (model is null)
-                return NotFound();
-            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
-                return Forbid();
-            var result = await _tagService.GetTaskTagsAsync(id);
-            return Ok(_mapper.Map<IEnumerable<TagDTO>>(result));
-        }
-
-        [HttpPost("{id}/tags")]
-        public async Task<IActionResult> AddTag(int id, [FromBody] AddTagDTO dto)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var model = await _taskService.GetByIdAsync(id);
-            if (model is null)
-                return NotFound();
-            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
-                return Forbid();
-            var foundTag = await _tagService.FindByName(dto.Name);
-            int tagId;
-            if (foundTag is null)
-            {
-                try
-                {
-                    var tag = new TagModel
-                    {
-                        Name = dto.Name
-                    };
-                    await _tagService.AddAsync(tag);
-                    tagId = tag.Id;
-                }
-                catch (ArgumentException exc)
-                {
-                    return BadRequest(exc.Message);
-                }
-            }
-            else
-                tagId = foundTag.Id;
-            try
-            {
-                await _taskService.AddTagToTaskAsync(id, tagId);
-            }
-            catch (InvalidOperationException exc)
-            {
-                return BadRequest(exc.Message);
-            }
-            return Created($"{this.GetApiUrl()}Tasks/{id}/Tags", new TagDTO()
-            {
-                Id = tagId,
-                Name = dto.Name
-            });
-        }
-
-        [HttpDelete("{id}/tags/{tagId}")]
-        public async Task<IActionResult> DeleteTag(int id, int tagId)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var model = await _taskService.GetByIdAsync(id);
-            if (model is null)
-                return NotFound();
-            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
-                return Forbid();
-            try
-            {
-                await _taskService.DeleteTagFromTaskAsync(id, tagId);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
             }
             return NoContent();
         }

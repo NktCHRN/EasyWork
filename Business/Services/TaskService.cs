@@ -28,7 +28,6 @@ namespace Business.Services
         private async Task<TaskEntity> GetNotMappedByIdAsync(int id)
         {
             var model = await _context.Tasks
-                .Include(t => t.Tags)
                 .Include(t => t.Files)
                 .Include(t => t.Executors)
                 .SingleOrDefaultAsync(t => t.Id == id);
@@ -52,18 +51,6 @@ namespace Business.Services
             model.Id = mapped.Id;
         }
 
-        public async Task AddTagToTaskAsync(int taskId, int tagId)
-        {
-            var tag = await _context.Tags.FindAsync(tagId);
-            if (tag is null)
-                throw new InvalidOperationException("Tag with such an id was not found");
-            var task = await GetNotMappedByIdAsync(taskId);
-            if (task.Tags.Any(t => t.Id == tagId))
-                throw new InvalidOperationException("This task already has such a tag");
-            task.Tags.Add(tag);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task DeleteByIdAsync(int id)
         {
             var model = await GetNotMappedByIdAsync(id);
@@ -84,28 +71,11 @@ namespace Business.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteTagFromTaskAsync(int taskId, int tagId)
-        {
-            var task = await GetNotMappedByIdAsync(taskId);
-            var tag = task.Tags.SingleOrDefault(t => t.Id == tagId);
-            if (tag is null)
-                throw new InvalidOperationException("Tag with such an id does not belong to the task");
-            task.Tags.Remove(tag);
-            await _context.SaveChangesAsync();
-            var tagExtended = await _context.Tags.Include(t => t.Tasks).SingleOrDefaultAsync(t => t.Id == tagId);
-            if (tagExtended is not null && !tagExtended.Tasks.Any())
-            {
-                _context.Tags.Remove(tagExtended);
-                await _context.SaveChangesAsync();
-            }
-        }
-
         public async Task<TaskModel?> GetByIdAsync(int id)
         {
             var model = await _context.Tasks
                 .Include(t => t.Messages)
                 .Include(t => t.Files)
-                .Include(t => t.Tags)
                 .Include(t => t.Executors)
                 .SingleOrDefaultAsync(m => m.Id == id);
             return _mapper.Map<TaskModel?>(model);
@@ -190,18 +160,12 @@ namespace Business.Services
                     && !(t.StartDate >= to)));
         }
 
-        public IEnumerable<TaskModel> GetProjectTasksByStatusAndTag(int projectId, TaskStatuses status, int? tagId = null)
+        public IEnumerable<TaskModel> GetProjectTasksByStatus(int projectId, TaskStatuses status)
         {
             var tasksExtended = _context.Tasks
                 .Include(t => t.Messages)
-                .Include(t => t.Files)
-                .Include(t => t.Tags);
-            if (tagId is null)
-                return _mapper.Map<IEnumerable<TaskModel>>(tasksExtended.Where(t => t.ProjectId == projectId && t.Status == status));
-            var result = tasksExtended
-                .Include(t => t.Tags)
-                .Where(t => t.ProjectId == projectId && t.Status == status && t.Tags.Any(t => t.Id == tagId));
-            return _mapper.Map<IEnumerable<TaskModel>>(result);
+                .Include(t => t.Files);
+            return _mapper.Map<IEnumerable<TaskModel>>(tasksExtended.Where(t => t.ProjectId == projectId && t.Status == status));
         }
 
         public async Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId)

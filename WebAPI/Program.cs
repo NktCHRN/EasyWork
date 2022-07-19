@@ -96,7 +96,6 @@ builder.Services.AddScoped<IBanService, BanService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
-builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserAvatarService, UserAvatarService>();
 builder.Services.AddScoped<IUserOnProjectService, UserOnProjectService>();

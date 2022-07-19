@@ -267,23 +267,6 @@ namespace Tests.BLLTests
                 _context.SaveChanges();
             }
 
-            var tags = new Tag[]
-            {
-                new Tag()
-                {
-                    Name = "Automatisation",
-                },
-                new Tag()
-                {
-                    Name = "Testing",
-                }
-            };
-            foreach (var tag in tags)
-            {
-                _context.Tags.Add(tag);
-                _context.SaveChanges();
-            }
-
             var files = new File[]
             {
                 new File()
