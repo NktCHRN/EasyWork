@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business.Enums;
 using Business.Interfaces;
 using Business.Models;
 using Business.Services;
@@ -9,8 +10,10 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Task = System.Threading.Tasks.Task;
+using File = Data.Entities.File;
 
 namespace Tests.BLLTests
 {
@@ -101,11 +104,8 @@ namespace Tests.BLLTests
                     Name = "Task 4"
                 }
             };
-            foreach (var task in tasks)
-            {
-                _context.Tasks.Add(task);
-                _context.SaveChanges();
-            }
+            _context.Tasks.AddRange(tasks);
+            _context.SaveChanges();
 
             var messages = new Message[]
             {
@@ -129,55 +129,62 @@ namespace Tests.BLLTests
                     Text = "This is message 5"
                 }
             };
-            foreach (var message in messages)
-            {
-                _context.Messages.Add(message);
-                _context.SaveChanges();
-            }
+            _context.Messages.AddRange(messages);
+            _context.SaveChanges();
 
             var files = new File[]
             {
                 new File()  // id 1
             {
                 TaskId = 1,
-                Name = "TestFile1.cs"
+                Name = "TestFile1.cs",
+                IsFull = true,
             },
             new File()  // id 2
             {
                 TaskId = 1,
-                Name = "TestFile2.pdf"
+                Name = "TestFile2.pdf",
+                IsFull = true,
             },
             new File()  // id 3
             {
                 TaskId = 1,
-                Name = "TestFile3.txt"
+                Name = "TestFile3.txt",
+                IsFull = true,
             },
             new File()  // id 4
             {
                 TaskId = 1,
-                Name = "TestFile4.docx"
+                Name = "TestFile4.docx",
+                IsFull = true,
             },
             new File()  // id 5
             {
                 TaskId = 1,
-                Name = "TestFile5.json"
+                Name = "TestFile5.json",
+                IsFull = true,
             },
             new File()  // id 6
             {
                 TaskId = 2,
-                Name = "TestFile6.rtf"
+                Name = "TestFile6.rtf",
+                IsFull = true,
             },
             new File()  // id 7
             {
                 TaskId = 3,
-                Name = "TestFile7.html"
+                Name = "TestFile7.html",
+                IsFull = true,
+            },
+            new File()  // id 8
+            {
+                TaskId = 3,
+                Name = "TestFile8.xml",
+                IsFull = false
             },
             };
-            foreach (var file in files)
-            {
-                _context.Files.Add(file);
-                _context.SaveChanges();
-            }
+            _context.Files.AddRange(files);
+            _context.SaveChanges();
         }
 
         [Test]
@@ -187,7 +194,7 @@ namespace Tests.BLLTests
             SeedData();
             var fileModel = _validFiles.First();
             var file = new Mock<IFormFile>().Object;
-            var expectedName = "8.cs";
+            var expectedName = "9.cs";
             var expectedCount = _context.Files.Count() + 1;
 
             // Act
@@ -199,6 +206,38 @@ namespace Tests.BLLTests
             _managerMock.Verify(t => t.AddFileAsync(file, expectedName, Business.Enums.EasyWorkFileTypes.File),
                 "Method does not add file to file system");
             Assert.AreNotEqual(fileModel.Id, 0, "Method does not set id to the model");
+            Assert.IsTrue(fileModel.IsFull, $"The {nameof(fileModel.IsFull)} property should be set to true");
+        }
+
+        [Test]
+        public async Task ChunkAddStartAsyncTest_ValidModel_AddsToDb()
+        {
+            // Arrange
+            SeedData();
+            var fileModel = _validFiles.First();
+            var expectedCount = _context.Files.Count() + 1;
+
+            // Act
+            await _service.ChunkAddStartAsync(fileModel);
+
+            // Assert
+            var actualCount = _context.Files.Count();
+            Assert.AreEqual(expectedCount, actualCount, "Method does not add a file model to DB");
+            Assert.AreNotEqual(fileModel.Id, 0, "Method does not set id to the model");
+            Assert.IsFalse(fileModel.IsFull, $"The {nameof(fileModel.IsFull)} property should be set to false");
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        public void ChunkAddStartAsyncTest_InvalidModel_ThrowsArgumentException(int index)
+        {
+            // Arrange
+            var fileModel = _invalidFiles.ElementAt(index);
+
+            // Act
+            Assert.ThrowsAsync<ArgumentException>(async () => await _service.ChunkAddStartAsync(fileModel));
         }
 
         [Test]
@@ -214,6 +253,173 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void AddChunkAsyncTest_NullChunkModel_ThrowsArgumentNullException()
+        {
+            // Arrange
+            int fileId = 1;
+            FileChunkModel chunkModel = null!;
+
+            // Act & Assert
+            Assert.ThrowsAsync<ArgumentNullException>(async () => await _service.AddChunkAsync(fileId, chunkModel));
+        }
+
+        [Test]
+        public void AddChunkAsyncTest_FullFile_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            _context.Files.Add(new File
+            {
+                TaskId = 1,
+                Name = "file1.txt",
+                IsFull = true
+            });
+            _context.SaveChanges();
+            int fileId = 1;
+            FileChunkModel chunkModel = new();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddChunkAsync(fileId, chunkModel));
+        }
+
+        [Test]
+        public void AddChunkAsyncTest_InvalidFileId_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            int fileId = 10;
+            FileChunkModel chunkModel = new();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddChunkAsync(fileId, chunkModel));
+        }
+
+        [Test]
+        public async Task AddChunkAsyncTest_AddsChunk()
+        {
+            // Arrange
+            await _context.Files.AddAsync(new File
+            {
+                TaskId = 1,
+                Name = "file1.txt",
+                IsFull = false
+            });
+            await _context.SaveChangesAsync();
+            int fileId = 1;
+            FileChunkModel chunkModel = new();
+
+            // Act
+            await _service.AddChunkAsync(fileId, chunkModel);
+
+            // Assert
+            _managerMock.Verify(t => t.AddFileChunkAsync(fileId.ToString(), chunkModel), 
+                "Method does not add the chunk to the file system");
+        }
+
+        [Test]
+        public void ChunkAddEndAsyncTest_FullFile_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            _context.Files.Add(new File
+            {
+                TaskId = 1,
+                Name = "file1.txt",
+                IsFull = true
+            });
+            _context.SaveChanges();
+            int fileId = 1;
+            FileChunkModel chunkModel = new();
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.ChunkAddEndAsync(fileId));
+        }
+
+        [Test]
+        public void ChunkAddEndAsyncTest_InvalidFileId_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            int fileId = 10;
+
+            // Act & Assert
+            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.ChunkAddEndAsync(fileId));
+        }
+
+        [Test]
+        public async Task ChunkAddEndAsyncTest_MergesChunk()
+        {
+            // Arrange
+            var extension = ".txt";
+            _context.Files.Add(new File
+            {
+                TaskId = 1,
+                Name = $"file1{extension}",
+                IsFull = false
+            });
+            _context.SaveChanges();
+            int fileId = 1;
+
+            // Act
+            await _service.ChunkAddEndAsync(fileId);
+
+            // Assert
+            _managerMock.Verify(t => t.MergeChunksAsync(fileId.ToString(), extension),
+                "Method does not call the MergeChunksAsync method");
+        }
+
+        [Test]
+        public async Task ChunkAddEndAsyncTest_UpdatesDB()
+        {
+            // Arrange
+            var taskId = 1;
+            _context.Files.Add(new File
+            {
+                TaskId = taskId,
+                Name = $"file1.txt",
+                IsFull = false
+            });
+            _context.SaveChanges();
+            int fileId = 1;
+
+            // Act
+            await _service.ChunkAddEndAsync(fileId);
+
+            // Assert
+            var actualFile = await _context.Files.FindAsync(taskId);
+            Assert.NotNull(actualFile);
+            Assert.IsTrue(actualFile!.IsFull, $"Method does not set the {nameof(actualFile.IsFull)} property to \"true\"");
+        }
+
+        [Test]
+        public async Task ChunkAddEndAsyncTest_ReturnedExtendedModel()
+        {
+            // Arrange
+            var file = new File
+            {
+                TaskId = 1,
+                Name = $"file1.txt",
+                IsFull = false
+            };
+            _context.Files.Add(file);
+            _context.SaveChanges();
+            int fileId = 1;
+            var expectedSize = 10000L;
+            _managerMock.Setup(m => m.GetFileSizeAsync(It.IsAny<string>(), It.IsAny<EasyWorkFileTypes>()))
+                .ReturnsAsync(expectedSize);
+
+            // Act
+            var model = await _service.ChunkAddEndAsync(fileId);
+
+            // Assert
+            Assert.NotNull(model);
+            _managerMock.Verify(m => m.GetFileSizeAsync(file.TaskId + Path.GetExtension(file.Name), EasyWorkFileTypes.File),
+                "The service does not manager's method in order to determine the file's size");
+            Assert.AreEqual(fileId, model.Id, "Method returned wrong element");
+            Assert.AreEqual(file.Name, model.Name, "Method returned wrong element");
+            Assert.AreEqual(file.TaskId, model.TaskId, "Method returned wrong element");
+            Assert.IsTrue(model.IsFull, $"Method does not set the {nameof(model.IsFull)} property to \"true\"" +
+                "or returned the wrong element");
+            Assert.AreEqual(expectedSize, model.Size, "Method returned wrong size");
+        }
+
+        [Test]
         public void AddAsyncTest_TaskLimitExceeded_ThrowsInvalidOperationException()
         {
             // Arrange
@@ -224,7 +430,7 @@ namespace Tests.BLLTests
                 _context.Files.Add(new File()
                 {
                     TaskId = taskId,
-                    Name = $"{i+8}.file"
+                    Name = $"{i+9}.file"
                 });
                 _context.SaveChanges();
             }
@@ -282,7 +488,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task DeleteByIdAsyncTest_ValidId_DeletesElementFromDBAndFileSystem()
+        public async Task DeleteByIdAsyncTest_FullFile_DeletesElementFromDBAndFileSystem()
         {
             // Arrange
             SeedData();
@@ -296,7 +502,24 @@ namespace Tests.BLLTests
             var actualCount = _context.Files.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not remove the file model from DB");
             _managerMock.Verify(t => t.DeleteFile("2.pdf", Business.Enums.EasyWorkFileTypes.File), 
-                "Method does not remove the file from file system");
+                "Method does not remove the file from the file system");
+        }
+
+        [Test]
+        public async Task DeleteByIdAsyncTest_NotFullFile_DeletesElementFromDBAndFileSystem()
+        {
+            // Arrange
+            SeedData();
+            int id = 8;
+            var expectedCount = _context.Files.Count() - 1;
+
+            // Act
+            await _service.DeleteByIdAsync(id);
+
+            // Assert
+            var actualCount = _context.Files.Count();
+            Assert.AreEqual(expectedCount, actualCount, "Method does not remove the file model from DB");
+            _managerMock.Verify(t => t.DeleteChunks("8"), "Method does not remove file chunks from the file system");
         }
 
         [Test]

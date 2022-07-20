@@ -32,21 +32,61 @@ namespace Business.Services
             return model;
         }
 
+        public async Task ChunkAddStartAsync(FileModel model)
+        {
+            if (!IsValid(model, out string? error))
+                throw new ArgumentException(error, nameof(model));
+            model.IsFull = false;
+            await AddAsync(model);
+        }
+
+        public async Task AddChunkAsync(int fileId, FileChunkModel chunkModel)
+        {
+            if (chunkModel is null)
+                throw new ArgumentNullException(nameof(chunkModel), "Chunk cannot be null");
+            var model = await GetNotMappedByIdAsync(fileId);
+            if (model.IsFull)
+                throw new InvalidOperationException("This file is already full");
+            await _manager.AddFileChunkAsync(fileId.ToString(), chunkModel);
+        }
+
+        public async Task<FileModelExtended> ChunkAddEndAsync(int fileId)
+        {
+            var model = await GetNotMappedByIdAsync(fileId);
+            if (model.IsFull)
+                throw new InvalidOperationException("This file is already full");
+            await _manager.MergeChunksAsync(fileId.ToString(), Path.GetExtension(model.Name));
+            model.IsFull = true;
+            _context.Files.Update(model);
+            await _context.SaveChangesAsync();
+            var mapped = _mapper.Map<FileModelExtended>(model);
+            mapped.Size = 
+                await _manager
+                .GetFileSizeAsync(fileId.ToString() + Path.GetExtension(model.Name), Enums.EasyWorkFileTypes.File);
+            return mapped;
+        }
+
         public async Task AddAsync(FileModel model, IFormFile file)
         {
             if (file is null)
                 throw new ArgumentNullException(nameof(file));
             if (!IsValid(model, out string? error))
                 throw new ArgumentException(error, nameof(model));
+            model.IsFull = true;
+            await AddAsync(model);
+            await _manager.AddFileAsync(file, model.Id.ToString() + Path.GetExtension(model.Name), Enums.EasyWorkFileTypes.File);
+        }
+
+        private async Task AddAsync(FileModel model)
+        {
             const ushort maxFiles = 10;
-                var task = await _context.Tasks.Include(m => m.Files).FirstAsync(m => m.Id == model.TaskId);
-                if (task.Files.Count >= maxFiles)
-                    throw new InvalidOperationException("Task can have not more than 10 files");
+            var task = await _context.Tasks.Include(m => m.Files).FirstAsync(m => m.Id == model.TaskId);
+            if (task.Files.Count >= maxFiles)
+                throw new InvalidOperationException("Task can have not more than 10 files");
             var mapped = _mapper.Map<File>(model);
             await _context.Files.AddAsync(mapped);
             await _context.SaveChangesAsync();
             model.Id = mapped.Id;
-            await _manager.AddFileAsync(file, mapped.Id.ToString() + Path.GetExtension(model.Name), Enums.EasyWorkFileTypes.File);
         }
 
         public async Task DeleteByIdAsync(int id)
@@ -56,7 +96,10 @@ namespace Business.Services
             await _context.SaveChangesAsync();
             try
             {
-                _manager.DeleteFile(id.ToString() + Path.GetExtension(model.Name), Enums.EasyWorkFileTypes.File);
+                if (model.IsFull)
+                    _manager.DeleteFile(id.ToString() + Path.GetExtension(model.Name), Enums.EasyWorkFileTypes.File);
+                else
+                    _manager.DeleteChunks(id.ToString());
             }
             catch (Exception) { }
         }

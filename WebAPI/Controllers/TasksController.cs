@@ -153,7 +153,7 @@ namespace WebAPI.Controllers
             if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
                 return Forbid();
             var files = await _fileService.GetTaskFilesAsync(id);
-            return Ok(_mapper.Map<IEnumerable<FileModelDTO>>(files));
+            return Ok(_mapper.Map<IEnumerable<FileDTO>>(files));
         }
 
         [HttpPost("{id}/files")]
@@ -186,13 +186,43 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
-            var dto = new FileModelDTO()
+            var dto = new FileDTO()
             {
                 Id = fileModel.Id,
                 Name = fileModel.Name,
-                Size = file.Length
+                Size = file.Length,
+                IsFull = fileModel.IsFull
             };
             return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", dto);
+        }
+
+        [HttpPost("{id}/files/start")]
+        public async Task<IActionResult> StartChunkFileAdd(int id, AddFileDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var fileModel = new FileModel
+            {
+                Name = dto.Name,
+                TaskId = id
+            };
+            try
+            {
+                await _fileService.ChunkAddStartAsync(fileModel);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", _mapper.Map<FileReducedDTO>(fileModel));
         }
 
         [HttpGet("{id}/messages")]

@@ -118,7 +118,8 @@ builder.Services.Configure<CustomEmailConfirmationTokenProviderOptions>(opt =>
 builder.Services.Configure<CustomPasswordResetTokenProviderOptions>(opt =>
         opt.TokenLifespan = TimeSpan
         .FromHours(int.Parse(builder.Configuration.GetSection("TokenProvidersSetting:PasswordResetLifetime").Value)));
-const long maxFileSize = 10737418240;                       // 10 GB
+
+long maxFileSize = long.Parse(builder.Configuration.GetSection("FileSettings:MaxFileSize").Value);
 builder.Services.Configure<IISServerOptions>(options =>
 {
     options.MaxRequestBodySize = maxFileSize;

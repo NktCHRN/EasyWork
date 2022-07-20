@@ -1,4 +1,5 @@
 ﻿using Business.Enums;
+using Business.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Business.Interfaces
@@ -26,5 +27,11 @@ namespace Business.Interfaces
         public Task<byte[]> GetFileContentAsync(string name, EasyWorkFileTypes ewtype);
 
         public Task<long> GetFileSizeAsync(string name, EasyWorkFileTypes ewtype);
+
+        public Task AddFileChunkAsync(string folderName, FileChunkModel model);
+
+        public Task MergeChunksAsync(string folderName, string extension);
+
+        public void DeleteChunks(string folderName);
     }
 }

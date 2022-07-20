@@ -79,11 +79,12 @@ namespace WebAPI
                 .ForSourceMember(t => t.Status, m => m.DoNotValidate())
                 .ForSourceMember(t => t.Priority, m => m.DoNotValidate());
             ValueTransformers.Add<byte[]?>(val => (val == null || val.Length == 0) ? null : val);
-            CreateMap<FileModelExtended, FileModelDTO>();
+            CreateMap<FileModelExtended, FileDTO>();
             CreateMap<MessageModel, MessageDTO>()
                 .ForMember(m => m.Sender, u => u.Ignore());
             CreateMap<ProjectLimitsModel, ProjectLimitsDTO>()
                 .ReverseMap();
+            CreateMap<FileModel, FileReducedDTO>();
         }
     }
 }

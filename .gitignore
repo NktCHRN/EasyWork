@@ -362,8 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# User avatars and files
+# User avatars, temp files and files
 Data/Files/
+Data/TempFiles/
 Data/UserAvatars/
 
 # Actual appsettings
