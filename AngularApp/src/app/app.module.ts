@@ -108,7 +108,10 @@ import { MessageService } from './services/message.service';
 import { LinkyModule } from 'ngx-linky';
 import {MatListModule} from '@angular/material/list';
 import { TaskExecutorsComponent } from './components/project/project-tasks/task/task-executors/task-executors.component';
-import { TaskExecutorDeleteComponent } from './components/project/project-tasks/task/task-executors/task-executor-delete/task-executor-delete.component'; 
+import { TaskExecutorDeleteComponent } from './components/project/project-tasks/task/task-executors/task-executor-delete/task-executor-delete.component';
+import { TaskFilesComponent } from './components/project/project-tasks/task/task-files/task-files.component';
+import { TaskFileDeleteComponent } from './components/project/project-tasks/task/task-files/task-file-delete/task-file-delete.component';
+import { FileSizePipe } from './pipes/file-size.pipe'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -162,7 +165,10 @@ export function tokenGetter() {
     TaskMessageComponent,
     TaskMessageDeleteComponent,
     TaskExecutorsComponent,
-    TaskExecutorDeleteComponent
+    TaskExecutorDeleteComponent,
+    TaskFilesComponent,
+    TaskFileDeleteComponent,
+    FileSizePipe
   ],
   imports: [
     BrowserModule,

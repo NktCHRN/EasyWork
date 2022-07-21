@@ -1,0 +1,39 @@
+<h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center">
+    <mat-icon>attach_file</mat-icon><span>&nbsp;Files</span>
+    <button type="button" mat-icon-button (click)="toggleEditable()">
+        <mat-icon *ngIf="!editable">edit</mat-icon>
+        <mat-icon *ngIf="editable">visibility</mat-icon>
+    </button>
+</h2>
+<div *ngIf="files">
+    <mat-list>
+        <mat-list-item *ngFor="let file of files">
+            <a mat-list-avatar class="pointer" title="{{file.name}}" *ngIf="file.isFull" (click)="download(file.id)">
+                <mat-icon class="file-icon" mat-list-avatar>description</mat-icon>
+            </a>
+            <mat-icon class="file-icon" mat-list-avatar *ngIf="!file.isFull">error</mat-icon>
+            <div mat-line>
+                <a class="orange no-decor text-md pointer" title="{{file.name}}" *ngIf="file.isFull" (click)="download(file.id)">
+                    {{file.name}}
+                </a>
+                <p class="text-md mb-0" *ngIf="!file.isFull">{{file.name}}</p>
+            </div>
+            <div mat-line>
+                <p *ngIf="file.isFull && file.size" class="mb-0 text-xxs text-muted">
+                    {{file.size | fileSize}}
+                </p>
+                <p class="red mb-0 text-xxs" *ngIf="!file.isFull" style="overflow-x: scroll; padding-bottom: 5px !important;">
+                    This file is not fully loaded or damaged
+                </p>
+            </div>
+            <div class="spacer"></div>
+            <div *ngIf="editable"><button type="button" mat-icon-button (click)="openDeleteDialog(file)"><mat-icon>delete</mat-icon></button></div>
+        </mat-list-item>
+    </mat-list>
+</div>
+<div *ngIf="!files && !errorMessage">
+    <mat-spinner></mat-spinner>
+</div>
+<div *ngIf="errorMessage">
+    <h1 class="red">{{errorMessage}}</h1>
+</div>

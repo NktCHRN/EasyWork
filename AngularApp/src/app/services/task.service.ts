@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable } from 'rxjs';
+import { FileModel } from '../shared/file/file.model';
 import { AddMessageModel } from '../shared/message/add-message.model';
 import { MessageModel } from '../shared/message/message.model';
 import { AddExecutorModel } from '../shared/task/executor/add-executor.model';
@@ -127,6 +128,18 @@ export class TaskService extends BaseService {
       })
     };
     return this._http.get<MessageModel[]>(this.serviceBaseURL + id + '/messages', httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public getFiles(token: string, id: number) : Observable<FileModel[]>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + token
+      })
+    };
+    return this._http.get<FileModel[]>(this.serviceBaseURL + id + '/files', httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

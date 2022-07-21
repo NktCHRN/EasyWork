@@ -76,6 +76,7 @@ export class TaskReducedComponent implements OnInit {
     );
     dialogRef.componentInstance.addedMessage.subscribe(() => this.model.messagesCount++);
     dialogRef.componentInstance.deletedMessage.subscribe(() => this.model.messagesCount--);
+
     dialogRef.componentInstance.deletedExecutor.subscribe(id => 
     {
       const index = this.executors.findIndex(e => e.id == id);
@@ -83,6 +84,9 @@ export class TaskReducedComponent implements OnInit {
         this.executors.splice(index, 1);
     });
     dialogRef.componentInstance.addedExecutor.subscribe(e => this.executors.push(e));
-    // add an update for a files quantity change
+
+    // add an update for a file add
+    dialogRef.componentInstance.deletedFile.subscribe(() => this.model.filesCount--);
+    dialogRef.componentInstance.addedFile.subscribe(() => this.model.filesCount++);
   }
 }

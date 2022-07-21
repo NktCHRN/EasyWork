@@ -105,7 +105,10 @@
                 (deletedExecutor)="this.deletedExecutor.emit($event)"
                 (addedExecutor)="this.addedExecutor.emit($event)"></app-task-executors>
                     <mat-divider></mat-divider>
-                    <p>BLOCK 2 (executors & files)</p>
+                    <app-task-files
+                    [taskId]="task.id"
+                    (deletedFile)="deletedFile.emit()"
+                    (addedFile)="addedFile.emit()"></app-task-files>
                     <mat-divider></mat-divider>
                     <button 
                     mat-flat-button 

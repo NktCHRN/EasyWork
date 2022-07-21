@@ -52,6 +52,10 @@ export class TaskComponent implements OnInit {
   readonly taskStatuses = TaskStatus;
   @Output() addedMessage = new EventEmitter();
   @Output() deletedMessage = new EventEmitter();
+
+  @Output() deletedFile = new EventEmitter();
+  @Output() addedFile = new EventEmitter();
+
   limits: ProjectLimitsModel = undefined!;
   tasksCount: TasksCountModel = undefined!;
   @Output() deletedExecutor: EventEmitter<number> = new EventEmitter<number>();
