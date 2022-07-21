@@ -2,6 +2,6 @@
 {
     public record FileDTO : FileReducedDTO
     {
-        public long Size { get; init; }
+        public long? Size { get; init; }
     }
 }

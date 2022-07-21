@@ -4,6 +4,6 @@ namespace Business.Other
 {
     public class FileModelExtended : FileModel
     {
-        public long Size { get; set; }
+        public long? Size { get; set; }
     }
 }

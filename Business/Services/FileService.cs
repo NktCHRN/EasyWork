@@ -113,7 +113,13 @@ namespace Business.Services
         {
             var files = _mapper.Map<IEnumerable<FileModelExtended>>(_context.Files.Where(f => f.TaskId == taskId));
             foreach (var file in files)
-                file.Size = await _manager.GetFileSizeAsync(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+            {
+                try
+                {
+                    file.Size = await _manager.GetFileSizeAsync(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                }
+                catch (FileNotFoundException) { }
+            }
             return files;
         }
 
