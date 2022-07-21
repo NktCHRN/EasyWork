@@ -12,8 +12,9 @@ export class FileSizePipe implements PipeTransform {
     for (i = 0; i < suffixes.length && value >= 1024; i++, value /= 1024)
         dblSByte = value / 1024.0;
     let result: string;
-    if (dblSByte.toFixed() == dblSByte.toString() || dblSByte.toFixed(1) == dblSByte.toString())
-      result = dblSByte.toString();
+    const stringified: string = dblSByte.toString();
+    if (dblSByte.toFixed() == stringified || dblSByte.toFixed(1) == stringified)
+      result = stringified;
     else
       result = dblSByte.toFixed(2);
     result += ` ${suffixes[i]}`;

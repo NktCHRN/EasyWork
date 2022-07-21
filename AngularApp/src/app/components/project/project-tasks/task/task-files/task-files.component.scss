@@ -4,3 +4,36 @@
     height: $size;
     width: $size;
 }
+
+::ng-deep {
+    .file-list-item>.mat-list-item-content>.mat-list-text {
+        width: 100% !important;
+    }
+}
+
+.file-adder {
+    margin-top: 10px;
+}
+
+.file-add-form {
+    margin-top: 15px;
+}
+
+$file-upload-height: 125px;
+.fileupload {
+    height: $file-upload-height;
+    width: 100%;
+    cursor: pointer;
+    border: 2px dashed  orange;
+    border-radius: 6px;
+    background-position: center 28px;
+}
+.ddinfo {
+    $text-size: 12pt;
+    font-size: $text-size;
+    line-height: $text-size;
+    display: block;
+    text-align: center;
+    color: #a0a1a2;
+    margin-top: calc($file-upload-height / 2 - ($text-size / 2));
+}

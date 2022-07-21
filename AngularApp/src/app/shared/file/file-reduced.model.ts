@@ -1,5 +1,5 @@
-export interface FileReducedModel {
-    id: number;
-    name: string;
-    isFull: boolean;
+export class FileReducedModel {
+    id: number = 0;
+    name: string = '';
+    isFull: boolean = false;
 }

@@ -112,6 +112,10 @@ import { TaskExecutorDeleteComponent } from './components/project/project-tasks/
 import { TaskFilesComponent } from './components/project/project-tasks/task/task-files/task-files.component';
 import { TaskFileDeleteComponent } from './components/project/project-tasks/task/task-files/task-file-delete/task-file-delete.component';
 import { FileSizePipe } from './pipes/file-size.pipe'; 
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { DragDropFileUploadDirective } from './directives/drag-drop-file-upload.directive';
+import { TaskFileTooBigErrorComponent } from './components/project/project-tasks/task/task-files/task-file-too-big-error/task-file-too-big-error.component';
+import { TaskFileUploadCancelComponent } from './components/project/project-tasks/task/task-files/task-file-upload-cancel/task-file-upload-cancel.component'; 
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -168,7 +172,10 @@ export function tokenGetter() {
     TaskExecutorDeleteComponent,
     TaskFilesComponent,
     TaskFileDeleteComponent,
-    FileSizePipe
+    FileSizePipe,
+    DragDropFileUploadDirective,
+    TaskFileTooBigErrorComponent,
+    TaskFileUploadCancelComponent
   ],
   imports: [
     BrowserModule,
@@ -214,7 +221,8 @@ export function tokenGetter() {
     NgxMatNativeDateModule,
     MatDatepickerModule,
     LinkyModule,
-    MatListModule
+    MatListModule,
+    MatProgressBarModule
   ],
   providers: [
     GeneralinfoService,

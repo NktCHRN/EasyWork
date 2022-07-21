@@ -118,7 +118,7 @@
                     (click)="openDeleteDialog()" 
                     [disabled]="task.status != taskStatuses.Archived"
                     matTooltip="Only archived projects can be deleted"
-                    [matTooltipDisabled]="task.status == taskStatuses.Archived"><mat-icon>delete</mat-icon>Delete</button>
+                    [matTooltipDisabled]="task.status == taskStatuses.Archived"><mat-icon>delete</mat-icon>Delete this task</button>
                 </div>
             </div>
             <mat-divider fxShow fxHide.gt-sm></mat-divider>
