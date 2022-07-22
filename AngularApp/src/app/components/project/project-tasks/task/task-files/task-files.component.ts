@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { from, mergeMap, map, catchError, throwError, of } from 'rxjs';
+import { from, mergeMap, map, catchError, throwError, of, Observable, forkJoin, Subscription } from 'rxjs';
 import { FileService } from 'src/app/services/file.service';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
@@ -28,9 +28,12 @@ export class TaskFilesComponent implements OnInit {
   isFormOpened: boolean = false;
   toAdd: FileWithTempId[] = [];
   showEmptyError: boolean = false;
-  private readonly _maxFileSize: number = 10737418240;
+  private readonly _maxFileSize: number = 1073741824;   // 1 GB
   cancelLockers: BooleanContainer[] = [];
   uploading: boolean = false;
+  private _stop: EventEmitter<number> = new EventEmitter<number>();
+  _fileCount: number = 0;
+  _finishedCount: number = 0;
 
   constructor(private _tokenService: TokenService, private _taskService: TaskService, private _dialog: MatDialog,
   private _fileService: FileService, private _snackBar: MatSnackBar) {   }
@@ -124,12 +127,22 @@ export class TaskFilesComponent implements OnInit {
       panelClass: "dialog-responsive",
       data: file
     });
-    dialogRef.afterClosed().subscribe(
-      () => {
-        if (dialogRef.componentInstance.success)
-          this.delete(file.id);
-      }
-    );
+    dialogRef.componentInstance.cancellationStarted.subscribe(() => {
+      this._stop.emit(file.id);
+    });
+    dialogRef.componentInstance.cancelled.subscribe(() => {
+      this.delete(file.id);
+    });
+  }
+
+  private finishUpload() {
+    this._finishedCount++;
+    if (this._fileCount == this._finishedCount)
+    {
+      this.uploading = false;
+      this.isFormOpened = false;
+      this._finishedCount = 0;
+    }
   }
 
   onSubmit(): void {
@@ -141,6 +154,7 @@ export class TaskFilesComponent implements OnInit {
     }
     this.uploading = true;
     this.toAdd.forEach(f => f.locked = true);
+    this._fileCount = this.toAdd.length;
     from(this.toAdd)
     .pipe(
       mergeMap(f => {
@@ -154,6 +168,7 @@ export class TaskFilesComponent implements OnInit {
         }
       }), catchError((error: any) => 
         {
+          this.finishUpload();
           const message = `File ${f.file.name} will not be uploaded. Error: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
           console.log(message);
           this._snackBar.open(message, "Close", {duration: 5000});
@@ -172,7 +187,73 @@ export class TaskFilesComponent implements OnInit {
         }
         this.files.push(model);
         this.addedFile.emit();
-        
+        const chunkSize = 102400;
+        let chunkIndex = 1;
+        const chunkObservables: Observable<Object>[] = [];
+        const chunkSubscriptions: Subscription[] = [];
+        this._stop.subscribe(id => {
+          if (model.id == id)
+          {
+            model.loadingParameters!.isStopped = true;
+            chunkSubscriptions.forEach(o => o.unsubscribe());
+          }
+        });
+        for(let offset = 0; offset < result.object.file.size; offset += chunkSize ){
+          if (!model.loadingParameters.isStopped)
+          {
+            const chunk =  result.object.file.slice( offset, offset + chunkSize );
+            const data = new FormData();
+            data.append("chunk", chunk);
+            const observable = this._fileService.sendChunk(this._tokenService.getJwtToken()!, result.result.id, chunkIndex, data);
+            chunkObservables.push(observable);
+            chunkSubscriptions.push(observable.subscribe(
+              {
+                next: () => 
+                {
+                  if (model.loadingParameters)
+                    model.loadingParameters!.currentSize += chunk.size;
+                },
+                error: error => 
+                {
+                  if (!model.loadingParameters!.isStopped)
+                  {
+                    const message = `File ${model.name} will not be uploaded. Error: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
+                    console.log(message);
+                    this._snackBar.open(message, "Close", {duration: 5000});
+                    model.loadingParameters!.isStopped = true;
+                  }
+                }
+              }));
+            chunkIndex++;
+          }
+          else {
+            chunkObservables.push(throwError(() => new Error("Upload stopped")));
+          }
+        }
+        forkJoin(chunkObservables).subscribe({
+          next: () => {
+            this._fileService.endUpload(this._tokenService.getJwtToken()!, model.id)
+            .subscribe({
+              next: result => {
+                model.isFull = result.isFull;
+                model.loadingParameters = null;
+                this.finishUpload();
+              },
+              error: error => {
+                const message = `File ${model.name} will not be uploaded. Error: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
+                console.log(message);
+                this._snackBar.open(message, "Close", {duration: 5000});
+                model.loadingParameters = null;
+                this.finishUpload();
+              }
+            });
+          },
+          error: () => {
+            model.loadingParameters = null;
+            console.log("An error occured");
+            this.finishUpload();
+          }
+        });
       }
     });
   }

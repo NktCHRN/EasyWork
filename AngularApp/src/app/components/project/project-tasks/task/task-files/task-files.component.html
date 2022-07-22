@@ -21,7 +21,7 @@
             </div>
             <div mat-line class="w-100">
                 <div *ngIf="file.loadingParameters" class="w-100" fxLayoutAlign="center start" fxLayoutGap="3px" fxLayout="column">
-                    <mat-progress-bar mode="determinate" [value]="(file.size) ? file.loadingParameters.currentSize / file.size : 100"></mat-progress-bar>
+                    <mat-progress-bar mode="determinate" [value]="(file.size) ? file.loadingParameters.currentSize / file.size * 100 : 100"></mat-progress-bar>
                     <span class="text-xxs text-muted">{{file.loadingParameters.currentSize | fileSize}} of {{file.size! | fileSize}}</span>
                 </div>
                 <p *ngIf="file.isFull && file.size != null && file.size != undefined" class="mb-0 text-xxs text-muted">
@@ -83,14 +83,13 @@
               />
             </div>
           </div>
-          <div fxShow fxHide.gt-sm>
+          <div fxShow fxHide.gt-sm *ngIf="files.length + toAdd.length < 10">
             <input
             type="file"
             (change)="onToAddChange($any($event).target.files)"
             hidden
             multiple
             #fileField
-            [disabled]="files.length + toAdd.length < 10"
           />
             <button type="button" mat-flat-button (click)="fileField.click()" color="primary">Choose file(s)</button>
           </div>

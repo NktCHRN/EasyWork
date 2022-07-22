@@ -21,6 +21,8 @@ import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model'
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { ProjectService } from 'src/app/services/project.service';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
+import { TaskFilesComponent } from './task-files/task-files.component';
+import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-task',
@@ -61,6 +63,8 @@ export class TaskComponent implements OnInit {
   @Output() deletedExecutor: EventEmitter<number> = new EventEmitter<number>();
   @Output() addedExecutor: EventEmitter<UserMiniWithAvatarModel> = new EventEmitter<UserMiniWithAvatarModel>();
 
+  @ViewChild(TaskFilesComponent) filesComponent: TaskFilesComponent = undefined!;
+
   formErrors : any = {
     'name': '',
     'deadline': ''
@@ -83,6 +87,10 @@ export class TaskComponent implements OnInit {
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(true);
     this.priorities = this._taskService.getSortedPriorities();
     this.createForm();
+    this._dialogRef.disableClose = true;
+    this._dialogRef.backdropClick().subscribe(() => {
+      this.close();
+    });
   }
 
   exceedsLimits(status: TaskStatus): boolean {
@@ -272,6 +280,17 @@ export class TaskComponent implements OnInit {
   }
 
   close() {
-    this._dialogRef.close();
+    if (this.filesComponent && 
+      ((this.filesComponent.files && this.filesComponent.files.filter(f => f.loadingParameters).length > 0) || this.filesComponent.uploading))
+      {
+        this._dialogRef.disableClose = true;
+        this._dialog.open(ErrorDialogComponent, {
+          panelClass: "dialog-responsive",
+          data: "You have some unfinished uploads. Please, either wait for them to finish or cancel them"
+        });
+      }
+      else {
+        this._dialogRef.close();
+      }
   }
 }
