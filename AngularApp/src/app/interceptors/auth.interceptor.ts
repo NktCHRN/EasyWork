@@ -11,12 +11,14 @@ import { BehaviorSubject, catchError, filter, Observable, throwError, switchMap,
 import { TokenService } from '../services/token.service';
 import { AccountService } from '../services/account.service';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
-  constructor(private _tokenService: TokenService, private _accountService: AccountService, private _router: Router) { }
+  constructor(private _tokenService: TokenService, private _accountService: AccountService, private _router: Router, 
+    private _dialog: MatDialog) { }
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<Object>> {
     let authReq = req;
     const token = this._tokenService.getJwtToken();
@@ -40,6 +42,7 @@ export class AuthInterceptor implements HttpInterceptor {
   private handleBannedError(error: HttpErrorResponse) : Observable<HttpEvent<any>> {
     this._accountService.logout();
     this._accountService.sendAuthStateChangeNotification(false);
+    this._dialog.closeAll();
     this._router.navigate(["login"]); 
     console.log(error);
     return throwError(() => error);
@@ -63,6 +66,7 @@ export class AuthInterceptor implements HttpInterceptor {
             this.isRefreshing = false;
             this._accountService.logout();
             this._accountService.sendAuthStateChangeNotification(false);
+            this._dialog.closeAll();
             this._router.navigate(["login"]); 
             console.log(err);
             return throwError(() => err);

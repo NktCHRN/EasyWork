@@ -41,7 +41,7 @@
                                 <mat-icon *ngIf="editDescription">visibility</mat-icon>
                             </button>
                         </h2>
-                        <p *ngIf="!editDescription" class="w-100 text-muted text-sm formatted lh-16" [innerHTML]="task.description ?? '' | linky"></p>
+                        <p *ngIf="!editDescription" class="w-100 text-muted text-sm formatted lh-16 break-all" [innerHTML]="task.description ?? '' | linky"></p>
                         <mat-form-field *ngIf="editDescription" class="w-100" appearance="outline">
                             <textarea matInput
                             class="text-sm"
