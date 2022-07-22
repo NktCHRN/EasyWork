@@ -151,8 +151,21 @@ namespace Business.Managers
 
         private static async Task DownloadFileToPath(IFormFile file, string path)
         {
-            using var fileStream = new FileStream(path, FileMode.Create);
-            await file.CopyToAsync(fileStream);
+            const int numberOfRetries = 3;
+            const int delayOnRetry = 1000;
+            for (int i = 1; i <= numberOfRetries; ++i)
+            {
+                try
+                {
+                    using var fileStream = new FileStream(path, FileMode.Create);
+                    await file.CopyToAsync(fileStream);
+                    break;
+                }
+                catch (IOException) when (i <= numberOfRetries) 
+                {
+                    Thread.Sleep(delayOnRetry);
+                }
+            }
         }
 
         public async Task AddFileAsync(IFormFile file, string? name, EasyWorkFileTypes ewtype)

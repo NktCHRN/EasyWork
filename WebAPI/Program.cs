@@ -89,11 +89,11 @@ builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, NotBannedAu
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped);
 
-builder.Services.AddScoped<IFileManager, FileManager>();
+builder.Services.AddTransient<IFileManager, FileManager>();
 builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IBanService, BanService>();
-builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddTransient<IFileService, FileService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
