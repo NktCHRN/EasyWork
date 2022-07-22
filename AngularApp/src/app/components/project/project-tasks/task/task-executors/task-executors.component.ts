@@ -151,16 +151,13 @@ export class TaskExecutorsComponent implements OnInit {
           user: user
         }
       });
-      dialogRef.afterClosed()
+      dialogRef.componentInstance.succeeded
       .subscribe(() => {
-        if (dialogRef.componentInstance.success)
-        {
           this.executors.splice(this.executors.indexOf(user!), 1);
           this.deletedExecutor.emit(user.id);
           const found = this.usersOnProject.find(u => u.id == user.id);
           if (found)
             this.freeUsersOnProject.push(found);
-        };
       });
     }
   }

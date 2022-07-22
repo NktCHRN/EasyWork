@@ -77,11 +77,8 @@ export class TaskFilesComponent implements OnInit {
       panelClass: "dialog-responsive",
       data: file
     });
-    dialogRef.afterClosed().subscribe(
-      () => {
-        if (dialogRef.componentInstance.success)
-          this.delete(file.id);
-      }
+    dialogRef.componentInstance.succeeded.subscribe(
+      () => this.delete(file.id)
     );
   }
 

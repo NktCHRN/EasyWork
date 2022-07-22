@@ -84,14 +84,11 @@ export class ProjectParticipantsComponent implements OnInit {
         }
       }
     });
-    dialogRef.afterClosed()
+    dialogRef.componentInstance.succeeded
     .subscribe(() => {
-      if (dialogRef.componentInstance.success)
-      {
         this.users.splice(this.users.indexOf(user!), 1);
         this.table.renderRows();
         this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
-      };
     });
   }
 
@@ -108,12 +105,9 @@ export class ProjectParticipantsComponent implements OnInit {
         user: user
       }
     });
-    dialogRef.afterClosed()
+    dialogRef.componentInstance.succeeded
     .subscribe(() => {
-      if (dialogRef.componentInstance.success)
-      {
         this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
-      };
     });
   }
 
@@ -129,11 +123,8 @@ export class ProjectParticipantsComponent implements OnInit {
         myRole: this.me.role
       }
     });
-    dialogRef.afterClosed()
-    .subscribe(() => {
-      if (dialogRef.componentInstance.newUser)
-      {
-        const user = dialogRef.componentInstance.newUser;
+    dialogRef.componentInstance.succeeded
+    .subscribe(user => {
         let lastIndex = this.findLastWithRoleIndex(user.role);
         let index: number;
         if (lastIndex == -1)
@@ -154,7 +145,6 @@ export class ProjectParticipantsComponent implements OnInit {
         this.users.splice(index, 0, user);
         this.table.renderRows();
         this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
-      };
     });
   }
 

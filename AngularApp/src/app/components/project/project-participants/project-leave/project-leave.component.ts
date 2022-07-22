@@ -32,17 +32,25 @@ export class ProjectLeaveComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  close(): void {
+    if (!this._dialogRef.disableClose)
+      this._dialogRef.close();
+  }
+
   onSubmit() : void {
     this.loading = true;
+    this._dialogRef.disableClose = true;
       this._projectService.leave(this._tokenService.getJwtToken()!, this._projectId).subscribe(
       {
         next: () => {
           this.success = true;
           this.loading = false;
+          this._dialogRef.disableClose = false;
         },
         error: error => {
           this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
           this.loading = false;
+          this._dialogRef.disableClose = false;
         }
       }
       );

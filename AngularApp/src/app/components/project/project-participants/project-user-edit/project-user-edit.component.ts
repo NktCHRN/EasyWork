@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Inject, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -28,6 +28,7 @@ export class ProjectUserEditComponent implements OnInit {
   form: FormGroup = null!;
   @ViewChild('eform') formDirective: any;
   selectedRole: RoleWithDescription;
+  @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<ProjectUserEditComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectEditUserPageModel, private _router: Router,
@@ -68,6 +69,7 @@ export class ProjectUserEditComponent implements OnInit {
         this.success = true;
         this.loading = false;
         this.user.role = this.roleService.roleToEnum(model.role);
+        this.succeeded.emit();
       },
       error: error => {
         this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;

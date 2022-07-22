@@ -1,4 +1,4 @@
-<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+<button mat-icon-button class="dialog-close-button" (click)="close()" tabindex="-1">
     <mat-icon class="close-icon">close</mat-icon>
 </button>
 <h1 mat-dialog-title class="deep-orange">Delete {{projectName}}</h1>

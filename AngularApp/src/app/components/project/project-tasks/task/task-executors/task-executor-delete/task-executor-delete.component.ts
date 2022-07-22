@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
@@ -16,6 +16,7 @@ export class TaskExecutorDeleteComponent implements OnInit {
   errorMessage: string | null | undefined;
   private _taskId: number;
   user: UserMiniReducedModel;
+  @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<TaskExecutorDeleteComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: TaskExecutorDeletePageModel,
@@ -35,6 +36,7 @@ export class TaskExecutorDeleteComponent implements OnInit {
         next: () => {
           this.success = true;
           this.loading = false;
+          this.succeeded.emit();
         },
         error: error => {
           this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;

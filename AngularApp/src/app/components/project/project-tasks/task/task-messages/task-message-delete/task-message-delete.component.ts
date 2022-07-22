@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageService } from 'src/app/services/message.service';
 import { TokenService } from 'src/app/services/token.service';
@@ -13,6 +13,7 @@ export class TaskMessageDeleteComponent implements OnInit {
   success: boolean = false;
   loading: boolean = false;
   errorMessage: string | null | undefined;
+  @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<TaskMessageDeleteComponent>, @Inject(MAT_DIALOG_DATA) public data: number,
   private _tokenService: TokenService, private _messageService: MessageService) {
@@ -29,6 +30,7 @@ export class TaskMessageDeleteComponent implements OnInit {
         next: () => {
           this.success = true;
           this.loading = false;
+          this.succeeded.emit();
         },
         error: error => {
           this.errorMessage = error.error ?? error.message ?? error;

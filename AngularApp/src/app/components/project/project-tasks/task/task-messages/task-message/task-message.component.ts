@@ -59,11 +59,8 @@ export class TaskMessageComponent implements OnInit {
       panelClass: "mini-dialog-responsive",
       data: this.message.id
     });
-    dialogRef.afterClosed()
-    .subscribe(() => {
-      if (dialogRef.componentInstance.success)
-        this.deletedMessage.emit(this.message.id);
-    });
+    dialogRef.componentInstance.succeeded
+    .subscribe(() => this.deletedMessage.emit(this.message.id));
   }
 
   createForm() {

@@ -1,9 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ProjectService } from 'src/app/services/project.service';
 import { TokenService } from 'src/app/services/token.service';
 import { ProjectKickPageModel } from 'src/app/shared/project/user-on-project/kick/project-kick-page.model';
 import { UserMiniReducedModel } from 'src/app/shared/user/user-mini-reduced.model';
+import { EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-project-kick',
@@ -17,6 +18,7 @@ export class ProjectKickComponent implements OnInit {
   private _projectId: number;
   projectName: string;
   toKick: UserMiniReducedModel;
+  @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<ProjectKickComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectKickPageModel,
@@ -40,6 +42,7 @@ export class ProjectKickComponent implements OnInit {
         next: () => {
           this.success = true;
           this.loading = false;
+          this.succeeded.emit();
         },
         error: error => {
           this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;

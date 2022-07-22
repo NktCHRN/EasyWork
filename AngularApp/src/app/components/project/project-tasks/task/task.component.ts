@@ -258,9 +258,8 @@ export class TaskComponent implements OnInit {
         ...this.task
       }
     });
-    dialogRef.afterClosed()
+    dialogRef.componentInstance.succeeded
     .subscribe(() => {
-      if (dialogRef.componentInstance.success)
         this._dialogRef.close();
         this.deletedTask.emit(this.task.id);
     });

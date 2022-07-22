@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Inject, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -34,6 +34,7 @@ export class ProjectUserAddComponent implements OnInit {
   public searching = false;
   public usersFilteringCtrl: FormControl = new FormControl();
   private _projectUserIds: number[];
+  @Output() succeeded: EventEmitter<UserOnProjectExtendedModel> = new EventEmitter<UserOnProjectExtendedModel>();
 
   formErrors : any = {
     'user': ''
@@ -147,6 +148,7 @@ export class ProjectUserAddComponent implements OnInit {
           }
         };
         this.loading = false;
+        this.succeeded.emit(this.newUser);
       },
       error: error => {
         this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;

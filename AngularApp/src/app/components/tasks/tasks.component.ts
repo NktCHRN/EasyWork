@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TaskStatus } from 'src/app/shared/task/status/task-status';
-import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
 import { TaskService } from '../../services/task.service';
 import { TokenService } from '../../services/token.service';
 import { UserTaskModel } from '../../shared/task/user-task.model';
