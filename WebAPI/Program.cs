@@ -20,6 +20,9 @@ using System.Text;
 using WebAPI;
 using WebAPI.Authorization;
 using WebAPI.Data;
+using WebAPI.Hubs;
+using WebAPI.Hubs.HelperClasses;
+using WebAPI.Interfaces;
 using WebAPI.TokenProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +76,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             
             ValidateLifetime = true
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/usersHub"))
+                    context.Token = accessToken;
+                return System.Threading.Tasks.Task.CompletedTask;
+            }
+        };
     });
 builder.Services.AddTransient<IAuthorizationHandler, NotBannedHandler>();
 builder.Services.AddAuthorization(options => {
@@ -102,6 +116,7 @@ builder.Services.AddScoped<IUserOnProjectService, UserOnProjectService>();
 builder.Services.AddScoped<IUserStatsService, UserStatsService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<IUserConnectionsContainer, UserConnectionsContainer>();
 builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile), typeof(AutoMapperWebAPIProfile));
 builder.Services.AddCors(setup =>
 {
@@ -132,6 +147,7 @@ builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = maxFileSize;
 });
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -150,6 +166,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<UsersHub>("/usersHub");
 
 using var serviceScope = app.Services.CreateScope();
 var seeder = new DataSeeder()
