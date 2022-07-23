@@ -52,8 +52,7 @@ export class AppComponent {
       }
       else
       {
-        this.connection?.stop();
-        this.connection = null;
+        this.connection?.stop().then(() => this.connection = null);
       }
    }
 
