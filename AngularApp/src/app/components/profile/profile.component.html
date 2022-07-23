@@ -12,7 +12,7 @@
                 <h1 fxLayoutAlign="center center" class="truncate-content">
                     <span class="truncate" [ngClass.gt-sm]="'text-xl'">{{usersService.getFullName(user.firstName, user.lastName)}}</span>
                 </h1>
-                <i class="text-md text-muted">On/CHANGE/line</i>
+                <i class="text-md text-muted"><span *ngIf="user.isOnline" class="orange">online</span><span *ngIf="!user.isOnline">last seen {{user.lastSeen | date:'d MMM y, HH:mm'}}</span></i>
             </div>
         </div>
         <div>

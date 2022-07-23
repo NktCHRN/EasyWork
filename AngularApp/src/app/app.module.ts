@@ -116,6 +116,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { DragDropFileUploadDirective } from './directives/drag-drop-file-upload.directive';
 import { TaskFileTooBigErrorComponent } from './components/project/project-tasks/task/task-files/task-file-too-big-error/task-file-too-big-error.component';
 import { TaskFileUploadCancelComponent } from './components/project/project-tasks/task/task-files/task-file-upload-cancel/task-file-upload-cancel.component'; 
+import { signalRBaseURL } from './shared/constants/signalr-baseurl';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -228,6 +229,7 @@ export function tokenGetter() {
     GeneralinfoService,
     ProcessHTTPMsgService,
     {provide: 'baseURL', useValue: baseURL},
+    {provide: 'signalRURL', useValue: signalRBaseURL},
     {provide: 'appURL', useValue: appURL},
     {provide: 'emailConfirmationURL', useValue: emailConfirmationURL},
     {provide: 'projectName', useValue: projectName},

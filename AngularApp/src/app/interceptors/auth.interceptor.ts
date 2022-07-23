@@ -59,7 +59,7 @@ export class AuthInterceptor implements HttpInterceptor {
             this.isRefreshing = false;
             this._tokenService.setTokens(token);
             this.refreshTokenSubject.next(token.accessToken);
-            
+            this._accountService.sendAuthStateChangeNotification(true);
             return next.handle(this.addTokenHeader(request, token.accessToken));
           }),
           catchError((err) => {

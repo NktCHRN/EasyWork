@@ -50,8 +50,6 @@ export class HeaderComponent implements OnInit {
 
    private onAuthChange(res: boolean): void {
     this.isUserAuthenticated = res;
-      if (res)
-        this._userInfoService.updateLastUser();
    }
 
   showBtns() : void {

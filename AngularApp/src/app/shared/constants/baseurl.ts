@@ -1,1 +1,3 @@
-export const baseURL = 'https://localhost:7255/api/';
+import { signalRBaseURL } from "./signalr-baseurl";
+
+export const baseURL = signalRBaseURL + 'api/';
