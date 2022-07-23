@@ -4,6 +4,7 @@ import { catchError, Observable, retry } from 'rxjs';
 import { FileModel } from '../shared/file/file.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,49 +13,49 @@ export class FileService extends BaseService {
   override serviceBaseURL: string = this.baseURL + 'Files/';
 
   constructor(private _http: HttpClient,
-    private _processHTTPMsgService: ProcessHTTPMsgService) {
+    private _processHTTPMsgService: ProcessHTTPMsgService, private _tokenService: TokenService) {
     super();
   }
 
-  public download(token: string, id: number)
+  public download(id: number)
   {
     return this._http.get(this.serviceBaseURL + id,{
       observe: 'response',
       responseType: 'blob',
       headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     })
     .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public delete(token: string, id: number) : Observable<Object>
+  public delete(id: number) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.delete(this.serviceBaseURL + id, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public sendChunk(token: string, id: number, index: number, chunk: FormData): Observable<Object> {
+  public sendChunk(id: number, index: number, chunk: FormData): Observable<Object> {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.post(this.serviceBaseURL + id + "/chunk/" + index, chunk, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public endUpload(token: string, id: number): Observable<FileModel> {
+  public endUpload(id: number): Observable<FileModel> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.post<FileModel>(this.serviceBaseURL + id + "/end", httpOptions)

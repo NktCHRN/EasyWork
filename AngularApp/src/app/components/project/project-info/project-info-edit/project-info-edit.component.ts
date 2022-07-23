@@ -1,10 +1,8 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectModel } from 'src/app/shared/project/project.model';
 import { take } from 'rxjs';
 import { UpdateProjectModel } from 'src/app/shared/project/update-project.model';
@@ -38,7 +36,6 @@ export class ProjectInfoEditComponent implements OnInit {
 
   constructor(private _fb: FormBuilder,
     private _projectsService: ProjectService,
-    private _tokenService: TokenService,
     private _ngZone: NgZone,
     private _snackBar: MatSnackBar) {
       this.createForm();
@@ -95,7 +92,7 @@ export class ProjectInfoEditComponent implements OnInit {
     if ((this.model[callerNameAsKey]) != event.target.value && this.form.valid)
     {
       this.model = this.form.value;
-    this._projectsService.update(this._tokenService.getJwtToken()!, this.project.id, this.model!)
+    this._projectsService.update(this.project.id, this.model!)
     .subscribe({
       next: () => {
         this._snackBar.open("Updated successfully", "Close", {
@@ -111,6 +108,7 @@ export class ProjectInfoEditComponent implements OnInit {
         this._snackBar.open(`The project was not updated: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`, "Close", {
           duration: 5000,
         });
+        console.log(error);
       }
     });
   }

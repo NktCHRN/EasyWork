@@ -1,11 +1,9 @@
 import { Component, EventEmitter, Inject, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { filter, ReplaySubject, tap, takeUntil, debounceTime, Subject, map, delay, switchMap } from 'rxjs';
+import { filter, ReplaySubject, tap, takeUntil, debounceTime, Subject, map, switchMap } from 'rxjs';
 import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { UserService } from 'src/app/services/user.service';
 import { AddUserOnProjectModel } from 'src/app/shared/project/user-on-project/add/add-user-on-project.model';
 import { ProjectAddUserPageModel } from 'src/app/shared/project/user-on-project/add/project-add-user-page.model';
@@ -46,10 +44,9 @@ export class ProjectUserAddComponent implements OnInit {
     }
   };
 
-
   constructor(private _dialogRef: MatDialogRef<ProjectUserAddComponent>, 
-    @Inject(MAT_DIALOG_DATA) public data: ProjectAddUserPageModel, private _router: Router,
-    private _projectService: ProjectService, private _tokenService: TokenService, public roleService: ProjectRoleService,
+    @Inject(MAT_DIALOG_DATA) public data: ProjectAddUserPageModel,
+    private _projectService: ProjectService, public roleService: ProjectRoleService,
     private _fb: FormBuilder, private _userService: UserService) { 
       this._projectId = data.project.id;
       this.projectName = data.project.name;
@@ -132,7 +129,7 @@ export class ProjectUserAddComponent implements OnInit {
       role: this.form.get('role')?.value,
       userId: user.id
     };
-    this._projectService.addUser(this._tokenService.getJwtToken()!, this._projectId, model).subscribe(
+    this._projectService.addUser(this._projectId, model).subscribe(
     {
       next: result => {
         const role = this.roleService.roleToEnum(result.role);

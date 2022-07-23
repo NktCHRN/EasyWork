@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectExtendedModel } from 'src/app/shared/project/user-on-project/user-on-project-extended.model';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
@@ -34,14 +33,14 @@ export class ProjectParticipantsComponent implements OnInit {
   @ViewChild(MatTable) table: MatTable<UserOnProjectExtendedModel> = undefined!;
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, private _dialog: MatDialog, 
-  private _projectService: ProjectService, private _tokenService: TokenService, private _router: Router, 
+  private _projectService: ProjectService, private _router: Router, 
   public roleService: ProjectRoleService) { }
 
   ngOnInit(): void {
     this._titleService.setTitle(`${this.projectName} | Participants - ${this._websiteName}`);
     if (this.me.role >= this.userOnProjectRoles.Manager)
       this.displayedColumns.push('actions');
-    this._projectService.getUsers(this._tokenService.getJwtToken()!, this.projectId, this.me.role)
+    this._projectService.getUsers(this.projectId, this.me.role)
     .subscribe({
       next: result => 
       {this.loading = false; this.users = result; this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me)); },

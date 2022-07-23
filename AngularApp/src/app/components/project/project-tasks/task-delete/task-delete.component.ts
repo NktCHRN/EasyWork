@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { TaskExtraReducedModel } from 'src/app/shared/task/task-extra-reduced.model';
 
 @Component({
@@ -17,7 +16,7 @@ export class TaskDeleteComponent implements OnInit {
   @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<TaskDeleteComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskExtraReducedModel, 
-  private _taskService: TaskService, private _tokenService: TokenService) {
+  private _taskService: TaskService) {
     this.model = data;
   }
 
@@ -26,7 +25,7 @@ export class TaskDeleteComponent implements OnInit {
 
   onSubmit(): void {
     this.loading = true;
-    this._taskService.delete(this._tokenService.getJwtToken()!, this.model.id).subscribe(
+    this._taskService.delete(this.model.id).subscribe(
       {
         next: () => {
           this.success = true;

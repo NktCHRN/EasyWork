@@ -1,6 +1,5 @@
 import { Component, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { EventEmitter } from '@angular/core';
@@ -10,7 +9,6 @@ import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { take } from 'rxjs';
 import { AddTaskModel } from 'src/app/shared/task/add-task.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { TaskService } from 'src/app/services/task.service';
 
 @Component({
   selector: 'app-task-add',
@@ -38,8 +36,8 @@ export class TaskAddComponent implements OnInit {
     },
   };
 
-  constructor(private _projectService: ProjectService, private _tokenService: TokenService, 
-    private _fb: FormBuilder, private _ngZone: NgZone, private _snackBar: MatSnackBar, private _taskService: TaskService) { 
+  constructor(private _projectService: ProjectService,
+    private _fb: FormBuilder, private _ngZone: NgZone, private _snackBar: MatSnackBar) { 
       this.createForm();
     }
 
@@ -95,7 +93,7 @@ export class TaskAddComponent implements OnInit {
         name: this.form.get('name')?.value,
         status: this.taskStatus
       };
-      this._projectService.addTask(this._tokenService.getJwtToken()!, this.projectId, model)
+      this._projectService.addTask(this.projectId, model)
       .subscribe({
         next: result => {
           this.loading = false;

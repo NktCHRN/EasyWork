@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectInfoMode } from 'src/app/shared/project/info/project-info-mode';
 import { ProjectModel } from 'src/app/shared/project/project.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
@@ -27,13 +26,13 @@ export class ProjectInfoComponent implements OnInit {
   pageModes = ProjectInfoMode;
   @Output() projectNameChange = new EventEmitter<string>();
 
-  constructor(private _tokenService: TokenService, private _titleService: Title, 
+  constructor(private _titleService: Title, 
     private _projectService: ProjectService, @Inject('projectName') private _websiteName: string, private _router: Router, 
     private _dialog: MatDialog) { }
 
   ngOnInit(): void {
     this._titleService.setTitle(`${this.projectName} | Info - ${this._websiteName}`);
-      this._projectService.getById(this._tokenService.getJwtToken()!, this.projectId)
+      this._projectService.getById(this.projectId)
       .subscribe({
         next: result => 
         {this.loading = false; this.project = result; },

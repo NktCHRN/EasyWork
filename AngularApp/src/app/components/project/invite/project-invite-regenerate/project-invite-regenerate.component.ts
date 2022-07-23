@@ -16,8 +16,7 @@ export class ProjectInviteRegenerateComponent implements OnInit {
   @Output() inviteCodeChange = new EventEmitter<string>();
 
   constructor(private _dialogRef: MatDialogRef<ProjectInviteRegenerateComponent>, 
-    @Inject(MAT_DIALOG_DATA) public data: number, private _projectService: ProjectService, 
-    private _tokenService: TokenService) {
+    @Inject(MAT_DIALOG_DATA) public data: number, private _projectService: ProjectService) {
     this._projectId = data
   }
 
@@ -26,7 +25,7 @@ export class ProjectInviteRegenerateComponent implements OnInit {
 
   onSubmit() : void {
     this.loading = true;
-    this._projectService.regenerateInviteCode(this._tokenService.getJwtToken()!, this._projectId).subscribe(
+    this._projectService.regenerateInviteCode(this._projectId).subscribe(
       {
         next: result => {
           this.success = true;

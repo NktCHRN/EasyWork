@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageService } from 'src/app/services/message.service';
-import { TokenService } from 'src/app/services/token.service';
 
 @Component({
   selector: 'app-task-message-delete',
@@ -16,7 +15,7 @@ export class TaskMessageDeleteComponent implements OnInit {
   @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<TaskMessageDeleteComponent>, @Inject(MAT_DIALOG_DATA) public data: number,
-  private _tokenService: TokenService, private _messageService: MessageService) {
+  private _messageService: MessageService) {
     this._messageId = data;
   }
 
@@ -25,7 +24,7 @@ export class TaskMessageDeleteComponent implements OnInit {
 
   onSubmit(): void {
     this.loading = true;
-    this._messageService.delete(this._tokenService.getJwtToken()!, this._messageId).subscribe(
+    this._messageService.delete(this._messageId).subscribe(
       {
         next: () => {
           this.success = true;

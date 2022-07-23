@@ -4,6 +4,7 @@ import { Observable, catchError, BehaviorSubject } from 'rxjs';
 import { UserReducedModel } from '../shared/user/user-reduced.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ import { ProcessHTTPMsgService } from './process-httpmsg.service';
 export class UserInfoService extends BaseService {
 
   constructor(private http: HttpClient,
-    private processHTTPMsgService: ProcessHTTPMsgService) {
+    private processHTTPMsgService: ProcessHTTPMsgService,
+    private _tokenService: TokenService) {
     super();
   }
 
@@ -28,16 +30,16 @@ export class UserInfoService extends BaseService {
   }
 
   public updateLastUser() : void {
-    this.get(localStorage.getItem('jwt')!)
+    this.get()
     .subscribe(user => this.setLastUser(user));
   }
 
-  public get(token: string): Observable<UserReducedModel>
+  public get(): Observable<UserReducedModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this.http.get<UserReducedModel>(this.serviceBaseURL, httpOptions)

@@ -1,10 +1,8 @@
 import { Component, EventEmitter, Inject, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectEditUserPageModel } from 'src/app/shared/project/user-on-project/edit/project-edit-user-page.model';
 import { UpdateUserOnProjectModel } from 'src/app/shared/project/user-on-project/edit/update-user-on-project.model';
 import { RoleWithDescription } from 'src/app/shared/project/user-on-project/role/role-with-description.model';
@@ -31,8 +29,8 @@ export class ProjectUserEditComponent implements OnInit {
   @Output() succeeded = new EventEmitter();
 
   constructor(private _dialogRef: MatDialogRef<ProjectUserEditComponent>, 
-    @Inject(MAT_DIALOG_DATA) public data: ProjectEditUserPageModel, private _router: Router,
-    private _projectService: ProjectService, private _tokenService: TokenService, public roleService: ProjectRoleService,
+    @Inject(MAT_DIALOG_DATA) public data: ProjectEditUserPageModel,
+    private _projectService: ProjectService, public roleService: ProjectRoleService,
     private _fb: FormBuilder) { 
       this._projectId = data.project.id;
       this.projectName = data.project.name;
@@ -60,7 +58,8 @@ export class ProjectUserEditComponent implements OnInit {
   onSubmit(): void {
     this.loading = true;
     let model: UpdateUserOnProjectModel = this.form.value;
-    this._projectService.updateUser(this._tokenService.getJwtToken()!, {
+    this._projectService.updateUser(
+    {
       id: this._projectId, 
       userId: this.user.user.id
     }, model).subscribe(

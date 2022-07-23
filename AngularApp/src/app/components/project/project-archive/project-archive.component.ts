@@ -3,7 +3,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
@@ -40,12 +39,12 @@ export class ProjectArchiveComponent implements OnInit {
   }
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string,
-  private _tokenService: TokenService, private _projectService: ProjectService, private _snackBar: MatSnackBar,
+  private _projectService: ProjectService, private _snackBar: MatSnackBar,
   private _taskService: TaskService) { }
 
   ngOnInit(): void {
     this._titleService.setTitle(`${this.projectName} | Archive - ${this._websiteName}`);
-    this._projectService.getArchivedTasks(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getArchivedTasks(this.projectId)
     .subscribe({
       next: result => {
         this.tasks = result;
@@ -55,7 +54,7 @@ export class ProjectArchiveComponent implements OnInit {
         this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
       }
     });
-    this._projectService.getLimits(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getLimits(this.projectId)
     .subscribe({
       next: result => 
       {
@@ -68,7 +67,7 @@ export class ProjectArchiveComponent implements OnInit {
       error: error => 
       this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
     });
-    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getTasks(this.projectId)
     .subscribe({
       next: result => 
       {

@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
@@ -28,11 +27,11 @@ export class TaskReducedComponent implements OnInit {
   @Input() limits: ProjectLimitsModel = undefined!;
   @Input() tasksCount: TasksCountModel = undefined!;
 
-  constructor(private _taskService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog) { }
+  constructor(private _taskService: TaskService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.prioritiesWithColors = this._taskService.getPrioritiesWithColors();
-    this._taskService.getExecutors(this._tokenService.getJwtToken()!, this.model.id)
+    this._taskService.getExecutors(this.model.id)
     .subscribe(result => this.executors = result);
   }
 

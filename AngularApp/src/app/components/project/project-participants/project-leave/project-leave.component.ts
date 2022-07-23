@@ -2,7 +2,6 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectMiniModel } from 'src/app/shared/project/project-mini.model';
 
 @Component({
@@ -19,7 +18,7 @@ export class ProjectLeaveComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<ProjectLeaveComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectMiniModel, private _router: Router,
-    private _projectService: ProjectService, private _tokenService: TokenService) {
+    private _projectService: ProjectService) {
       this._projectId = data.id;
       this.projectName = data.name;
       this._dialogRef.afterClosed()
@@ -40,7 +39,7 @@ export class ProjectLeaveComponent implements OnInit {
   onSubmit() : void {
     this.loading = true;
     this._dialogRef.disableClose = true;
-      this._projectService.leave(this._tokenService.getJwtToken()!, this._projectId).subscribe(
+      this._projectService.leave(this._projectId).subscribe(
       {
         next: () => {
           this.success = true;

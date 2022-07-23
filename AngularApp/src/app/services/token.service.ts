@@ -41,6 +41,10 @@ export class TokenService extends BaseService {
     return this._jwtService.tokenGetter();
   }
 
+  public getAuthHeaderValue(): string {
+    return 'Bearer ' + this.getJwtToken();
+  }
+
   public getRefreshToken(): string | null | undefined
   {
     return localStorage.getItem("refreshToken");

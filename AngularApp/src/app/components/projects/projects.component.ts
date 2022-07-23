@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project.service';
-import { TokenService } from '../../services/token.service';
 import { ProjectReducedModel } from '../../shared/project/project-reduced.model';
 import { ProjectAddComponent } from './project-add/project-add.component';
 
@@ -16,10 +15,10 @@ export class ProjectsComponent implements OnInit {
   errorMessage: string | null | undefined;
   loading: boolean = true;
 
-  constructor(private _projectsService: ProjectService, private _tokenService: TokenService, private _dialog: MatDialog) { }
+  constructor(private _projectsService: ProjectService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
-    this._projectsService.get(this._tokenService.getJwtToken()!)
+    this._projectsService.get()
     .subscribe({
       next: projects => 
       {

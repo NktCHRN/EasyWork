@@ -100,7 +100,7 @@ export class TaskMessageComponent implements OnInit {
     {
       this.switchedToLoading.emit();
       const model: AddMessageModel = this.form.value;
-      this._messageService.update(this._tokenService.getJwtToken()!, this.message.id, model)
+      this._messageService.update(this.message.id, model)
       .subscribe({
         next: () => {
           this.switchedToSuccess.emit();

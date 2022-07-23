@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { AddExecutorModel } from 'src/app/shared/task/executor/add-executor.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskExecutorDeleteComponent } from './task-executor-delete/task-executor-delete.component';
@@ -41,7 +40,7 @@ export class TaskExecutorsComponent implements OnInit {
     }
   };
 
-  constructor(private _taskService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog, 
+  constructor(private _taskService: TaskService, private _dialog: MatDialog, 
     private _projectService: ProjectService, private _fb: FormBuilder) {
       this.createForm();
   }
@@ -84,7 +83,7 @@ export class TaskExecutorsComponent implements OnInit {
     {
       this.switchedToLoading.emit();
       const model: AddExecutorModel = this.form.value;
-      this._taskService.addExecutor(this._tokenService.getJwtToken()!, this.taskId, model)
+      this._taskService.addExecutor(this.taskId, model)
       .subscribe({
         next: result => {
           this.switchedToSuccess.emit();
@@ -104,12 +103,12 @@ export class TaskExecutorsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._taskService.getExecutors(this._tokenService.getJwtToken()!, this.taskId)
+    this._taskService.getExecutors(this.taskId)
     .subscribe({
       next: result => 
       {
         this.executors = result;
-        this._projectService.getUsersWithoutRoles(this._tokenService.getJwtToken()!, this.projectId)
+        this._projectService.getUsersWithoutRoles(this.projectId)
     .subscribe({
       next: result => 
       {

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../../services/task.service';
-import { TokenService } from '../../services/token.service';
 import { UserTaskModel } from '../../shared/task/user-task.model';
 import { TaskComponent } from '../project/project-tasks/task/task.component';
 
@@ -16,7 +15,7 @@ export class TasksComponent implements OnInit {
   loading: boolean = true;
   readonly statuses: Map<string, string>;
 
-  constructor(private _tasksService: TaskService, private _tokenService: TokenService, private _dialog: MatDialog) {
+  constructor(private _tasksService: TaskService, private _dialog: MatDialog) {
      this.statuses = new Map(
       _tasksService.getStatusesWithDescriptions(true).map(object => {
         return [object.status.toString(), object.description];
@@ -25,7 +24,7 @@ export class TasksComponent implements OnInit {
    }
 
   ngOnInit(): void {
-    this._tasksService.get(this._tokenService.getJwtToken()!)
+    this._tasksService.get()
     .subscribe({
       next: tasks => 
       {

@@ -16,6 +16,7 @@ import { UserCabinetModel } from '../shared/user/cabinet/user-cabinet.model';
 import { UpdateUserModel } from '../shared/user/update-user.model';
 import { ForgotPasswordModel } from '../shared/user/forgot-password.model';
 import { ResetPasswordModel } from '../shared/user/reset-password.model';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,8 @@ export class AccountService extends BaseService {
 
   constructor(private _http: HttpClient,
     private _processHTTPMsgService: ProcessHTTPMsgService,
-    private _jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService) {
+    private _jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService,
+    private _tokenService: TokenService) {
     super();
   }
 
@@ -122,46 +124,46 @@ export class AccountService extends BaseService {
     this._authChangeSub.next(isAuthenticated);
   }
 
-  public get(token: string) : Observable<UserCabinetModel>
+  public get() : Observable<UserCabinetModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<UserCabinetModel>(this.serviceBaseURL, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public update(token: string, user: UpdateUserModel)
+  public update(user: UpdateUserModel)
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.put(this.serviceBaseURL, user, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public deleteAvatar(token: string) {
+  public deleteAvatar() {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.delete(this.serviceBaseURL + "Avatar", httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public updateAvatar(token: string, file: FormData)
+  public updateAvatar(file: FormData)
   {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.put(this.serviceBaseURL + "Avatar", file, httpOptions)

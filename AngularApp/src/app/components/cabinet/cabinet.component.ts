@@ -51,7 +51,7 @@ export class CabinetComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._accountService.get(localStorage.getItem('jwt')!)
+    this._accountService.get()
     .subscribe({
       next: result => 
       {
@@ -111,7 +111,7 @@ export class CabinetComponent implements OnInit {
     if ((this.user[callerNameAsKey]) != event.target.value && this.form.valid)
     {
       this.updateUser = this.form.value;
-    this._accountService.update(localStorage.getItem('jwt')!, this.updateUser!)
+    this._accountService.update(this.updateUser!)
     .subscribe({
       next: () => {
         this._snackBar.open("Updated successfully", "Close", {

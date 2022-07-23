@@ -4,7 +4,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { createIsEqualToValueValidator } from 'src/app/customvalidators';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectMiniModel } from 'src/app/shared/project/project-mini.model';
 import { ProjectInfoComponent } from '../project-info.component';
 
@@ -35,7 +34,6 @@ export class ProjectInfoDeleteComponent implements OnInit {
   constructor(private _dialogRef: MatDialogRef<ProjectInfoComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectMiniModel, private _router: Router,
     private _projectService: ProjectService,
-    private _tokenService: TokenService,
     private _fb: FormBuilder) { 
     this._projectId = data.id;
     this.projectName = data.name;
@@ -93,7 +91,7 @@ export class ProjectInfoDeleteComponent implements OnInit {
     this._dialogRef.disableClose = true;
     if (this.form.valid)
     {
-      this._projectService.delete(this._tokenService.getJwtToken()!, this._projectId).subscribe(
+      this._projectService.delete(this._projectId).subscribe(
       {
         next: () => {
           this.success = true;

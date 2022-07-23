@@ -18,7 +18,7 @@ export class TaskFileDeleteComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<TaskFileDeleteComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: FileModel,
-    private _fileService: FileService, private _tokenService: TokenService) {
+    private _fileService: FileService) {
       this.file = data;
   }
 
@@ -28,7 +28,7 @@ export class TaskFileDeleteComponent implements OnInit {
   onSubmit()
   {
     this.loading = true;
-      this._fileService.delete(this._tokenService.getJwtToken()!, this.file.id).subscribe(
+      this._fileService.delete(this.file.id).subscribe(
       {
         next: () => {
           this.success = true;

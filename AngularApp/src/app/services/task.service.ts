@@ -17,6 +17,7 @@ import { UserTaskModel } from '../shared/task/user-task.model';
 import { UserMiniWithAvatarModel } from '../shared/user/user-mini-with-avatar.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -25,16 +26,17 @@ export class TaskService extends BaseService {
   override serviceBaseURL: string = this.baseURL + 'Tasks/';
 
   constructor(private _http: HttpClient,
-    private _processHTTPMsgService: ProcessHTTPMsgService) {
+    private _processHTTPMsgService: ProcessHTTPMsgService,
+    private _tokenService: TokenService) {
     super();
   }
 
-  public get(token: string) : Observable<UserTaskModel[]>
+  public get() : Observable<UserTaskModel[]>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<UserTaskModel[]>(this.serviceBaseURL, httpOptions)
@@ -48,108 +50,108 @@ export class TaskService extends BaseService {
       }), catchError(this._processHTTPMsgService.handleError));
   }
 
-  public getById(token: string, id: number) : Observable<TaskModel>
+  public getById(id: number) : Observable<TaskModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<TaskModel>(this.serviceBaseURL + id, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public update(token: string, id: number, model: UpdateTaskModel) : Observable<Object>
+  public update(id: number, model: UpdateTaskModel) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.put(this.serviceBaseURL + id, model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public delete(token: string, id: number) : Observable<Object>
+  public delete(id: number) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.delete(this.serviceBaseURL + id, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public deleteExecutor(token: string, id: number, userId: number) : Observable<Object>
+  public deleteExecutor(id: number, userId: number) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.delete(this.serviceBaseURL + id + "/users/" + userId, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public addExecutor(token: string, id: number, model: AddExecutorModel) : Observable<UserMiniWithAvatarModel>
+  public addExecutor(id: number, model: AddExecutorModel) : Observable<UserMiniWithAvatarModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.post<UserMiniWithAvatarModel>(this.serviceBaseURL + id + '/users', model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public getExecutors(token: string, id: number) : Observable<UserMiniWithAvatarModel[]>
+  public getExecutors(id: number) : Observable<UserMiniWithAvatarModel[]>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<UserMiniWithAvatarModel[]>(this.serviceBaseURL + id + '/users', httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public getMessages(token: string, id: number) : Observable<MessageModel[]>
+  public getMessages(id: number) : Observable<MessageModel[]>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<MessageModel[]>(this.serviceBaseURL + id + '/messages', httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public getFiles(token: string, id: number) : Observable<FileModel[]>
+  public getFiles(id: number) : Observable<FileModel[]>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<FileModel[]>(this.serviceBaseURL + id + '/files', httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public startFileUpload(token: string, id: number, model: AddFileModel) : Observable<FileModel>
+  public startFileUpload(id: number, model: AddFileModel) : Observable<FileModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.post<FileModel>(this.serviceBaseURL + id + '/files/start', model, httpOptions)
@@ -157,12 +159,12 @@ export class TaskService extends BaseService {
   }
 
 
-  public addMessage(token: string, id: number, model: AddMessageModel) : Observable<MessageModel>
+  public addMessage(id: number, model: AddMessageModel) : Observable<MessageModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.post<MessageModel>(this.serviceBaseURL + id + '/messages', model, httpOptions)

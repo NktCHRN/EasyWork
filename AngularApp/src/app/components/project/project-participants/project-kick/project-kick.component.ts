@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ProjectKickPageModel } from 'src/app/shared/project/user-on-project/kick/project-kick-page.model';
 import { UserMiniReducedModel } from 'src/app/shared/user/user-mini-reduced.model';
 import { EventEmitter } from '@angular/core';
@@ -22,7 +21,7 @@ export class ProjectKickComponent implements OnInit {
 
   constructor(private _dialogRef: MatDialogRef<ProjectKickComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectKickPageModel,
-    private _projectService: ProjectService, private _tokenService: TokenService) { 
+    private _projectService: ProjectService) { 
       this._projectId = data.project.id;
       this.projectName = data.project.name;
       this.toKick = data.toKick;
@@ -34,7 +33,8 @@ export class ProjectKickComponent implements OnInit {
   onSubmit()
   {
     this.loading = true;
-      this._projectService.kick(this._tokenService.getJwtToken()!, {
+      this._projectService.kick(
+      {
         id: this._projectId, 
         userId: this.toKick.id
       }).subscribe(

@@ -61,7 +61,7 @@ export class TaskMessagesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._taskService.getMessages(this._tokenService.getJwtToken()!, this.taskId)
+    this._taskService.getMessages(this.taskId)
     .subscribe({
       next: result => {
         this.messages = result;
@@ -73,7 +73,7 @@ export class TaskMessagesComponent implements OnInit {
       }
     });
     this._userInfoService.lastUser.subscribe(user => this.me = user!);
-    this._projectService.getMeAsProjectUser(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getMeAsProjectUser(this.projectId)
     .subscribe(user => this.meOnProject = user);
   }
 
@@ -118,7 +118,7 @@ export class TaskMessagesComponent implements OnInit {
     {
       this.switchedToLoading.emit();
       const model: AddMessageModel = this.form.value;
-      this._taskService.addMessage(this._tokenService.getJwtToken()!, this.taskId, model)
+      this._taskService.addMessage(this.taskId, model)
       .subscribe({
         next: result => {
           this.switchedToSuccess.emit();

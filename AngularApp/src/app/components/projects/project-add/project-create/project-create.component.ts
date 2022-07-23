@@ -3,7 +3,6 @@ import { Component, EventEmitter, NgZone, OnInit, Output, ViewChild } from '@ang
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { take } from 'rxjs';
 import { AddProjectModel } from 'src/app/shared/project/add-project.model';
@@ -36,7 +35,6 @@ export class ProjectCreateComponent implements OnInit {
   constructor(private _fb: FormBuilder,
     private _router: Router,
     private _projectsService: ProjectService,
-    private _tokenService: TokenService,
     private _ngZone: NgZone) {
       this.createForm();
      }
@@ -85,7 +83,7 @@ export class ProjectCreateComponent implements OnInit {
   onSubmit() {
     this.loading = true;
     let model: AddProjectModel = this.form.value;
-    this._projectsService.add(this._tokenService.getJwtToken()!, model)
+    this._projectsService.add(model)
     .subscribe({
       next: result => {
         this.closeOuter.emit();

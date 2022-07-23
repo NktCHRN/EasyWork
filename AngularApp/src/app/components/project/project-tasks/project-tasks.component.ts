@@ -84,7 +84,7 @@ export class ProjectTasksComponent implements OnInit {
     const toDoControl = this.form.controls['toDo'];
     const inProgressControl = this.form.controls['inProgress'];
     const validateControl = this.form.controls['validate'];
-    this._projectService.getLimits(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getLimits(this.projectId)
     .subscribe({
       next: result => 
       {
@@ -104,7 +104,7 @@ export class ProjectTasksComponent implements OnInit {
       const controls = [toDoControl, inProgressControl, validateControl];
       controls.forEach(control => control.disable());
     }
-    this._projectService.getTasks(this._tokenService.getJwtToken()!, this.projectId)
+    this._projectService.getTasks(this.projectId)
     .subscribe({
       next: result => 
       {
@@ -184,7 +184,7 @@ export class ProjectTasksComponent implements OnInit {
         maxInProgress: isNaN(inProgress) ? undefined : inProgress,
         maxValidate: isNaN(validate) ? undefined : validate
       };
-      this._projectService.updateLimits(this._tokenService.getJwtToken()!, this.projectId, newLimits)
+      this._projectService.updateLimits(this.projectId, newLimits)
       .subscribe({
         next: () => {
           this.limits = newLimits;

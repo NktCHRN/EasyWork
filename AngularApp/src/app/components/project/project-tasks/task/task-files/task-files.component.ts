@@ -4,7 +4,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { from, mergeMap, map, catchError, throwError, of, Observable, forkJoin, Subscription } from 'rxjs';
 import { FileService } from 'src/app/services/file.service';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { FileWithTempId } from 'src/app/shared/file/file-with-temp-id.model';
 import { FileModel } from 'src/app/shared/file/file.model';
 import { BooleanContainer } from 'src/app/shared/other/booleancontainer';
@@ -35,11 +34,11 @@ export class TaskFilesComponent implements OnInit {
   _fileCount: number = 0;
   _finishedCount: number = 0;
 
-  constructor(private _tokenService: TokenService, private _taskService: TaskService, private _dialog: MatDialog,
+  constructor(private _taskService: TaskService, private _dialog: MatDialog,
   private _fileService: FileService, private _snackBar: MatSnackBar) {   }
 
   ngOnInit(): void {
-    this._taskService.getFiles(this._tokenService.getJwtToken()!, this.taskId)
+    this._taskService.getFiles(this.taskId)
     .subscribe({
       next: result => this.files = result,
       error: error => {
@@ -57,7 +56,7 @@ export class TaskFilesComponent implements OnInit {
   }
 
   download(id: number): void {
-    this._fileService.download(this._tokenService.getJwtToken()!, id)
+    this._fileService.download(id)
     .subscribe({
       next: result => {
         const fileName = result.headers.get('content-disposition')
@@ -155,7 +154,7 @@ export class TaskFilesComponent implements OnInit {
     from(this.toAdd)
     .pipe(
       mergeMap(f => {
-      return this._taskService.startFileUpload(this._tokenService.getJwtToken()!, this.taskId, {
+      return this._taskService.startFileUpload(this.taskId, {
         name: f.file.name
       })
       .pipe(map(result => {
@@ -201,7 +200,7 @@ export class TaskFilesComponent implements OnInit {
             const chunk =  result.object.file.slice( offset, offset + chunkSize );
             const data = new FormData();
             data.append("chunk", chunk);
-            const observable = this._fileService.sendChunk(this._tokenService.getJwtToken()!, result.result.id, chunkIndex, data);
+            const observable = this._fileService.sendChunk(result.result.id, chunkIndex, data);
             chunkObservables.push(observable);
             chunkSubscriptions.push(observable.subscribe(
               {
@@ -229,7 +228,7 @@ export class TaskFilesComponent implements OnInit {
         }
         forkJoin(chunkObservables).subscribe({
           next: () => {
-            this._fileService.endUpload(this._tokenService.getJwtToken()!, model.id)
+            this._fileService.endUpload(model.id)
             .subscribe({
               next: result => {
                 model.isFull = result.isFull;

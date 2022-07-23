@@ -1,12 +1,11 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { Component, Inject, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { TaskPriority } from 'src/app/shared/task/priority/task-priority';
 import { TaskPriorityNone } from 'src/app/shared/task/priority/task-priority-none';
 import { SavedIconState } from 'src/app/shared/task/save/saved-icon-state';
@@ -78,7 +77,7 @@ export class TaskComponent implements OnInit {
   };
 
   constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskDialogSettingsModel, 
-  private _taskService: TaskService, private _tokenService: TokenService, private _snackBar: MatSnackBar, 
+  private _taskService: TaskService, private _snackBar: MatSnackBar, 
   private _fb: FormBuilder, private _router: Router, private _dialog: MatDialog, private _projectService: ProjectService) { 
     this._taskId = data.taskId;
     this.showToProject = data.showToProjectButton;
@@ -136,7 +135,7 @@ export class TaskComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._taskService.getById(this._tokenService.getJwtToken()!, this._taskId)
+    this._taskService.getById(this._taskId)
     .subscribe({
       next: result => 
       {
@@ -159,7 +158,7 @@ export class TaskComponent implements OnInit {
 
   private checkLimitsAndTasks(): void {
     if (!this.limits) {
-      this._projectService.getLimits(this._tokenService.getJwtToken()!, this.task.projectId)
+      this._projectService.getLimits(this.task.projectId)
       .subscribe({
         next: result => 
         {
@@ -171,7 +170,7 @@ export class TaskComponent implements OnInit {
       // Also subscribe to limits changes in this if after the SignalR implementation
     }
     if (!this.tasksCount) {
-      this._projectService.getTasks(this._tokenService.getJwtToken()!, this.task.projectId)
+      this._projectService.getTasks(this.task.projectId)
       .subscribe({
         next: result => 
         {
@@ -236,7 +235,7 @@ export class TaskComponent implements OnInit {
       const updateModel: UpdateTaskModel = {
         ...this.task
       };
-      this._taskService.update(this._tokenService.getJwtToken()!, this.task.id, updateModel)
+      this._taskService.update(this.task.id, updateModel)
       .subscribe({
         next: () => {
           this.updatedTask.emit(updateModel);

@@ -34,8 +34,7 @@ export class ProjectJoinComponent implements OnInit {
 
   constructor(private _fb: FormBuilder,
     private _router: Router,
-    private _invitesService: InviteService,
-    private _tokenService: TokenService) {
+    private _invitesService: InviteService) {
       this.createForm();
      }
 
@@ -77,7 +76,7 @@ export class ProjectJoinComponent implements OnInit {
   onSubmit() {
     this.loading = true;
     let inviteCodeControl = this.form.get('inviteCode');
-    this._invitesService.join(this._tokenService.getJwtToken()!, inviteCodeControl?.value)
+    this._invitesService.join(inviteCodeControl?.value)
     .subscribe({
       next: result => {
         this.closeOuter.emit();

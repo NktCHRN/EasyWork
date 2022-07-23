@@ -128,7 +128,7 @@ onSubmit()
   let file = new File([blob], this.fileName!);
   let formData = new FormData();
   formData.append('file', file);
-  this._accountService.updateAvatar(localStorage.getItem('jwt')!, formData)
+  this._accountService.updateAvatar(formData)
   .subscribe({
     next: () => {
       this._userInfoService.updateLastUser();
