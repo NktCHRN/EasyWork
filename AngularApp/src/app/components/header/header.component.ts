@@ -22,7 +22,8 @@ export class HeaderComponent implements OnInit {
   logOut = () => {
     let model = new RevokeTokenModel();
     model.token = localStorage.getItem("refreshToken")!;
-    this._tokenService.revokeToken(localStorage.getItem('jwt')!, model).subscribe();
+    const jwt = localStorage.getItem('jwt')!;
+    this._tokenService.revokeToken(jwt, model).subscribe();
     this._accountService.logout();
     this._accountService.sendAuthStateChangeNotification(false);
     if(this.isExternalAuth)
