@@ -56,6 +56,20 @@ export class AppComponent {
       }
    }
 
+   private _lastJwt: string | null | undefined;
+
+   private listenStorageChange() {
+    const token = this._tokenService.getJwtToken();
+    if (token != this._lastJwt)
+    {
+      if (token)
+        this._accountService.sendAuthStateChangeNotification(true);
+      else
+        this._accountService.sendAuthStateChangeNotification(false);
+      this._lastJwt = token;
+    }
+  }
+
   ngOnInit() {
     this._router.events
       .pipe(
@@ -77,6 +91,11 @@ export class AppComponent {
           this._titleService.setTitle(`${this._projectName} - ${title}`);
         }
       });
+
+    this._lastJwt = this._tokenService.getJwtToken();
+    window.addEventListener("storage", () => {
+      this.listenStorageChange();
+    }, false);
 
     this._accountService.authChanged
     .subscribe(res => {
