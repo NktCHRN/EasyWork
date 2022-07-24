@@ -39,6 +39,7 @@ export class AppComponent {
     }
 
    private onAuthChange(res: boolean): void {
+      this._lastJwt = this._tokenService.getJwtToken()!;
       if (res)
       {
         if (this.connection)
@@ -61,13 +62,7 @@ export class AppComponent {
    private listenStorageChange() {
     const token = this._tokenService.getJwtToken();
     if (token != this._lastJwt)
-    {
-      if (token)
-        this._accountService.sendAuthStateChangeNotification(true);
-      else
-        this._accountService.sendAuthStateChangeNotification(false);
-      this._lastJwt = token;
-    }
+      this._accountService.sendAuthStateChangeNotification(!!token);
   }
 
   ngOnInit() {
@@ -93,9 +88,7 @@ export class AppComponent {
       });
 
     this._lastJwt = this._tokenService.getJwtToken();
-    window.addEventListener("storage", () => {
-      this.listenStorageChange();
-    }, false);
+    window.addEventListener("storage", () => this.listenStorageChange(), false);
 
     this._accountService.authChanged
     .subscribe(res => {
