@@ -1,6 +1,4 @@
 ﻿using Data.Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using WebAPI.Interfaces;
@@ -13,6 +11,8 @@ namespace WebAPI.Hubs
         private readonly UserManager<User> _userManager;
 
         private readonly IUserConnectionsContainer _connections;
+
+        private static readonly object _locker = new();
 
         public UsersHub(UserManager<User> userManager, IUserConnectionsContainer connections)
         {
@@ -61,8 +61,7 @@ namespace WebAPI.Hubs
                 var model = await _userManager.GetUserAsync(Context.User);
                 if (model != null)
                 {
-                    object locker = new();
-                    lock (locker)
+                    lock (_locker)
                     {
                         if (value)
                         {
