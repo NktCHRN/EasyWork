@@ -32,20 +32,26 @@ export class ProfileComponent implements OnInit {
             skipNegotiation: true,
             transport: signalR.HttpTransportType.WebSockets,
           })
+          .withAutomaticReconnect()
           .build();
+          this.connection.onreconnected(() => this.startListening());
           this.connection.on("StatusChange", (data: boolean) => {
             this.user.isOnline = data;
             if (!data)
               this.user.lastSeen = new Date().toString();
           });
           this.connection.start().then(
-            () => this.connection!.invoke('StartListening', this.id)
-            .catch(error => console.error(error))
+            () => this.startListening()
           ).catch(err => document.write(err));
         },
         error: () => this._router.navigate(["**"], { skipLocationChange: true })
       });
     });
+  }
+
+  private startListening(): void {
+    this.connection!.invoke('StartListening', this.id)
+    .catch(error => console.error(error))
   }
 
   ngOnDestroy() {

@@ -36,6 +36,7 @@ export class AppComponent {
             return this._tokenService.getJwtToken()!;
           }
         })
+        .withAutomaticReconnect()
         .build();
         this.connection.start().catch(err => document.write(err));
     }
