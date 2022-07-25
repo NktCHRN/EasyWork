@@ -6,6 +6,8 @@ import { AccountService } from './services/account.service';
 import { TokenService } from './services/token.service';
 import { UserInfoService } from './services/userinfo.service';
 import * as signalR from '@microsoft/signalr';
+import { AnonymousGuard } from './guards/anonymous.guard';
+import { AuthGuard } from './guards/auth.guard';
 
 @Component({
   selector: 'app-root',
@@ -62,7 +64,14 @@ export class AppComponent {
    private listenStorageChange() {
     const token = this._tokenService.getJwtToken();
     if (token != this._lastJwt)
+    {
       this._accountService.sendAuthStateChangeNotification(!!token);
+      const routerActivators = this._router.config.find(f=>f.path == this._router.url.substring(1))?.canActivate;
+      if (token && routerActivators?.find(a => a == AnonymousGuard))
+        this._router.navigate(["cabinet"]); 
+      if (!token && routerActivators?.find(a => a == AuthGuard))
+        this._router.navigate(["login"]); 
+    }
   }
 
   ngOnInit() {
