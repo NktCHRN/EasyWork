@@ -4,9 +4,11 @@ using Business.Models;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs.UserOnProject;
+using WebAPI.Hubs;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -22,11 +24,14 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public InvitesController(IProjectService projectService, IUserOnProjectService userOnProjectService, IMapper mapper)
+        private readonly IHubContext<ProjectsHub> _projectsHubContext;
+
+        public InvitesController(IProjectService projectService, IUserOnProjectService userOnProjectService, IMapper mapper, IHubContext<ProjectsHub> projectsHubContext)
         {
             _projectService = projectService;
             _userOnProjectService = userOnProjectService;
             _mapper = mapper;
+            _projectsHubContext = projectsHubContext;
         }
 
         [HttpPost("{inviteCode}")]
@@ -44,17 +49,23 @@ namespace WebAPI.Controllers
                 UserId = User.GetId()!.Value,
                 Role = UserOnProjectRoles.User
             };
+            UserOnProjectDTO mapped;
             try
             {
                 await _userOnProjectService.AddAsync(uop);
+                mapped = _mapper.Map<UserOnProjectDTO>(uop);
+                await _projectsHubContext.Clients.Group(project.Id.ToString()).SendAsync("AddedUser", mapped);
+                await _projectsHubContext.Clients.User(userId.Value.ToString()).SendAsync("AddedUser", mapped);
             }
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
             }
-            catch (DbUpdateException)
-            {   }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{uop.UserId}", _mapper.Map<UserOnProjectDTO>(uop));
+            catch (DbUpdateException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{uop.UserId}", mapped);
         }
     }
 }

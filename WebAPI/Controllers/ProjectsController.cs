@@ -5,6 +5,7 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WebAPI.DTOs.Project;
 using WebAPI.DTOs.Project.Gantt;
@@ -14,6 +15,7 @@ using WebAPI.DTOs.Project.Tasks;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.UserOnProject;
+using WebAPI.Hubs;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -34,7 +36,10 @@ namespace WebAPI.Controllers
         private readonly ITaskService _taskService;
 
         private readonly IMapper _mapper;
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
+
+        private readonly IHubContext<ProjectsHub> _hubContext;
+
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService, IHubContext<ProjectsHub> hubContext)
         {
             _projectService = projectService;
             _mapper = mapper;
@@ -42,6 +47,7 @@ namespace WebAPI.Controllers
             _userManager = userManager;
             _fileManager = fileManager;
             _taskService = taskService;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -136,6 +142,7 @@ namespace WebAPI.Controllers
                 StartDate = DateTimeOffset.UtcNow,
                 InviteCode = Guid.NewGuid()
             };
+            ProjectDTO mapped;
             try
             {
                 await _projectService.AddAsync(project);
@@ -145,12 +152,14 @@ namespace WebAPI.Controllers
                     ProjectId = project.Id,
                     Role = UserOnProjectRoles.Owner
                 });
+                mapped = _mapper.Map<ProjectDTO>(project);
+                await _hubContext.Clients.User(userId.Value.ToString()).SendAsync("Added", mapped);
             }
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
             }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}", _mapper.Map<ProjectDTO>(project));
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}", mapped);
         }
 
         [HttpPut("{id}")]
@@ -171,6 +180,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.UpdateAsync(project);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("Updated", id, dto);
             }
             catch (ArgumentException exc)
             {
@@ -194,6 +205,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.DeleteByIdAsync(id);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("Deleted", id);
             }
             catch (InvalidOperationException)
             {
@@ -363,6 +376,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _userOnProjectService.DeleteByIdAsync(id, userId);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("DeletedUser", id, userId);
             }
             catch (InvalidOperationException)
             {
@@ -382,6 +397,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _userOnProjectService.DeleteByIdAsync(id, userId.Value);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("DeletedUser", id, userId);
             }
             catch (InvalidOperationException exc)
             {
@@ -414,9 +431,14 @@ namespace WebAPI.Controllers
                 UserId = dto.UserId,
                 Role = toAddRole
             };
+            UserOnProjectDTO mapped;
             try
             {
                 await _userOnProjectService.AddAsync(model);
+                mapped = _mapper.Map<UserOnProjectDTO>(model);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("AddedUser", mapped);
+                await _hubContext.Clients.User(dto.UserId.ToString()).SendAsync("AddedUser", mapped);
             }
             catch (ArgumentException exc)
             {
@@ -430,7 +452,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest("This user is already on the project");
             }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{dto.UserId}", _mapper.Map<UserOnProjectDTO>(model));
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{dto.UserId}", mapped);
         }
 
         [HttpPut("{id}/users/{userId}")]
