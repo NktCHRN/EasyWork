@@ -45,7 +45,7 @@ export class AppComponent {
       this._lastJwt = this._tokenService.getJwtToken()!;
       if (res)
       {
-        if (this.connection)
+        if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
           this.connection?.stop().then(() => {
             this.connection = null;
             this.connect();
@@ -54,9 +54,9 @@ export class AppComponent {
           this.connect();
         this._userInfoService.updateLastUser();
       }
-      else
+      else if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
       {
-        this.connection?.stop().then(() => this.connection = null);
+        this.connection.stop().then(() => this.connection = null);
       }
    }
 
@@ -103,7 +103,7 @@ export class AppComponent {
     this._accountService.authChanged
     .subscribe(res => {
       this.onAuthChange(res);
-    })
+    });
     this._accountService.isUserAuthenticated().then(res => this.onAuthChange(res));
   }
 }

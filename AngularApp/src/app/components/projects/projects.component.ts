@@ -1,8 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project.service';
 import { ProjectReducedModel } from '../../shared/project/project-reduced.model';
 import { ProjectAddComponent } from './project-add/project-add.component';
+import * as signalR from '@microsoft/signalr';
+import { TokenService } from 'src/app/services/token.service';
+import { AccountService } from 'src/app/services/account.service';
+import { ProjectModel } from 'src/app/shared/project/project.model';
+import { UpdateProjectModel } from 'src/app/shared/project/update-project.model';
+import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-projects',
@@ -15,15 +22,30 @@ export class ProjectsComponent implements OnInit {
   errorMessage: string | null | undefined;
   loading: boolean = true;
 
-  constructor(private _projectsService: ProjectService, private _dialog: MatDialog) { }
+  connection: signalR.HubConnection | null | undefined;
+  readonly myId: number;
+  authChangeSubscription: Subscription | null | undefined;
+
+  constructor(private _projectsService: ProjectService, private _dialog: MatDialog, @Inject('signalRURL') private _signalRURL: string,
+  private _tokenService: TokenService, private _accountService: AccountService) {
+    this.myId = this._tokenService.getMyId()!;
+   }
 
   ngOnInit(): void {
+    const connectPromise = this.connect();
     this._projectsService.get()
     .subscribe({
       next: projects => 
       {
         this.projects = projects; 
         this.loading = false;
+        connectPromise.then(() => {
+          this.addProjects();
+        });
+        this.authChangeSubscription = this._accountService.authChanged
+        .subscribe(res => {
+          this.onAuthChange(res);
+        });
       },
       error: error => 
       {
@@ -33,6 +55,89 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  private onAuthChange(res: boolean): void {
+    if (res)
+    {
+      if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
+        this.connection?.stop().then(() => {
+          this.connection = null;
+          this.connect().then(() => this.addProjects());
+        });
+      else
+      {
+        this.connect().then(() => this.addProjects());
+      }
+    }
+ }
+
+  private async connect(): Promise<void> {
+    this.connection = new signalR.HubConnectionBuilder()
+      .withUrl(this._signalRURL + "projectsHub", {
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
+        accessTokenFactory: () => {
+          return this._tokenService.getJwtToken()!;
+        }
+      })
+      .withAutomaticReconnect()
+      .build();
+      this.connection?.onreconnected(() => this.addProjects());
+      this.connection.on("Added", (data: ProjectModel) => {
+        this.projects?.unshift(data);
+        this.addProject(data.id);
+      });
+      this.connection.on("Updated", (id: number, model: UpdateProjectModel) => {
+        const found = this.projects?.find(p => p.id == id);
+        if (found)
+        {
+          found.name = model.name;
+          found.description = model.description;
+        }
+      });
+      this.connection.on("Deleted", (id: number) => {
+        const foundIndex = this.projects?.findIndex(p => p.id == id);
+        if (foundIndex != undefined && foundIndex != null && foundIndex != -1)
+          this.projects?.splice(foundIndex, 1);
+        this.deleteProject(id);
+      });
+      this.connection.on("DeletedUser", (projectId: number, userId: number) => {
+        if (userId == this.myId)
+        {
+          const foundIndex = this.projects?.findIndex(p => p.id == projectId);
+          if (foundIndex != undefined && foundIndex != null && foundIndex != -1)
+            this.projects?.splice(foundIndex, 1);
+          this.deleteProject(projectId);
+        }
+      });
+      this.connection.on("AddedUser", (data: UserOnProjectModel) => {
+        if (data.userId == this.myId)
+          this._projectsService.getReducedById(data.projectId).subscribe(result => {
+            this.projects?.unshift(result);
+            this.addProject(result.id);
+          });
+      });
+      try {
+      return await this.connection.start();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  }
+
+  private addProjects() {
+    this.projects?.forEach(p => this.addProject(p.id));
+  }
+
+  private addProject(id: number) {
+    this.connection!.invoke('StartListening', id)
+    .catch(error => console.error(error))
+  }
+
+  private deleteProject(id: number) {
+    this.connection!.invoke('StopListening', id)
+    .catch(error => console.error(error))
+  }
+
   onAddClick()
   {
     this._dialog.open(ProjectAddComponent, {
@@ -40,4 +145,10 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy()
+  {
+    if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
+      this.connection.stop().then(() => this.connection = null);
+    this.authChangeSubscription?.unsubscribe();
+  }
 }

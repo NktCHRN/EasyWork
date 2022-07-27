@@ -51,7 +51,7 @@ export class ProfileComponent implements OnInit {
 
   private startListening(): void {
     this.connection!.invoke('StartListening', this.id)
-    .catch(error => console.error(error))
+    .catch(error => console.error(error));
   }
 
   ngOnDestroy() {
