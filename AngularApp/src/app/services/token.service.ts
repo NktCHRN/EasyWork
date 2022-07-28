@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { AsyncLock } from '../shared/other/async-lock';
 import { RevokeTokenModel } from '../shared/token/revoke-token.model';
 import { TokenResponseModel } from '../shared/token/token-response.model';
@@ -37,17 +37,21 @@ export class TokenService extends BaseService {
       const httpOptions = {
         headers: new HttpHeaders({
           'Content-Type':  'application/json'
-        })
+        }),
+        params: {
+          called: 'asdsadssda'
+        }
       };
-      const observable = this._http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions);
-      observable.subscribe({
-        next: result => {
-          this.setTokens(result);
-          this.lock.disable();
-        },
-        error: () => this.lock.disable()
-      });
-      return observable;
+      return this._http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
+      .pipe(map(result => {
+        this.setTokens(result);
+        this.lock.disable();
+        return result;
+      }), catchError(error => {
+        this.lock.disable();
+        throwError(() => error);
+        return of();
+      }));
   }
 
   public revokeToken(token: string, tokenModel: RevokeTokenModel) : Observable<Object> {
