@@ -1,4 +1,5 @@
 ﻿using Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using WebAPI.Interfaces;
@@ -22,8 +23,32 @@ namespace WebAPI.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            await ChangeStatus(true);
             await base.OnConnectedAsync();
+        }
+
+        [Authorize]
+        public async Task Login()
+        {
+            if (Context.User == null)
+                throw new HubException("You are not authorized");
+            var model = await _userManager.GetUserAsync(Context.User);
+            if (model == null)
+                throw new HubException("You are not authorized");
+            lock (_locker)
+            {
+                try
+                {
+                    if (_connections.UserConnections[model.Id].FirstOrDefault(c => c == Context.ConnectionId) == default)
+                        _connections.UserConnections[model.Id].Add(Context.ConnectionId);
+                }
+                catch (KeyNotFoundException)
+                {
+                    _connections.UserConnections[model.Id] = new List<string>() { Context.ConnectionId };
+                }
+            }
+            await SendStatusChange(Clients.Group(model.Id.ToString()), model.Id);
+            model.LastSeen = DateTimeOffset.Now;
+            await _userManager.UpdateAsync(model);
         }
 
         public async Task StartListening(int userId)
@@ -54,7 +79,8 @@ namespace WebAPI.Hubs
             await recipient.SendAsync("StatusChange", IsOnline(userId));
         }
 
-        private async Task ChangeStatus(bool value)
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (Context.User != null)
             {
@@ -63,36 +89,17 @@ namespace WebAPI.Hubs
                 {
                     lock (_locker)
                     {
-                        if (value)
+                        try
                         {
-                            try
-                            {
-                                _connections.UserConnections[model.Id].Add(Context.ConnectionId);
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                _connections.UserConnections[model.Id] = new List<string>() { Context.ConnectionId };
-                            }
+                            _connections.UserConnections[model.Id].Remove(Context.ConnectionId);
                         }
-                        else
-                        {
-                            try
-                            {
-                                _connections.UserConnections[model.Id].Remove(Context.ConnectionId);
-                            }
-                            catch (KeyNotFoundException) { }
-                        }
+                        catch (KeyNotFoundException) { }
                     }
                     await SendStatusChange(Clients.Group(model.Id.ToString()), model.Id);
                     model.LastSeen = DateTimeOffset.Now;
                     await _userManager.UpdateAsync(model);
                 }
             }
-        }
-
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            await ChangeStatus(false);
             await base.OnDisconnectedAsync(exception);
         }
     }
