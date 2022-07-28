@@ -7,11 +7,12 @@ import {
   HttpErrorResponse,
   HTTP_INTERCEPTORS
 } from '@angular/common/http';
-import { BehaviorSubject, catchError, filter, Observable, throwError, switchMap, take } from 'rxjs';
+import { BehaviorSubject, catchError, filter, Observable, throwError, switchMap, take, from } from 'rxjs';
 import { TokenService } from '../services/token.service';
 import { AccountService } from '../services/account.service';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { TokenResponseModel } from '../shared/token/token-response.model';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -62,24 +63,25 @@ export class AuthInterceptor implements HttpInterceptor {
     if (!this.isRefreshing) {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
-      const token = this._tokenService.getTokens();
-      if (token)
-        return this._tokenService.refreshToken(token).pipe(
-          switchMap((token: any) => {
-            this.isRefreshing = false;
-            this._tokenService.setTokens(token);
-            this.refreshTokenSubject.next(token.accessToken);
-            this._accountService.sendAuthStateChangeNotification(true);
-            return next.handle(this.addTokenHeader(request, token.accessToken));
-          }),
-          catchError((err) => {
-            this.isRefreshing = false;
-            this._accountService.logout();
-            this._accountService.sendAuthStateChangeNotification(false);
-            this._dialog.closeAll();
-            this._router.navigate(["login"]); 
-            console.log(err);
-            return throwError(() => err);
+        return from(this._tokenService.refreshToken())
+        .pipe(
+          switchMap(inner => {
+            return inner.pipe(
+            switchMap((token: TokenResponseModel) => {
+              this.isRefreshing = false;
+              this.refreshTokenSubject.next(token.accessToken);
+              this._accountService.sendAuthStateChangeNotification(true);
+              return next.handle(this.addTokenHeader(request, token.accessToken));
+            }),
+            catchError((err) => {
+              this.isRefreshing = false;
+              this._accountService.logout();
+              this._accountService.sendAuthStateChangeNotification(false);
+              this._dialog.closeAll();
+              this._router.navigate(["login"]); 
+              console.log(err);
+              return throwError(() => err);
+            }));
           })
         );
     }

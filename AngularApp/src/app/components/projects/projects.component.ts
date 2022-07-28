@@ -5,11 +5,10 @@ import { ProjectReducedModel } from '../../shared/project/project-reduced.model'
 import { ProjectAddComponent } from './project-add/project-add.component';
 import * as signalR from '@microsoft/signalr';
 import { TokenService } from 'src/app/services/token.service';
-import { AccountService } from 'src/app/services/account.service';
 import { ProjectModel } from 'src/app/shared/project/project.model';
 import { UpdateProjectModel } from 'src/app/shared/project/update-project.model';
 import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
-import { Subscription } from 'rxjs';
+import { TokenGuardService } from 'src/app/services/token-guard.service';
 
 @Component({
   selector: 'app-projects',
@@ -24,10 +23,9 @@ export class ProjectsComponent implements OnInit {
 
   connection: signalR.HubConnection | null | undefined;
   readonly myId: number;
-  authChangeSubscription: Subscription | null | undefined;
 
   constructor(private _projectsService: ProjectService, private _dialog: MatDialog, @Inject('signalRURL') private _signalRURL: string,
-  private _tokenService: TokenService, private _accountService: AccountService) {
+  private _tokenService: TokenService, private _tokenGuardService: TokenGuardService) {
     this.myId = this._tokenService.getMyId()!;
    }
 
@@ -42,10 +40,6 @@ export class ProjectsComponent implements OnInit {
         connectPromise.then(() => {
           this.addProjects();
         });
-        this.authChangeSubscription = this._accountService.authChanged
-        .subscribe(res => {
-          this.onAuthChange(res);
-        });
       },
       error: error => 
       {
@@ -55,29 +49,12 @@ export class ProjectsComponent implements OnInit {
     });
   }
 
-  private onAuthChange(res: boolean): void {
-    if (res)
-    {
-      if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
-        this.connection?.stop().then(() => {
-          this.connection = null;
-          this.connect().then(() => this.addProjects());
-        });
-      else
-      {
-        this.connect().then(() => this.addProjects());
-      }
-    }
- }
-
   private async connect(): Promise<void> {
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(this._signalRURL + "projectsHub", {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
-        accessTokenFactory: () => {
-          return this._tokenService.getJwtToken()!;
-        }
+        accessTokenFactory: () => this._tokenGuardService.getOrRefreshToken()
       })
       .withAutomaticReconnect()
       .build();
@@ -119,8 +96,7 @@ export class ProjectsComponent implements OnInit {
       try {
       return await this.connection.start();
     } catch (err) {
-      console.error(err);
-      throw err;
+      return console.error(err);
     }
   }
 
@@ -149,6 +125,5 @@ export class ProjectsComponent implements OnInit {
   {
     if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
       this.connection.stop().then(() => this.connection = null);
-    this.authChangeSubscription?.unsubscribe();
   }
 }

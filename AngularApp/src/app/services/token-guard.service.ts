@@ -8,39 +8,42 @@ import { TokenService } from './token.service';
   providedIn: 'root'
 })
 export class TokenGuardService {
-
-  constructor(private accountService: AccountService, private tokenService: TokenService, private jwtHelper: JwtHelperService) {  }
+  constructor(private _accountService: AccountService, private _tokenService: TokenService, private _jwtHelper: JwtHelperService) {
+    }
 
   public async tryRefreshingTokens(token: string): Promise<boolean> {
     // Try refreshing tokens using refresh token
     const refreshToken: string = localStorage.getItem("refreshToken")!;
     if (!token || !refreshToken) { 
-      this.accountService.sendAuthStateChangeNotification(false);
+      this._accountService.sendAuthStateChangeNotification(false);
       return false;
     }
-    const credentials: TokenResponseModel = { accessToken: token, refreshToken: refreshToken };
     let isRefreshSuccess: boolean = false;
-
     try {
-      const refreshRes = await new Promise<TokenResponseModel>((resolve, reject) => {
-        this.tokenService.refreshToken(credentials).subscribe({
+      await new Promise<TokenResponseModel>(async (resolve, reject) => {
+        (await this._tokenService.refreshToken()).subscribe({
           next: (res: TokenResponseModel) => resolve(res),
           error: (_) => { reject(); isRefreshSuccess = false;}
         });
       })
-      localStorage.setItem("jwt", refreshRes.accessToken);
-      localStorage.setItem("refreshToken", refreshRes.refreshToken);
       isRefreshSuccess = true;
     }
     catch (error) {   }
-    this.accountService.sendAuthStateChangeNotification(isRefreshSuccess);
+    this._accountService.sendAuthStateChangeNotification(isRefreshSuccess);
     return isRefreshSuccess;
   }
 
   public async refreshToken()
   {
     const token = localStorage.getItem("jwt");    
-    if (!token || this.jwtHelper.isTokenExpired(token))
+    if (!token || this._jwtHelper.isTokenExpired(token))
       await this.tryRefreshingTokens(token!); 
+  }
+
+  public async getOrRefreshToken(): Promise<string>
+  {
+    const token = this._tokenService.getJwtToken()!;
+    await this.tryRefreshingTokens(token!); 
+    return this._tokenService.getJwtToken()!;
   }
 }

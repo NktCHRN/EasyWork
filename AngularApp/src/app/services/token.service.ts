@@ -1,7 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { AsyncLock } from '../shared/other/async-lock';
 import { RevokeTokenModel } from '../shared/token/revoke-token.model';
 import { TokenResponseModel } from '../shared/token/token-response.model';
 import { BaseService } from './base.service';
@@ -10,6 +11,13 @@ import { BaseService } from './base.service';
   providedIn: 'root'
 })
 export class TokenService extends BaseService {
+  private static _lock: AsyncLock | null | undefined;
+
+  private get lock() {
+    if (!TokenService._lock)
+      TokenService._lock = new AsyncLock();
+    return TokenService._lock;
+  }
 
   constructor(private _http: HttpClient, private _jwtService: JwtHelperService) {
     super();
@@ -17,13 +25,29 @@ export class TokenService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'Token/';
   
-  public refreshToken(credentials: TokenResponseModel): Observable<TokenResponseModel> {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type':  'application/json'
-      })
-    };
-    return this._http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
+  public async refreshToken(): Promise<Observable<TokenResponseModel>> {
+    await this.lock.promise;
+      this.lock.enable();
+      const credentials = this.getTokens();
+      if (!this._jwtService.isTokenExpired(credentials.accessToken))
+      {
+        this.lock.disable();
+        return of(credentials);
+      }
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type':  'application/json'
+        })
+      };
+      const observable = this._http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions);
+      observable.subscribe({
+        next: result => {
+          this.setTokens(result);
+          this.lock.disable();
+        },
+        error: () => this.lock.disable()
+      });
+      return observable;
   }
 
   public revokeToken(token: string, tokenModel: RevokeTokenModel) : Observable<Object> {

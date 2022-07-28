@@ -8,6 +8,7 @@ import { UserInfoService } from './services/userinfo.service';
 import * as signalR from '@microsoft/signalr';
 import { AnonymousGuard } from './guards/anonymous.guard';
 import { AuthGuard } from './guards/auth.guard';
+import { TokenGuardService } from './services/token-guard.service';
 
 @Component({
   selector: 'app-root',
@@ -24,17 +25,18 @@ export class AppComponent {
     private _accountService: AccountService,
     private _userInfoService: UserInfoService,
     @Inject('signalRURL') private _signalRURL: string,
-    private _tokenService: TokenService
+    private _tokenService: TokenService,
+    private _tokenGuardService: TokenGuardService
   ) {}
 
-    private connect(): void {
+  private _lastAuthStatus: boolean = false;
+
+    private async connect() {
       this.connection = new signalR.HubConnectionBuilder()
         .withUrl(this._signalRURL + "usersHub", {
           skipNegotiation: true,
           transport: signalR.HttpTransportType.WebSockets,
-          accessTokenFactory: () => {
-            return this._tokenService.getJwtToken()!;
-          }
+          accessTokenFactory: () => this._tokenGuardService.getOrRefreshToken()
         })
         .withAutomaticReconnect()
         .build();
@@ -43,21 +45,25 @@ export class AppComponent {
 
    private onAuthChange(res: boolean): void {
       this._lastJwt = this._tokenService.getJwtToken()!;
-      if (res)
+      if (res != this._lastAuthStatus)
       {
-        if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
-          this.connection?.stop().then(() => {
-            this.connection = null;
+        if (res)
+        {
+          if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
+            this.connection?.stop().then(() => {
+              this.connection = null;
+              this.connect();
+            });
+          else
             this.connect();
-          });
-        else
-          this.connect();
-        this._userInfoService.updateLastUser();
-      }
-      else if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
-      {
-        this.connection.stop().then(() => this.connection = null);
-      }
+          this._userInfoService.updateLastUser();
+        }
+        else if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
+        {
+          this.connection.stop().then(() => this.connection = null);
+        }
+        this._lastAuthStatus = res;
+      }  
    }
 
    private _lastJwt: string | null | undefined;
