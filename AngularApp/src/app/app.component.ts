@@ -40,7 +40,13 @@ export class AppComponent {
         })
         .withAutomaticReconnect()
         .build();
-        this.connection.start().catch(err => document.write(err));
+        this.connection.onreconnected(() => this.login());
+        this.connection.start().then(() => this.login()).catch(err => document.write(err));
+    }
+
+    private login(): void {
+      this.connection!.invoke('Login')
+          .catch(error => console.error(error));
     }
 
    private onAuthChange(res: boolean): void {

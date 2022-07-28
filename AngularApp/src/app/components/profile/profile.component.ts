@@ -14,6 +14,7 @@ export class ProfileComponent implements OnInit {
   user: UserModel = undefined!;
   id: number = undefined!;
   connection: signalR.HubConnection | null | undefined;
+  isFirstEvent: boolean = true;
 
   constructor(private _titleService: Title, private _route: ActivatedRoute, public usersService: UserService, private _router: Router, 
     @Inject('projectName') private _projectName: string, @Inject('signalRURL') private _signalRURL: string) { }
@@ -37,7 +38,9 @@ export class ProfileComponent implements OnInit {
           this.connection.onreconnected(() => this.startListening());
           this.connection.on("StatusChange", (data: boolean) => {
             this.user.isOnline = data;
-            if (!data)
+            if (this.isFirstEvent)
+              this.isFirstEvent = false;
+            else if (!data)
               this.user.lastSeen = new Date().toString();
           });
           this.connection.start().then(
