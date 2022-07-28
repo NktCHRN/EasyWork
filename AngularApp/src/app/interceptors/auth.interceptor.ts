@@ -36,7 +36,9 @@ export class AuthInterceptor implements HttpInterceptor {
         && error.status === 403 && error?.error === "You are banned") {
         return this.handleBannedError(error);
       }
-      else if (error instanceof HttpErrorResponse && error.status === 404)
+      else if (error instanceof HttpErrorResponse 
+        && error.status === 404
+        && req.method === "GET")
       {
         return this.handle404Error(error);
       }
@@ -46,7 +48,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private handle404Error(error: HttpErrorResponse) : Observable<HttpEvent<any>> {
     this._router.navigate(["**"], {skipLocationChange: true}); 
-    console.log(error);
+    console.error(error);
     return throwError(() => error);
   }
 
@@ -55,7 +57,7 @@ export class AuthInterceptor implements HttpInterceptor {
     this._accountService.sendAuthStateChangeNotification(false);
     this._dialog.closeAll();
     this._router.navigate(["login"]); 
-    console.log(error);
+    console.error(error);
     return throwError(() => error);
   }
 
@@ -79,7 +81,7 @@ export class AuthInterceptor implements HttpInterceptor {
               this._accountService.sendAuthStateChangeNotification(false);
               this._dialog.closeAll();
               this._router.navigate(["login"]); 
-              console.log(err);
+              console.error(err);
               return throwError(() => err);
             }));
           })
