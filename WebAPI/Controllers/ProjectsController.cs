@@ -233,6 +233,9 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.UpdateAsync(project);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("InviteStatusChanged", id, dto.IsActive);
             }
             catch (ArgumentException exc)
             {
@@ -271,6 +274,9 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.UpdateAsync(project);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("InviteChanged", id, project.InviteCode);
             }
             catch (ArgumentException exc)
             {
@@ -476,6 +482,9 @@ namespace WebAPI.Controllers
             try
             {
                 await _userOnProjectService.UpdateAsync(model);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("UpdatedUser", _mapper.Map<UserOnProjectDTO>(model));
             }
             catch (ArgumentException exc)
             {

@@ -27,6 +27,11 @@ namespace WebAPI.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, projectId.ToString());
         }
 
+        public async Task GetConnectionId()
+        {
+            await Clients.Caller.SendAsync("ConnectionId", Context.ConnectionId);
+        }
+
         public async Task StopListening(int projectId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, projectId.ToString());
