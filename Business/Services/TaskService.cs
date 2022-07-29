@@ -85,7 +85,8 @@ namespace Business.Services
         {
             return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
                 .Include(t => t.Executors))
-                .Where(t => t.ExecutorsIds.Contains(userId))
+                .Where(t => t.ExecutorsIds.Contains(userId)
+                && _context.UsersOnProjects.Any(uop => uop.ProjectId == t.ProjectId && uop.UserId == userId))
                 .OrderBy(t => IsDone(t.Status))
                 .ThenByDescending(t => t.Id);
         }

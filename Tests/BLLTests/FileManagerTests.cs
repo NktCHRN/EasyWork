@@ -566,19 +566,6 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        [TestCase(null)]
-        [TestCase("")]
-        public void MergeChunksAsyncTest_NullOrEmptyExtension_ThrowsArgumentException(string? extension)
-        {
-            // Arrange
-            var folderName = "testFolder";
-
-            // Act & Assert
-            Assert.ThrowsAsync<ArgumentException>(async () => await _manager.MergeChunksAsync(folderName, extension!),
-                "Method does not throw ArgumentException if the extension is null or empty");
-        }
-
-        [Test]
         public void MergeChunksAsyncTest_NotExistingDirectory_ThrowsDirectoryNotFoundException()
         {
             // Arrange

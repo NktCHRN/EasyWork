@@ -819,6 +819,30 @@ namespace Tests.BLLTests
         }
 
         [Test]
+        public void GetUserTasksTest_ReturnsOnlyTasksWhereUserIsOnProject()
+        {
+            // Arrange
+            SeedData();
+            _context.Tasks.Add(new TaskEntity
+            {
+                ProjectId = 3,
+                Executors = new List<User> { _context.Users.Find(1)! }
+            });
+            _context.SaveChanges();
+            var userId = 3;
+            IEnumerable<int> expectedTasksIds = new[] { 1 };
+
+            // Act
+            var actualTasks = _service.GetUserTasks(userId);
+
+            // Assert
+            Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
+            var actualTasksIds = actualTasks.Select(r => r.Id);
+            Assert.IsTrue(expectedTasksIds.SequenceEqual(actualTasksIds),
+                "Method returnes wrong elements or the order is wrong");
+        }
+
+        [Test]
         public void GetProjectTasksByDate_ReturnsRightTasks()
         {
             // Arrange
