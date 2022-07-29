@@ -27,6 +27,7 @@ export class ProfileComponent implements OnInit {
         next: user => 
         {
           this.user = user;
+          this.user.isOnline = false;
           this._titleService.setTitle(`${this._projectName} - ${this.usersService.getFullName(user.firstName, user.lastName)}'s profile`);
           this.connection = new signalR.HubConnectionBuilder()
           .withUrl(this._signalRURL + "usersHub", {
@@ -37,11 +38,14 @@ export class ProfileComponent implements OnInit {
           .build();
           this.connection.onreconnected(() => this.startListening());
           this.connection.on("StatusChange", (data: boolean) => {
-            this.user.isOnline = data;
             if (this.isFirstEvent)
-              this.isFirstEvent = false;
-            else if (!data)
+            {
+              if (data || data != this.user.isOnline)
+                this.isFirstEvent = false;
+            }
+            if (!data && !this.isFirstEvent)
               this.user.lastSeen = new Date().toString();
+            this.user.isOnline = data;
           });
           this.connection.start().then(
             () => this.startListening()

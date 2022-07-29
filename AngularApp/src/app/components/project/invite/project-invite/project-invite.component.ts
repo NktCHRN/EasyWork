@@ -7,6 +7,7 @@ import {Clipboard} from "@angular/cdk/clipboard"
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectInviteRegenerateComponent } from '../project-invite-regenerate/project-invite-regenerate.component';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 
 @Component({
   selector: 'app-project-invite',
@@ -22,6 +23,8 @@ export class ProjectInviteComponent implements OnInit {
   successRegeneration: boolean = false;
   inviteCode: InviteCodeModel = undefined!;
 
+  @Input() connectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _projectService: ProjectService, private _clipboard: Clipboard,
     private _snackBar: MatSnackBar, private _dialog: MatDialog, @Inject('appURL') private _appURL: string) { }
 
@@ -31,6 +34,17 @@ export class ProjectInviteComponent implements OnInit {
       next: result => this.inviteCode = result,
       error: error => this.errorMessage = `${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`
     });
+    if (this.connectionContainer)
+    {
+      this.connectionContainer.connection.on("InviteStatusChanged", (id: number, status: boolean) => {
+        if (id == this.projectId)
+          this.inviteCode.isInviteCodeActive = status;
+      });
+      this.connectionContainer.connection.on("InviteChanged", (id: number, code: string) => {
+        if (id == this.projectId)
+          this.inviteCode.inviteCode = code;
+      });
+    }
   }
 
   copy(text: string): void {
@@ -40,7 +54,7 @@ export class ProjectInviteComponent implements OnInit {
   }
 
   toggleStatus(): void {
-    this._projectService.changeInviteCodeStatus(this.projectId, {
+    this._projectService.changeInviteCodeStatus(this.connectionContainer.id, this.projectId, {
       isActive: !this.inviteCode.isInviteCodeActive
     })
     .subscribe({
@@ -58,7 +72,10 @@ export class ProjectInviteComponent implements OnInit {
   {
     let dialogRef = this._dialog.open(ProjectInviteRegenerateComponent, {
       panelClass: "mini-dialog-responsive",
-      data: this.projectId
+      data: {
+        projectId: this.projectId,
+        connectionContainer: this.connectionContainer
+      }
     });
     dialogRef.componentInstance.inviteCodeChange.subscribe(result => 
       {

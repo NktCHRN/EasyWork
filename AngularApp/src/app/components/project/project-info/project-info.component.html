@@ -20,7 +20,7 @@
             <app-project-info-edit [project]="project" (projectNameChange)="onProjectNameChange($event)"></app-project-info-edit>
         </div>
         <div>
-            <app-project-invite [projectId]="projectId" [me]="me"></app-project-invite>
+            <app-project-invite [projectId]="projectId" [me]="me" [connectionContainer]="connectionContainer"></app-project-invite>
         </div>
     </div>
     <div *ngIf="loading">

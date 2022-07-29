@@ -2,11 +2,15 @@ import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
+import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { ProjectInfoMode } from 'src/app/shared/project/info/project-info-mode';
 import { ProjectModel } from 'src/app/shared/project/project.model';
+import { UpdateProjectModel } from 'src/app/shared/project/update-project.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
+import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
 import { ErrorDialogComponent } from '../../error-dialog/error-dialog.component';
 import { ProjectInfoDeleteComponent } from './project-info-delete/project-info-delete.component';
 
@@ -26,9 +30,11 @@ export class ProjectInfoComponent implements OnInit {
   pageModes = ProjectInfoMode;
   @Output() projectNameChange = new EventEmitter<string>();
 
+  connectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _titleService: Title, 
     private _projectService: ProjectService, @Inject('projectName') private _websiteName: string, private _router: Router, 
-    private _dialog: MatDialog) { }
+    private _dialog: MatDialog, private _projectRoleService: ProjectRoleService) { }
 
   ngOnInit(): void {
     this._titleService.setTitle(`${this.projectName} | Info - ${this._websiteName}`);
@@ -46,6 +52,18 @@ export class ProjectInfoComponent implements OnInit {
               panelClass: "dialog-responsive",
               data: JSON.stringify(error)
             });
+        }
+      });
+      this.connectionContainer.connection.on("UpdatedUser", (model: UserOnProjectModel) => {
+        if (model.userId == this.me.userId && model.projectId == this.projectId && this._projectRoleService.roleToEnum(model.role) < UserOnProjectRole.Owner)
+          this.pageMode = this.pageModes.Show;
+      });
+      this.connectionContainer.connection.on("Updated", (id: number, model: UpdateProjectModel) => {
+        if (id == this.projectId)
+        {
+          this.projectName = model.name;
+          this.project.name = model.name;
+          this.project.description = model.description;
         }
       });
   }

@@ -5,11 +5,13 @@ import { filter, ReplaySubject, tap, takeUntil, debounceTime, Subject, map, swit
 import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
 import { UserService } from 'src/app/services/user.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { AddUserOnProjectModel } from 'src/app/shared/project/user-on-project/add/add-user-on-project.model';
 import { ProjectAddUserPageModel } from 'src/app/shared/project/user-on-project/add/project-add-user-page.model';
 import { RoleWithDescription } from 'src/app/shared/project/user-on-project/role/role-with-description.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectExtendedModel } from 'src/app/shared/project/user-on-project/user-on-project-extended.model';
+import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
 import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduced.model';
 
 @Component({
@@ -44,6 +46,8 @@ export class ProjectUserAddComponent implements OnInit {
     }
   };
 
+  connectionContainer: ConnectionContainer;
+
   constructor(private _dialogRef: MatDialogRef<ProjectUserAddComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectAddUserPageModel,
     private _projectService: ProjectService, public roleService: ProjectRoleService,
@@ -52,6 +56,7 @@ export class ProjectUserAddComponent implements OnInit {
       this.projectName = data.project.name;
       this._projectUserIds = data.project.users.map(u => u.user.id);
       this.myRole = data.myRole;
+      this.connectionContainer = data.connectionContainer;
       this.roles = this.roleService.getRolesWithDescription(this.myRole);
       this.selectedRole = this.roles[0];
       this.createForm();
@@ -120,6 +125,21 @@ export class ProjectUserAddComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.connectionContainer.connection.on("AddedUser", (model: UserOnProjectModel) => {
+      if (model.projectId == this._projectId && this._projectUserIds)
+      {
+        const found = this._projectUserIds.findIndex(u => u == model.userId);
+        if (found == -1)
+          this._projectUserIds.push(model.userId);
+      }
+    });
+    this.connectionContainer.connection.on("DeletedUser", (projectId: number, userId: number) => {
+      if (projectId == this._projectId && this._projectUserIds){
+        const found = this._projectUserIds.findIndex(u => u == userId);
+        if (found != -1)
+          this._projectUserIds.splice(found, 1);
+      }
+    });
   }
 
   onSubmit(): void {
@@ -129,7 +149,7 @@ export class ProjectUserAddComponent implements OnInit {
       role: this.form.get('role')?.value,
       userId: user.id
     };
-    this._projectService.addUser(this._projectId, model).subscribe(
+    this._projectService.addUser(this.connectionContainer.id, this._projectId, model).subscribe(
     {
       next: result => {
         const role = this.roleService.roleToEnum(result.role);

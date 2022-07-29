@@ -4,6 +4,7 @@ import { ProjectService } from 'src/app/services/project.service';
 import { ProjectKickPageModel } from 'src/app/shared/project/user-on-project/kick/project-kick-page.model';
 import { UserMiniReducedModel } from 'src/app/shared/user/user-mini-reduced.model';
 import { EventEmitter } from '@angular/core';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 
 @Component({
   selector: 'app-project-kick',
@@ -19,12 +20,15 @@ export class ProjectKickComponent implements OnInit {
   toKick: UserMiniReducedModel;
   @Output() succeeded = new EventEmitter();
 
+  connectionContainer: ConnectionContainer;
+
   constructor(private _dialogRef: MatDialogRef<ProjectKickComponent>, 
     @Inject(MAT_DIALOG_DATA) public data: ProjectKickPageModel,
     private _projectService: ProjectService) { 
       this._projectId = data.project.id;
       this.projectName = data.project.name;
       this.toKick = data.toKick;
+      this.connectionContainer = data.connectionContainer;
   }
 
   ngOnInit(): void {
@@ -33,7 +37,7 @@ export class ProjectKickComponent implements OnInit {
   onSubmit()
   {
     this.loading = true;
-      this._projectService.kick(
+      this._projectService.kick(this.connectionContainer.id, 
       {
         id: this._projectId, 
         userId: this.toKick.id

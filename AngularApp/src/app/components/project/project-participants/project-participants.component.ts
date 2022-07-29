@@ -6,9 +6,12 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
+import { UserService } from 'src/app/services/user.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectExtendedModel } from 'src/app/shared/project/user-on-project/user-on-project-extended.model';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
+import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
 import { ErrorDialogComponent } from '../../error-dialog/error-dialog.component';
 import { ProjectKickComponent } from './project-kick/project-kick.component';
 import { ProjectLeaveComponent } from './project-leave/project-leave.component';
@@ -32,8 +35,10 @@ export class ProjectParticipantsComponent implements OnInit {
   public isSingleOwner: Observable<boolean | null | undefined> = this._isSingleOwner.asObservable();
   @ViewChild(MatTable) table: MatTable<UserOnProjectExtendedModel> = undefined!;
 
+  connectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, private _dialog: MatDialog, 
-  private _projectService: ProjectService, private _router: Router, 
+  private _projectService: ProjectService, private _router: Router, private _userService: UserService,
   public roleService: ProjectRoleService) { }
 
   ngOnInit(): void {
@@ -55,6 +60,55 @@ export class ProjectParticipantsComponent implements OnInit {
             data: JSON.stringify(error)
           });
       }
+    });
+    this.connectionContainer.connection.on("UpdatedUser", (model: UserOnProjectModel) => {
+      if (model.projectId == this.projectId && this.users)
+      {
+        if (model.userId == this.me.userId)
+        {
+          this.me.role = this.roleService.roleToEnum(model.role);
+          this.users.forEach(u => {
+            u.isKickable = this.roleService.isKickable(this.me.role, u.role);
+          });
+          const colName = "actions";
+          const foundIndex = this.displayedColumns.findIndex(c => c == colName);
+          if (this.me.role >= this.userOnProjectRoles.Manager && foundIndex == -1)
+            this.displayedColumns.push(colName);
+          else if (this.me.role < this.userOnProjectRoles.Manager && foundIndex != -1)
+            this.displayedColumns.splice(foundIndex, 1);
+        }
+        const found = this.users.find(u => model.userId == u.user.id)
+        if (found)
+          found.role = this.roleService.roleToEnum(model.role);
+        this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
+      }
+    });
+    this.connectionContainer.connection.on("AddedUser", (model: UserOnProjectModel) => {
+      if (model.projectId == this.projectId && this.users)
+      {
+        const role = this.roleService.roleToEnum(model.role);
+        this._userService.getById(model.userId)
+        .subscribe({
+          next: result => {
+            this.AddUser({
+              role: role,
+              tasksNotDone: 0,
+              tasksDone: 0,
+              isKickable: this.roleService.isKickable(this.me.role, role),
+              user: {
+                id: model.userId,
+                fullName: this._userService.getFullName(result.firstName, result.lastName),
+                avatarURL: result.avatarURL
+              }
+            });
+          },
+          error: error => console.log(error)
+        });
+      }
+    });
+    this.connectionContainer.connection.on("DeletedUser", (projectId: number, userId: number) => {
+      if (projectId == this.projectId && this.users)
+        this.deleteUserById(userId);
     });
   }
 
@@ -80,15 +134,33 @@ export class ProjectParticipantsComponent implements OnInit {
         toKick: {
           id: user?.user.id,
           fullName: user?.user.fullName
-        }
+        },
+        connectionContainer: this.connectionContainer
       }
     });
     dialogRef.componentInstance.succeeded
     .subscribe(() => {
-        this.users.splice(this.users.indexOf(user!), 1);
-        this.table.renderRows();
-        this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
+        this.deleteUser(user!);
     });
+  }
+
+  private deleteUser(user: UserOnProjectExtendedModel): void
+  {
+    this.deleteUserByIndex(this.users.indexOf(user));
+  }
+
+  private deleteUserById(id: number): void
+  {
+    const foundIndex = this.users.findIndex(u => u.user.id == id);
+    if (foundIndex != -1)
+      this.deleteUserByIndex(foundIndex);
+  }
+
+  private deleteUserByIndex(index: number): void
+  {
+    this.users.splice(index, 1);
+    this.table.renderRows();
+    this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
   }
 
   openEditDialog(id: number): void {
@@ -101,7 +173,8 @@ export class ProjectParticipantsComponent implements OnInit {
           name: this.projectName
         },
         myRole: this.me.role,
-        user: user
+        user: user,
+        connectionContainer: this.connectionContainer
       }
     });
     dialogRef.componentInstance.succeeded
@@ -119,32 +192,38 @@ export class ProjectParticipantsComponent implements OnInit {
           name: this.projectName,
           users: this.users
         },
-        myRole: this.me.role
+        myRole: this.me.role,
+        connectionContainer: this.connectionContainer
       }
     });
     dialogRef.componentInstance.succeeded
     .subscribe(user => {
-        let lastIndex = this.findLastWithRoleIndex(user.role);
-        let index: number;
-        if (lastIndex == -1)
-        {
-          if (user.role == UserOnProjectRole.Manager)
-          {
-            lastIndex = this.findLastWithRoleIndex(UserOnProjectRole.Owner);
-            if (lastIndex == -1)
-              index = this.users.length;
-            else
-              index = this.calculateReversedIndex(lastIndex);
-          }
-          else
-            index = this.users.length;
-        }
-        else
-           index = this.calculateReversedIndex(lastIndex);
-        this.users.splice(index, 0, user);
-        this.table.renderRows();
-        this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
+        this.AddUser(user);
     });
+  }
+
+  private AddUser(user: UserOnProjectExtendedModel): void
+  {
+    let lastIndex = this.findLastWithRoleIndex(user.role);
+    let index: number;
+    if (lastIndex == -1)
+    {
+      if (user.role == UserOnProjectRole.Manager)
+      {
+        lastIndex = this.findLastWithRoleIndex(UserOnProjectRole.Owner);
+        if (lastIndex == -1)
+          index = this.users.length;
+        else
+          index = this.calculateReversedIndex(lastIndex);
+      }
+      else
+        index = this.users.length;
+    }
+    else
+       index = this.calculateReversedIndex(lastIndex);
+    this.users.splice(index, 0, user);
+    this.table.renderRows();
+    this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
   }
 
   private findLastWithRoleIndex(role: UserOnProjectRole): number

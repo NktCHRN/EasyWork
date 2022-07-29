@@ -141,24 +141,26 @@ export class ProjectService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public regenerateInviteCode(id: number) : Observable<string>
+  public regenerateInviteCode(connectionId: string | null, id: number) : Observable<string>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
-    return this._http.post<string>(this.serviceBaseURL + id + '/invite', httpOptions)
+    return this._http.post<string>(this.serviceBaseURL + id + '/invite', null, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public changeInviteCodeStatus(id: number, model: InviteCodeStatusModel) : Observable<InviteCodeModel>
+  public changeInviteCodeStatus(connectionId: string | null, id: number, model: InviteCodeStatusModel) : Observable<InviteCodeModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.put<InviteCodeModel>(this.serviceBaseURL + id + '/inviteStatus', model, httpOptions)
@@ -218,36 +220,39 @@ export class ProjectService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public kick(queryParams: UserOnProjectQueryParametersModel) : Observable<Object>
+  public kick(connectionId: string | null, queryParams: UserOnProjectQueryParametersModel) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.delete(this.serviceBaseURL + queryParams.id + "/users/" + queryParams.userId, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public updateUser(queryParams: UserOnProjectQueryParametersModel, model: UpdateUserOnProjectModel) : Observable<Object>
+  public updateUser(connectionId: string | null, queryParams: UserOnProjectQueryParametersModel, model: UpdateUserOnProjectModel) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.put(this.serviceBaseURL + queryParams.id + "/users/" + queryParams.userId, model, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public addUser(id: number, model: AddUserOnProjectModel) : Observable<UserOnProjectModel>
+  public addUser(connectionId: string | null, id: number, model: AddUserOnProjectModel) : Observable<UserOnProjectModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<UserOnProjectModel>(this.serviceBaseURL + id + "/users/", model, httpOptions)

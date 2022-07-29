@@ -125,5 +125,7 @@ export class ProjectsComponent implements OnInit {
   {
     if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
       this.connection.stop().then(() => this.connection = null);
+    else
+      this.connection = null!
   }
 }

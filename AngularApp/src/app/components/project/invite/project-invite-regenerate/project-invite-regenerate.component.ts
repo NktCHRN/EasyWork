@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ProjectService } from 'src/app/services/project.service';
-import { TokenService } from 'src/app/services/token.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
+import { InviteCodeRegeneratePage } from 'src/app/shared/project/invite/regenerate/invite-code-regenerate-page.model';
 
 @Component({
   selector: 'app-project-invite-regenerate',
@@ -15,9 +16,12 @@ export class ProjectInviteRegenerateComponent implements OnInit {
   private _projectId: number;
   @Output() inviteCodeChange = new EventEmitter<string>();
 
+  connectionContainer: ConnectionContainer;
+
   constructor(private _dialogRef: MatDialogRef<ProjectInviteRegenerateComponent>, 
-    @Inject(MAT_DIALOG_DATA) public data: number, private _projectService: ProjectService) {
-    this._projectId = data
+    @Inject(MAT_DIALOG_DATA) public data: InviteCodeRegeneratePage, private _projectService: ProjectService) {
+    this._projectId = data.projectId;
+    this.connectionContainer = data.connectionContainer;
   }
 
   ngOnInit(): void {
@@ -25,7 +29,7 @@ export class ProjectInviteRegenerateComponent implements OnInit {
 
   onSubmit() : void {
     this.loading = true;
-    this._projectService.regenerateInviteCode(this._projectId).subscribe(
+    this._projectService.regenerateInviteCode(this.connectionContainer.id, this._projectId).subscribe(
       {
         next: result => {
           this.success = true;

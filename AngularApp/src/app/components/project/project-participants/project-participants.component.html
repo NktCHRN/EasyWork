@@ -67,7 +67,7 @@
         </div>
           <button mat-flat-button color="primary" *ngIf="me.role >= userOnProjectRoles.Manager" (click)="openAddDialog()">Add</button>
         <div style="padding-top: 20px;">
-            <app-project-invite [projectId]="projectId" [me]="me"></app-project-invite>
+            <app-project-invite [projectId]="projectId" [me]="me" [connectionContainer]="connectionContainer"></app-project-invite>
         </div>
     </div>
     <div *ngIf="loading">

@@ -4,7 +4,8 @@
             <div fxFlex.gt-sm="50" fxLayoutAlign="start center" class="header-container" fxLayoutGap="5px"  [ngClass]="'row'" [ngClass.gt-sm]="''">
                 <button type="button" mat-raised-button [matMenuTriggerFor]="menu"><mat-icon>person_add</mat-icon> Invite</button>
                 <mat-menu #menu="matMenu" class="invite-menu">
-                    <app-project-invite [projectId]="projectId" [me]="me" style="margin-top: -8px; margin-bottom: -8px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"></app-project-invite>
+                    <app-project-invite [projectId]="projectId" [me]="me" [connectionContainer]="connectionContainer" 
+                    style="margin-top: -8px; margin-bottom: -8px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"></app-project-invite>
                 </mat-menu>
             </div>
             <div fxFlex.gt-sm="50" fxLayoutAlign="end center" class="header-container"  [ngClass]="'row'" [ngClass.gt-sm]="''">avatars</div>

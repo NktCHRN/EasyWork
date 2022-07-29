@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
@@ -37,6 +38,8 @@ export class ProjectArchiveComponent implements OnInit {
     validate: undefined!,
     done: undefined!
   }
+
+  connectionContainer: ConnectionContainer = new ConnectionContainer();
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string,
   private _projectService: ProjectService, private _snackBar: MatSnackBar,

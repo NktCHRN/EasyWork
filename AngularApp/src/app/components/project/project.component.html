@@ -44,6 +44,8 @@
         <button mat-icon-button class="project-sidenav-button" (click)="drawer.open()" fxShow="{{!drawer.opened}}">
             <mat-icon aria-hidden="false" aria-label="opes/close the side-menu">arrow_forward_ios</mat-icon>
         </button>
-        <router-outlet *ngIf="projectId && projectName && me" (activate)="onOutletLoaded($event)"></router-outlet>
+        <router-outlet 
+        *ngIf="projectId && projectName && me && connectionContainer && connectionContainer.connection && connectionContainer.id" 
+        (activate)="onOutletLoaded($event)"></router-outlet>
     </mat-drawer-content>
 </mat-drawer-container>

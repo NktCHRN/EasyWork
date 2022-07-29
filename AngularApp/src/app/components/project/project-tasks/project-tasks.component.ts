@@ -7,6 +7,7 @@ import { createNumberOrUnlimitedValidator } from 'src/app/customvalidators';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
 import { TokenService } from 'src/app/services/token.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
@@ -71,6 +72,8 @@ export class ProjectTasksComponent implements OnInit {
       'numberOrUnlimited': 'Max quantity must be a positive number, a zero or "unlimited"'
     }
   };
+
+  connectionContainer: ConnectionContainer = new ConnectionContainer();
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, 
   private _fb: FormBuilder, private _snackBar: MatSnackBar, private _projectService: ProjectService,
