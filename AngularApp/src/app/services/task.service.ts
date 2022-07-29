@@ -229,10 +229,36 @@ export class TaskService extends BaseService {
     return priority ? priority : TaskPriorityNone.None;
   }
 
-  getInsertAtIndexByTaskId(taskId: number, tasks: TaskReducedModel[]): number {
+  public getInsertAtIndexByTaskId(taskId: number, tasks: TaskReducedModel[]): number {
     let i = 0;
     while (i < tasks.length && tasks[i].id < taskId)
       ++i;
     return i;
+  }
+
+  public isDone(status: TaskStatus): boolean
+  {
+    return status == TaskStatus.Validate || status == TaskStatus.Complete || status == TaskStatus.Archived;
+  }
+
+  public insertUserTask(task: UserTaskModel, tasks: UserTaskModel[]): void
+  {
+    const taskIsDone = this.isDone(task.status as TaskStatus);
+    let start: number, end: number;
+    const found = tasks.findIndex(t => this.isDone(t.status as TaskStatus));
+    if (taskIsDone)
+    {
+      end = tasks.length;
+      start = found != -1 ? found : tasks.length;
+    }
+    else
+    {
+      start = 0;
+      end = found != -1 ? found : 0;
+    }
+    let index = start;
+    while (index < end && tasks[index].id > task.id)
+      ++index;
+    tasks.splice(index, 0, task);
   }
 }

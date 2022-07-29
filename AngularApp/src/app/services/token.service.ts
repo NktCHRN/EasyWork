@@ -37,10 +37,7 @@ export class TokenService extends BaseService {
       const httpOptions = {
         headers: new HttpHeaders({
           'Content-Type':  'application/json'
-        }),
-        params: {
-          called: 'asdsadssda'
-        }
+        })
       };
       return this._http.post<TokenResponseModel>(this.serviceBaseURL + 'refresh', credentials, httpOptions)
       .pipe(map(result => {
@@ -49,8 +46,7 @@ export class TokenService extends BaseService {
         return result;
       }), catchError(error => {
         this.lock.disable();
-        throwError(() => error);
-        return of();
+        return throwError(() => error);
       }));
   }
 
