@@ -66,10 +66,10 @@ namespace Business.Services
                     UserId = uop.UserId,
                     Role = uop.Role,
                     TasksDone = projectTasks
-                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && TaskService.IsDone(t.Status))
+                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && HelperMethods.IsDoneTask(t.Status))
                     .Count(),
                     TasksNotDone = projectTasks
-                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && !TaskService.IsDone(t.Status))
+                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && !HelperMethods.IsDoneTask(t.Status))
                     .Count()
                 }).ToList();
 

@@ -2,15 +2,19 @@
 using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
+using Business.Other;
+using Business.Services;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using WebAPI.DTOs.File;
 using WebAPI.DTOs.Message;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.Task.Executor;
 using WebAPI.DTOs.User;
+using WebAPI.Hubs;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -34,7 +38,9 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService)
+        private readonly IHubContext<ProjectsHub> _projectsHubContext;
+
+        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService, IHubContext<ProjectsHub> projectsHubContext)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
@@ -43,6 +49,7 @@ namespace WebAPI.Controllers
             _fileService = fileService;
             _fileManager = fileManager;
             _messageService = messageService;
+            _projectsHubContext = projectsHubContext;
         }
 
         [HttpGet]
@@ -83,6 +90,8 @@ namespace WebAPI.Controllers
             var model = await _taskService.GetByIdAsync(id);
             if (model is null)
                 return NotFound();
+            var executors = model.ExecutorsIds;
+            var oldStatus = model.Status;
             if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
                 return Forbid();
             var isValidStatus = Enum.TryParse(dto.Status, out TaskStatuses status);
@@ -102,6 +111,30 @@ namespace WebAPI.Controllers
             try
             {
                 await _taskService.UpdateAsync(model);
+
+                var newIsDone = HelperMethods.IsDoneTask(model.Status);
+                if (HelperMethods.IsDoneTask(oldStatus) != newIsDone)
+                {
+                    var doneValue = IsDoneToShort(newIsDone);
+                    var notDoneValue = IsDoneToShort(!newIsDone);
+                    foreach (var executor in executors)
+                    {
+                        await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
+                            .SendAsync("TasksDoneChanged", new StatsChangeDTO
+                            {
+                                ProjectId = model.ProjectId,
+                                UserId = executor,
+                                Value = doneValue
+                            });
+                        await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
+                            .SendAsync("TasksNotDoneChanged", new StatsChangeDTO
+                            {
+                                ProjectId = model.ProjectId,
+                                UserId = executor,
+                                Value = notDoneValue
+                            });
+                    }
+                }
             }
             catch (LimitsExceededException exc)
             {
@@ -118,6 +151,11 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
+        private static short IsDoneToShort(bool isDone) => (short)(isDone ? 1 : -1);
+
+        private static string StatusToMethodName(TaskStatuses status)
+            => HelperMethods.IsDoneTask(status) ? "TasksDoneChanged" : "TasksNotDoneChanged";
+
         // DELETE api/<TasksController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -128,11 +166,24 @@ namespace WebAPI.Controllers
             var model = await _taskService.GetByIdAsync(id);
             if (model is null)
                 return NotFound();
+            var executors = model.ExecutorsIds;
             if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
                 return Forbid();
             try
             {
                 await _taskService.DeleteByIdAsync(id);
+
+                var methodName = StatusToMethodName(model.Status);
+                foreach (var executor in executors)
+                {
+                    await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
+                        .SendAsync(methodName, new StatsChangeDTO
+                        {
+                            ProjectId = model.ProjectId,
+                            UserId = executor,
+                            Value = -1
+                        });
+                }
             }
             catch (InvalidOperationException exc)
             {
@@ -374,6 +425,15 @@ namespace WebAPI.Controllers
             try
             {
                 await _taskService.AddExecutorToTaskAsync(id, dto.Id);
+
+                var methodName = StatusToMethodName(model.Status);
+                await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
+                        .SendAsync(methodName, new StatsChangeDTO
+                        {
+                            ProjectId = model.ProjectId,
+                            UserId = dto.Id,
+                            Value = 1
+                        });
             }
             catch (InvalidOperationException exc)
             {
@@ -421,6 +481,15 @@ namespace WebAPI.Controllers
             try
             {
                 await _taskService.DeleteExecutorFromTaskAsync(id, userId);
+
+                var methodName = StatusToMethodName(model.Status);
+                await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
+                        .SendAsync(methodName, new StatsChangeDTO
+                        {
+                            ProjectId = model.ProjectId,
+                            UserId = userId,
+                            Value = -1
+                        });
             }
             catch (InvalidOperationException)
             {

@@ -19,7 +19,7 @@ namespace Business.Services
             var userTasks = _context.Tasks
                 .Include(t => t.Executors)
                 .Where(t => t.Executors.Select(e => e.Id).Contains(userId));
-            var tasksDoneCount = userTasks.AsEnumerable().Where(t => TaskService.IsDone(t.Status)).Count();
+            var tasksDoneCount = userTasks.AsEnumerable().Where(t => HelperMethods.IsDoneTask(t.Status)).Count();
             return new UserStats()
             {
                 UserId = userId,

@@ -2,6 +2,7 @@
 using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
+using Business.Other;
 using Data;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -87,11 +88,9 @@ namespace Business.Services
                 .Include(t => t.Executors))
                 .Where(t => t.ExecutorsIds.Contains(userId)
                 && _context.UsersOnProjects.Any(uop => uop.ProjectId == t.ProjectId && uop.UserId == userId))
-                .OrderBy(t => IsDone(t.Status))
+                .OrderBy(t => HelperMethods.IsDoneTask(t.Status))
                 .ThenByDescending(t => t.Id);
         }
-
-        internal static bool IsDone(TaskStatuses status) => status >= TaskStatuses.Validate;
 
         public bool IsValid(TaskModel model, out string? firstErrorMessage)
         {
