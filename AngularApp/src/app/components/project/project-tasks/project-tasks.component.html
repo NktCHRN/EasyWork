@@ -8,7 +8,34 @@
                     style="margin-top: -8px; margin-bottom: -8px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"></app-project-invite>
                 </mat-menu>
             </div>
-            <div fxFlex.gt-sm="50" fxLayoutAlign="end center" class="header-container"  [ngClass]="'row'" [ngClass.gt-sm]="''">avatars</div>
+            <div fxFlex.gt-sm="50" fxLayoutAlign="center center" fxLayoutAlign.gt-sm="end center" fxLayout="column" fxLayout.gt-sm="row" class="header-container"  [ngClass]="'row'" [ngClass.gt-sm]="''" *ngIf="usersOnPage">
+                <span fxLayout="row" fxLayoutGap="-23px">
+                    <a 
+                    *ngFor="let user of usersOnPage.slice(0, 5); index as i" 
+                    [ngStyle]="{'z-index': usersOnPage.length - i}"
+                    class="text-md black"
+                    [matTooltip]="user.fullName"
+                    matTooltipClass="bg-black"
+                    [routerLink]="['/users', user.id]"
+                    fxLayoutAlign="center center">
+                        <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="avatar user-on-page-avatar avatar-bordered-orange">
+                    </a>
+                </span>
+                <a mat-button *ngIf="usersOnPage.length > 5" [matMenuTriggerFor]="usersOnPageMenu">and {{usersOnPage.length - 5}} more</a>
+                <mat-menu #usersOnPageMenu="matMenu">
+                    <a 
+                    mat-menu-item *ngFor="let user of usersOnPage.slice(5)"
+            fxLayoutAlign="start center" 
+            fxLayoutGap="10px" 
+            fxLayout="row" 
+            class="text-md black" 
+            title="{{user.fullName}}" 
+            [routerLink]="['/users', user.id]">
+                <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="avatar user-on-page-avatar">
+                {{user.fullName}}
+            </a>
+                </mat-menu>
+            </div>
             <div fxLayout="row" fxLayoutAlign="center center" fxShow fxHide.gt-sm [ngClass]="'row'">
                 <mat-form-field appearance="outline">
                     <mat-label>Category</mat-label>

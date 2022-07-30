@@ -1,23 +1,24 @@
 import { Component, Inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
 import { createNumberOrUnlimitedValidator } from 'src/app/customvalidators';
+import { ProjectRoleService } from 'src/app/services/project-role.service';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
-import { TokenService } from 'src/app/services/token.service';
 import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { TasksModel } from 'src/app/shared/project/tasks/tasks.model';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
+import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
 import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
+import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskReducedComponent } from './task-reduced/task-reduced.component';
 
 @Component({
@@ -73,40 +74,59 @@ export class ProjectTasksComponent implements OnInit {
     }
   };
 
+  toDoControl: AbstractControl = undefined!;
+  inProgressControl: AbstractControl = undefined!;
+  validateControl: AbstractControl = undefined!;
+
+  get controls(){
+    return [this.toDoControl, this.inProgressControl, this.validateControl];
+  }
+
   connectionContainer: ConnectionContainer = new ConnectionContainer();
+
+  usersOnPage: UserMiniWithAvatarModel[] = undefined!;
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, 
   private _fb: FormBuilder, private _snackBar: MatSnackBar, private _projectService: ProjectService,
-  private _tokenService: TokenService, private _dialog: MatDialog, private _taskService: TaskService) { 
+  private _taskService: TaskService, private _projectRoleService: ProjectRoleService) { 
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(false);
     this.createForm();
   }
 
+  private setLimitsForm(): void {
+    const undefinedValue = 'unlimited';
+    this.toDoControl.setValue(this.limits.maxToDo ?? undefinedValue);
+    this.inProgressControl.setValue(this.limits.maxInProgress ?? undefinedValue);
+    this.validateControl.setValue(this.limits.maxValidate ?? undefinedValue);
+  }
+
+  private checkRole(role: UserOnProjectRole): void {
+    const controls = this.controls;
+    if (role < this.userOnProjectRoles.Manager)
+      controls.forEach(control => {
+        if (!control.disabled)
+          control.disable()
+      });
+    else
+      controls.forEach(control => {
+        if (!control.enabled)
+          control.enable();
+      });
+  }
+
   ngOnInit(): void {
     this._titleService.setTitle(`${this.projectName} | Tasks - ${this._websiteName}`);
-    const toDoControl = this.form.controls['toDo'];
-    const inProgressControl = this.form.controls['inProgress'];
-    const validateControl = this.form.controls['validate'];
     this._projectService.getLimits(this.projectId)
     .subscribe({
       next: result => 
       {
         this.limits = result;
-        if (result.maxToDo || result.maxToDo == 0)
-          toDoControl.setValue(result.maxToDo);
-        if (result.maxInProgress || result.maxInProgress == 0)
-          inProgressControl.setValue(result.maxInProgress);
-        if (result.maxValidate || result.maxValidate == 0)
-          validateControl.setValue(result.maxValidate);
+        this.setLimitsForm();
       },
       error: error => 
       this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
     });
-    if (this.me.role < this.userOnProjectRoles.Manager)
-    {
-      const controls = [toDoControl, inProgressControl, validateControl];
-      controls.forEach(control => control.disable());
-    }
+    this.checkRole(this.me.role);
     this._projectService.getTasks(this.projectId)
     .subscribe({
       next: result => 
@@ -121,6 +141,38 @@ export class ProjectTasksComponent implements OnInit {
         this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
       }
     });
+    this._projectService.getUsersOnPage(this.projectId)
+    .subscribe({
+      next: result => this.usersOnPage = result,
+      error: error => 
+      {
+        this.loadError = true;
+        this._snackBar.open("Users that are currently on page have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000});
+      }
+    });
+    this.connectionContainer.connection.on("UpdatedLimits", (id: number, model: ProjectLimitsModel) => {
+      if (id == this.projectId)
+      {
+        this.limits = model;
+        this.setLimitsForm();
+      }
+    });
+    this.connectionContainer.connection.on("UpdatedUser", (model: UserOnProjectModel) => {
+      if (model.userId == this.me.userId && model.projectId == this.projectId)
+        this.checkRole(this._projectRoleService.roleToEnum(model.role));
+    });
+    this.connectionContainer.connection.on("Login", (id: number, model: UserMiniWithAvatarModel) => {
+      if (id == this.projectId && this.usersOnPage && this.usersOnPage.findIndex(u => u.id == model.id) == -1)
+        this.usersOnPage.push(model);
+    });
+    this.connectionContainer.connection.on("Logout", (id: number, userId: number) => {
+      if (id == this.projectId && this.usersOnPage)
+      {
+        const foundIndex = this.usersOnPage.findIndex(u => u.id == userId);
+        if (foundIndex != -1)
+          this.usersOnPage.splice(foundIndex, 1);
+      }
+    });
   }
   
   public changeLimit(data: any): string
@@ -129,15 +181,15 @@ export class ProjectTasksComponent implements OnInit {
   }
 
   createForm() {
-    const toDoControl = new FormControl({value: 'unlimited', disabled: false}, [Validators.required, createNumberOrUnlimitedValidator()]);
-    const inProgressControl = new FormControl({value: 'unlimited', disabled: false}, [Validators.required, createNumberOrUnlimitedValidator()]);
-    const validateControl = new FormControl({value: 'unlimited', disabled: false}, [Validators.required, createNumberOrUnlimitedValidator()]);
+    this.toDoControl = new FormControl({value: 'unlimited', disabled: false}, [Validators.required, createNumberOrUnlimitedValidator()]);
+    this.inProgressControl = new FormControl({value: 'unlimited', disabled: false}, [Validators.required, createNumberOrUnlimitedValidator()]);
+    this.validateControl = new FormControl({value: 'unlimited', disabled: false}, [Validators.required, createNumberOrUnlimitedValidator()]);
     this.form = this._fb.group({
-      toDo: toDoControl,
-      inProgress: inProgressControl,
-      validate: validateControl
+      toDo: this.toDoControl,
+      inProgress: this.inProgressControl,
+      validate: this.validateControl
     });
-    const controls = [toDoControl, inProgressControl, validateControl];
+    const controls = this.controls;
     controls.forEach(control => {
       control.valueChanges
       .subscribe(data => control.setValue(this.changeLimit(data), {emitEvent: false}));
@@ -187,7 +239,7 @@ export class ProjectTasksComponent implements OnInit {
         maxInProgress: isNaN(inProgress) ? undefined : inProgress,
         maxValidate: isNaN(validate) ? undefined : validate
       };
-      this._projectService.updateLimits(this.projectId, newLimits)
+      this._projectService.updateLimits(this.connectionContainer.id, this.projectId, newLimits)
       .subscribe({
         next: () => {
           this.limits = newLimits;

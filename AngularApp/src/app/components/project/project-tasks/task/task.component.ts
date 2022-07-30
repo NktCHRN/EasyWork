@@ -57,7 +57,7 @@ export class TaskComponent implements OnInit {
   @Output() deletedFile = new EventEmitter();
   @Output() addedFile = new EventEmitter();
 
-  limits: ProjectLimitsModel = undefined!;
+  limits: ProjectLimitsModel = undefined!;      // subscribe to project's limits change!!!
   tasksCount: TasksCountModel = undefined!;
   @Output() deletedExecutor: EventEmitter<number> = new EventEmitter<number>();
   @Output() addedExecutor: EventEmitter<UserMiniWithAvatarModel> = new EventEmitter<UserMiniWithAvatarModel>();

@@ -187,6 +187,18 @@ export class ProjectService extends BaseService {
       }), catchError(this._processHTTPMsgService.handleError));
   }
 
+  public getUsersOnPage(id: number): Observable<UserMiniWithAvatarModel[]>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': this._tokenService.getAuthHeaderValue()
+      })
+    };
+    return this._http.get<UserMiniWithAvatarModel[]>(this.serviceBaseURL + id + '/page/users', httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
   public getUsersWithoutRoles(id: number): Observable<UserMiniWithAvatarModel[]>
   {
     const httpOptions = {
@@ -271,12 +283,13 @@ export class ProjectService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public updateLimits(id: number, limits: ProjectLimitsModel) : Observable<Object>
+  public updateLimits(connectionId: string | null, id: number, limits: ProjectLimitsModel) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.put(this.serviceBaseURL + id + "/limits", limits, httpOptions)

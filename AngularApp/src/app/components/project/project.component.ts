@@ -90,6 +90,8 @@ export class ProjectComponent implements OnInit {
   private addProject() {
     this.connectionContainer.connection.invoke('StartListening', this.projectId)
       .catch(error => console.error(error));
+    this.connectionContainer.connection.invoke('Login', this.projectId)
+      .catch(error => console.error(error));
     this.connectionContainer.connection.invoke('GetConnectionId')
       .catch(error => console.error(error));
   }
