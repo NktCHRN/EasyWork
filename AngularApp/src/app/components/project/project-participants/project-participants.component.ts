@@ -12,6 +12,7 @@ import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/u
 import { UserOnProjectExtendedModel } from 'src/app/shared/project/user-on-project/user-on-project-extended.model';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-on-project.model';
+import { StatsChangeModel } from 'src/app/shared/task/executor/stats-change.model';
 import { ErrorDialogComponent } from '../../error-dialog/error-dialog.component';
 import { ProjectKickComponent } from './project-kick/project-kick.component';
 import { ProjectLeaveComponent } from './project-leave/project-leave.component';
@@ -81,6 +82,22 @@ export class ProjectParticipantsComponent implements OnInit {
         if (found)
           found.role = this.roleService.roleToEnum(model.role);
         this._isSingleOwner.next(this._projectService.isSingleOwner(this.users, this.me));
+      }
+    });
+    this.connectionContainer.connection.on("TasksDoneChanged", (model: StatsChangeModel) => {
+      if (model.projectId == this.projectId && this.users)
+      {
+        const found = this.users.find(u => model.userId == u.user.id)
+        if (found)
+          found.tasksDone += model.value;
+      }
+    });
+    this.connectionContainer.connection.on("TasksNotDoneChanged", (model: StatsChangeModel) => {
+      if (model.projectId == this.projectId && this.users)
+      {
+        const found = this.users.find(u => model.userId == u.user.id)
+        if (found)
+          found.tasksNotDone += model.value;
       }
     });
     this.connectionContainer.connection.on("AddedUser", (model: UserOnProjectModel) => {
