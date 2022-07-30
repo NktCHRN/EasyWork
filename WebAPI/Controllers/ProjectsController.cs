@@ -16,6 +16,7 @@ using WebAPI.DTOs.Task;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.UserOnProject;
 using WebAPI.Hubs;
+using WebAPI.Interfaces;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -39,7 +40,9 @@ namespace WebAPI.Controllers
 
         private readonly IHubContext<ProjectsHub> _hubContext;
 
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService, IHubContext<ProjectsHub> hubContext)
+        private readonly IProjectUsersContainer _projectUsersContainer;
+
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService, IHubContext<ProjectsHub> hubContext, IProjectUsersContainer projectUsersContainer)
         {
             _projectService = projectService;
             _mapper = mapper;
@@ -48,6 +51,7 @@ namespace WebAPI.Controllers
             _fileManager = fileManager;
             _taskService = taskService;
             _hubContext = hubContext;
+            _projectUsersContainer = projectUsersContainer;
         }
 
         [HttpGet]
@@ -115,6 +119,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.UpdateLimitsByIdAsync(id, _mapper.Map<ProjectLimitsModel>(dto));
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("UpdatedLimits", id, dto);
             }
             catch (ArgumentException exc)
             {
@@ -283,6 +289,44 @@ namespace WebAPI.Controllers
                 return BadRequest(exc.Message);
             }
             return Created($"{this.GetApiUrl()}Invites/{project.InviteCode}", project.InviteCode);
+        }
+
+        [HttpGet("{id}/page/users")]
+        public async Task<IActionResult> GetUsersOnPage(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            var users = _projectUsersContainer.GetUsersOnProject(id);
+            var usersMapped = new List<UserMiniWithAvatarDTO>();
+            foreach (var user in users)
+            {
+                var userModel = await _userManager.FindByIdAsync(user.ToString());
+                var userDTO = new UserMiniWithAvatarDTO
+                {
+                    Id = user
+                };
+                if (userModel is not null)
+                {
+                    string? avatarType = null;
+                    string? avatarURL = null;
+                    if (userModel.AvatarFormat is not null)
+                    {
+                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
+                    }
+                    userDTO = userDTO with
+                    {
+                        FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
+                        MIMEAvatarType = avatarType,
+                        AvatarURL = avatarURL
+                    };
+                }
+                usersMapped.Add(userDTO);
+            }
+            return Ok(usersMapped);
         }
 
         [HttpGet("{id}/users")]

@@ -79,7 +79,6 @@ namespace WebAPI.Hubs
             await recipient.SendAsync("StatusChange", IsOnline(userId));
         }
 
-
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (Context.User != null)

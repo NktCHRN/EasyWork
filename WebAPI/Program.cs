@@ -119,6 +119,7 @@ builder.Services.AddScoped<IUserStatsService, UserStatsService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IUserConnectionsContainer, UserConnectionsContainer>();
+builder.Services.AddSingleton<IProjectUsersContainer, ProjectUsersContainer>();
 builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile), typeof(AutoMapperWebAPIProfile));
 builder.Services.AddCors(setup =>
 {
