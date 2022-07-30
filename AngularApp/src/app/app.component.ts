@@ -26,7 +26,8 @@ export class AppComponent {
     private _userInfoService: UserInfoService,
     @Inject('signalRURL') private _signalRURL: string,
     private _tokenService: TokenService,
-    private _tokenGuardService: TokenGuardService
+    private _tokenGuardService: TokenGuardService,
+    private _route: ActivatedRoute
   ) {}
 
   private _lastAuthStatus: boolean = false;
@@ -78,13 +79,29 @@ export class AppComponent {
     const token = this._tokenService.getJwtToken();
     if (token != this._lastJwt)
     {
-      this._accountService.sendAuthStateChangeNotification(!!token);
-      const routerActivators = this._router.config.find(f=>f.path == this._router.url.substring(1))?.canActivate;
-      if (token && routerActivators?.find(a => a == AnonymousGuard))
-        this._router.navigate(["cabinet"]); 
-      if (!token && routerActivators?.find(a => a == AuthGuard))
-        this._router.navigate(["login"]); 
+      const value = !!token;
+      const reload = value != this._lastAuthStatus;
+      this._accountService.sendAuthStateChangeNotification(value);
+      if (reload)
+      {
+        const currentUrl = this._router.url;
+        if (value && currentUrl.startsWith("/login"))
+        {
+          let urlParam: string | null | undefined = this._route.snapshot.queryParams['returnUrl'];
+          if (urlParam)
+            this._router.navigate([urlParam])
+          else
+            this.reload(currentUrl);
+        }
+        else
+          this.reload(currentUrl);
+      }
     }
+  }
+
+  private reload(currentUrl: string): void {
+    this._router.navigateByUrl("/home", {skipLocationChange: true})
+    .then(() => this._router.navigate([currentUrl]));
   }
 
   ngOnInit() {
