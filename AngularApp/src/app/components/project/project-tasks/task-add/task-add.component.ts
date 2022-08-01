@@ -9,6 +9,7 @@ import { createNotWhitespaceValidator } from 'src/app/customvalidators';
 import { take } from 'rxjs';
 import { AddTaskModel } from 'src/app/shared/task/add-task.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 
 @Component({
   selector: 'app-task-add',
@@ -35,6 +36,8 @@ export class TaskAddComponent implements OnInit {
       'notWhitespace':      'Name cannot be whitespace-only.'
     },
   };
+
+  @Input() projectsConnectionContainer: ConnectionContainer = new ConnectionContainer();
 
   constructor(private _projectService: ProjectService,
     private _fb: FormBuilder, private _ngZone: NgZone, private _snackBar: MatSnackBar) { 
@@ -93,7 +96,7 @@ export class TaskAddComponent implements OnInit {
         name: this.form.get('name')?.value,
         status: this.taskStatus
       };
-      this._projectService.addTask(this.projectId, model)
+      this._projectService.addTask(this.projectsConnectionContainer.id, this.projectId, model)
       .subscribe({
         next: result => {
           this.loading = false;

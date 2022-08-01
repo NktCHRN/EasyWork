@@ -36,7 +36,13 @@
           </mat-form-field>
           <div fxLayout="row" fxLayoutGap="10px">
             <button type="button" mat-flat-button (click)="turnOffShowForm()"><mat-icon>close</mat-icon></button>
-            <button type="submit" mat-flat-button color="primary"><mat-icon>check</mat-icon></button>
+            <button 
+            type="submit" 
+            mat-flat-button 
+            color="primary" 
+            [disabled]="executors.length >= 5"
+            matTooltip="There can be at maximum 5 executors" 
+            [matTooltipDisabled]="executors.length < 5"><mat-icon>check</mat-icon></button>
           </div>
     </form>
 </div>

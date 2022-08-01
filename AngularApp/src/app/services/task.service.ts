@@ -5,6 +5,7 @@ import { AddFileModel } from '../shared/file/add-file.model';
 import { FileModel } from '../shared/file/file.model';
 import { AddMessageModel } from '../shared/message/add-message.model';
 import { MessageModel } from '../shared/message/message.model';
+import { TasksAndProjectsConnections } from '../shared/task/connection/tasks-and-projects-connections';
 import { AddExecutorModel } from '../shared/task/executor/add-executor.model';
 import { TaskPriority } from '../shared/task/priority/task-priority';
 import { TaskPriorityNone } from '../shared/task/priority/task-priority-none';
@@ -62,7 +63,7 @@ export class TaskService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public update(id: number, model: UpdateTaskModel) : Observable<Object>
+  public getReducedById(id: number) : Observable<TaskReducedModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
@@ -70,16 +71,31 @@ export class TaskService extends BaseService {
         'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
-    return this._http.put(this.serviceBaseURL + id, model, httpOptions)
+    return this._http.get<TaskReducedModel>(this.serviceBaseURL + id + '/reduced', httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public delete(id: number) : Observable<Object>
+  public update(connections: TasksAndProjectsConnections, id: number, model: UpdateTaskModel) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ProjectsConnectionId': connections.projectsId ?? '',
+        'ConnectionId': connections.tasksId ?? ''
+      })
+    };
+    return this._http.put(this.serviceBaseURL + id, model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public delete(projectsConnectionId: string | null, id: number) : Observable<Object>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ProjectsConnectionId': projectsConnectionId ?? ''
       })
     };
     return this._http.delete(this.serviceBaseURL + id, httpOptions)

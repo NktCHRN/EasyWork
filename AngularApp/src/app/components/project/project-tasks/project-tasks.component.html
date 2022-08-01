@@ -71,14 +71,16 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.ToDo" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        (movedFromArchived)="onAddFromArchive($event)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-reduced>
                         <app-task-add 
                         *ngIf="(!limits.maxToDo && limits.maxToDo != 0) || limits.maxToDo > tasksCount.toDo" 
                         class="task-card"
                         [projectId]="projectId" 
                         [taskStatus]="taskStatuses.ToDo" 
                         (added)="addTask($event, taskStatuses.ToDo)"
-                        (addedWithTagError)="onAddedWithTagError(taskStatuses.ToDo)"></app-task-add>
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.ToDo)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.toDo && !loadError">
                         <mat-spinner></mat-spinner>
@@ -108,14 +110,16 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.InProgress" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        (movedFromArchived)="onAddFromArchive($event)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-reduced>
                         <app-task-add 
                         *ngIf="(!limits.maxInProgress && limits.maxInProgress != 0) || limits.maxInProgress > tasksCount.inProgress" 
                         class="task-card"
                         [projectId]="projectId" 
                         [taskStatus]="taskStatuses.InProgress" 
                         (added)="addTask($event, taskStatuses.InProgress)"
-                        (addedWithTagError)="onAddedWithTagError(taskStatuses.InProgress)"></app-task-add>
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.InProgress)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.inProgress && !loadError">
                         <mat-spinner></mat-spinner>
@@ -145,14 +149,16 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.Validate" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        (movedFromArchived)="onAddFromArchive($event)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-reduced>
                         <app-task-add 
                         *ngIf="(!limits.maxValidate && limits.maxValidate != 0) || limits.maxValidate > tasksCount.validate" 
                         class="task-card" 
                         [projectId]="projectId" 
                         [taskStatus]="taskStatuses.Validate" 
                         (added)="addTask($event, taskStatuses.Validate)"
-                        (addedWithTagError)="onAddedWithTagError(taskStatuses.Validate)"></app-task-add>
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.Validate)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.validate && !loadError">
                         <mat-spinner></mat-spinner>
@@ -181,13 +187,15 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.Complete" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"></app-task-reduced>
+                        (movedFromArchived)="onAddFromArchive($event)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-reduced>
                         <app-task-add 
                         class="task-card"
                         [projectId]="projectId" 
                         [taskStatus]="taskStatuses.Complete" 
                         (added)="addTask($event, taskStatuses.Complete)"
-                        (addedWithTagError)="onAddedWithTagError(taskStatuses.Complete)"></app-task-add>
+                        (addedWithTagError)="onAddedWithTagError(taskStatuses.Complete)"
+                        [projectsConnectionContainer]="connectionContainer"></app-task-add>
                     </div>
                     <div *ngIf="!tasks.done && !loadError">
                         <mat-spinner></mat-spinner>

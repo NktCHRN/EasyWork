@@ -308,12 +308,13 @@ export class ProjectService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public addTask(id: number, model: AddTaskModel) : Observable<TaskModel>
+  public addTask(connectionId: string | null, id: number, model: AddTaskModel) : Observable<TaskModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<TaskModel>(this.serviceBaseURL + id + "/tasks/", model, httpOptions)

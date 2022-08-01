@@ -22,6 +22,8 @@ import { ProjectService } from 'src/app/services/project.service';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskFilesComponent } from './task-files/task-files.component';
 import { ErrorDialogComponent } from 'src/app/components/error-dialog/error-dialog.component';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
+import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 
 @Component({
   selector: 'app-task',
@@ -76,6 +78,8 @@ export class TaskComponent implements OnInit {
     }
   };
 
+  projectsConnectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskDialogSettingsModel, 
   private _taskService: TaskService, private _snackBar: MatSnackBar, 
   private _fb: FormBuilder, private _router: Router, private _dialog: MatDialog, private _projectService: ProjectService) { 
@@ -83,6 +87,7 @@ export class TaskComponent implements OnInit {
     this.showToProject = data.showToProjectButton;
     this.limits = data.limits;
     this.tasksCount = data.tasksCount;
+    this.projectsConnectionContainer = data.projectsConnectionContainer;
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(true);
     this.priorities = this._taskService.getSortedPriorities();
     this.createForm();
@@ -154,6 +159,49 @@ export class TaskComponent implements OnInit {
         this.errorMessage = `${messageStart}${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
       }
     });
+    this.projectsConnectionContainer.connection.on("DeletedTask", (_, taskId: number) => {
+      if (taskId == this._taskId)
+      {
+        this._dialog.closeAll();
+        this._dialogRef.close();
+      }
+    });
+  }
+
+  private subscribeToLimitsChange(): void {
+    this.projectsConnectionContainer.connection.on("UpdatedLimits", (id: number, model: ProjectLimitsModel) => {
+      if (this.task && id == this.task.projectId)
+        this.limits = model;
+    });
+  }
+
+  private subscribeToStatusChange(): void {
+    this.projectsConnectionContainer.connection.on("TaskStatusChanged", (id: number, model: TaskStatusChangeModel) => {
+      if (this.task && id == this.task.projectId)
+      {
+        this.changeTasksCountByStatus(model.old, -1);
+        this.changeTasksCountByStatus(model.new, 1);
+      }
+    });
+  }
+
+  private changeTasksCountByStatus(status: TaskStatus, value: number)
+  {
+    switch(status)
+    {
+      case TaskStatus.ToDo:
+        this.tasksCount.toDo += value;
+        break;
+      case TaskStatus.InProgress:
+        this.tasksCount.inProgress += value;
+        break;
+      case TaskStatus.Validate:
+        this.tasksCount.validate += value;
+        break;
+      case TaskStatus.Complete:
+        this.tasksCount.done += value;
+        break;
+    }
   }
 
   private checkLimitsAndTasks(): void {
@@ -163,12 +211,14 @@ export class TaskComponent implements OnInit {
         next: result => 
         {
           this.limits = result;
+          this.subscribeToLimitsChange();
         },
         error: error => 
         this._snackBar.open("Max quantities have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
       });
-      // Also subscribe to limits changes in this if after the SignalR implementation
     }
+    else
+      this.subscribeToLimitsChange();
     if (!this.tasksCount) {
       this._projectService.getTasks(this.task.projectId)
       .subscribe({
@@ -185,11 +235,16 @@ export class TaskComponent implements OnInit {
             const objectKey = key as keyof typeof result;
             this.tasksCount[objectKey] = result[objectKey].length;
           };
+          this.subscribeToStatusChange();
         },
         error: error => 
           this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
       });
-      // Also subscribe to task add/delete changes in this if after the SignalR implementation
+    }
+    else
+    {
+      this.tasksCount = {...this.tasksCount};
+      this.subscribeToStatusChange();
     }
   }
 
@@ -227,6 +282,7 @@ export class TaskComponent implements OnInit {
     if (this.form.valid)
     {
       this.switchToLoadingMode();
+      const oldStatus = this.task.status;
       this.task = {
         ...this.task,
         ...this.form.value,
@@ -235,7 +291,10 @@ export class TaskComponent implements OnInit {
       const updateModel: UpdateTaskModel = {
         ...this.task
       };
-      this._taskService.update(this.task.id, updateModel)
+      this._taskService.update({
+        projectsId: this.projectsConnectionContainer.id,
+        tasksId: null    // CHANGE!!!
+      }, this.task.id, updateModel)
       .subscribe({
         next: () => {
           this.updatedTask.emit(updateModel);
@@ -254,7 +313,10 @@ export class TaskComponent implements OnInit {
     const dialogRef = this._dialog.open(TaskDeleteComponent, {
       panelClass: "dialog-responsive",
       data: {
-        ...this.task
+        task: {
+          ...this.task
+        },
+        projectsConnection: this.projectsConnectionContainer
       }
     });
     dialogRef.componentInstance.succeeded

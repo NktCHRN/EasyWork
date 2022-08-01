@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { ProjectLimitsModel } from 'src/app/shared/project/limits/project-limits.model';
 import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
@@ -27,6 +28,8 @@ export class TaskReducedComponent implements OnInit {
   @Input() limits: ProjectLimitsModel = undefined!;
   @Input() tasksCount: TasksCountModel = undefined!;
 
+  @Input() projectsConnectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _taskService: TaskService, private _dialog: MatDialog) { }
 
   ngOnInit(): void {
@@ -43,7 +46,8 @@ export class TaskReducedComponent implements OnInit {
         taskId: this.model.id,
         showToProjectButton: false,
         tasksCount: this.tasksCount,
-        limits: this.limits
+        limits: this.limits,
+        projectsConnectionContainer: this.projectsConnectionContainer
       }
     });
     dialogRef.componentInstance.updatedTask.subscribe(

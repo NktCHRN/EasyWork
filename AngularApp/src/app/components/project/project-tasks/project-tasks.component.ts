@@ -18,6 +18,7 @@ import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-ch
 import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
 import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
+import { TaskModel } from 'src/app/shared/task/task.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskReducedComponent } from './task-reduced/task-reduced.component';
 
@@ -171,6 +172,30 @@ export class ProjectTasksComponent implements OnInit {
         const foundIndex = this.usersOnPage.findIndex(u => u.id == userId);
         if (foundIndex != -1)
           this.usersOnPage.splice(foundIndex, 1);
+      }
+    });
+    this.connectionContainer.connection.on("AddedTask", (id: number, model: TaskModel) => {
+      if (id == this.projectId)
+        this.addTask({
+          filesCount: 0,
+          messagesCount: 0,
+          ...model
+        }, model.status);
+    });
+    this.connectionContainer.connection.on("TaskStatusChanged", (id: number, model: TaskStatusChangeModel) => {
+      if (id == this.projectId)
+      {
+        if (model.old != TaskStatus.Archived)
+          this.onTaskStatusUpdate(model);
+        else
+          this._taskService.getReducedById(model.id)
+          .subscribe({
+            next: result => this.onAddFromArchive({
+              status: model.new,
+              ...result
+            }),
+            error: error => console.error(error)
+          });
       }
     });
   }

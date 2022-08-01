@@ -9,7 +9,7 @@ import { TasksCountModel } from 'src/app/shared/project/tasks/tasks-count.model'
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
-import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
+import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { TaskReducedComponent } from '../project-tasks/task-reduced/task-reduced.component';
 
@@ -80,6 +80,25 @@ export class ProjectArchiveComponent implements OnInit {
       error: error => 
         this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
     });
+    this.connectionContainer.connection.on("DeletedTask", (id: number, taskId: number) => {
+      if (id == this.projectId)
+        this.onDeletedTask(taskId);
+    });
+    this.connectionContainer.connection.on("TaskStatusChanged", (id: number, model: TaskStatusChangeModel) => {
+      if (id == this.projectId)
+      {
+        if (model.old == TaskStatus.Archived)
+          this.onMovedFromArchive(model.id);
+        else if (model.new == TaskStatus.Archived)
+        {
+          this._taskService.getReducedById(model.id)
+          .subscribe({
+            next: result => this.onMovedToArchive(result),
+            error: error => console.error(error)
+          });
+        }
+      }
+    });
   }
 
   onMovedToArchive(event: TaskReducedModel): void {
@@ -87,9 +106,9 @@ export class ProjectArchiveComponent implements OnInit {
     this.subscribeToTask(event.id);
   }
 
-  onMovedFromArchive(event: TaskReducedWithStatusModel): void {
-    this.onDeletedTask(event.id);
-    this.subscribeToTask(event.id);
+  onMovedFromArchive(id: number): void {
+    this.onDeletedTask(id);
+    this.subscribeToTask(id);
   }
 
   onDeletedTask(id: number): void {
@@ -101,6 +120,6 @@ export class ProjectArchiveComponent implements OnInit {
   private subscribeToTask(taskId: number) {
     const foundViewTask = this.viewTasks.find(t => t.model.id == taskId);
     foundViewTask?.movedToArchived.subscribe(m => this.onMovedToArchive(m));
-    foundViewTask?.movedFromArchived.subscribe(m => this.onMovedFromArchive(m));
+    foundViewTask?.movedFromArchived.subscribe(m => this.onMovedFromArchive(m.id));
   }
 }
