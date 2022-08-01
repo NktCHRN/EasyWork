@@ -12,6 +12,8 @@
 
         public DateTimeOffset? EndDate { get; init; }
 
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; init; } = string.Empty;
+
+        public int ProjectId { get; init; }
     }
 }

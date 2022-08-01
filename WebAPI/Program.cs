@@ -84,7 +84,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) && 
                 (path.StartsWithSegments("/usersHub")
-                || path.StartsWithSegments("/projectsHub")))
+                || path.StartsWithSegments("/projectsHub")
+                || path.StartsWithSegments("/tasksHub")))
                     context.Token = accessToken;
                 return System.Threading.Tasks.Task.CompletedTask;
             }
@@ -172,6 +173,7 @@ app.MapControllers();
 
 app.MapHub<UsersHub>("/usersHub");
 app.MapHub<ProjectsHub>("/projectsHub");
+app.MapHub<TasksHub>("/tasksHub");
 
 using var serviceScope = app.Services.CreateScope();
 var seeder = new DataSeeder()

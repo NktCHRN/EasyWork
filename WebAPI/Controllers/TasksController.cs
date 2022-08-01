@@ -40,7 +40,11 @@ namespace WebAPI.Controllers
 
         private readonly IHubContext<ProjectsHub> _projectsHubContext;
 
-        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService, IHubContext<ProjectsHub> projectsHubContext)
+        private readonly IHubContext<TasksHub> _hubContext;
+
+        private readonly IHubContext<UsersHub> _usersHubContext;
+
+        public TasksController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, ITaskService taskService, IMapper mapper, IFileService fileService, IFileManager fileManager, IMessageService messageService, IHubContext<ProjectsHub> projectsHubContext, IHubContext<TasksHub> hubContext, IHubContext<UsersHub> usersHubContext)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
@@ -50,6 +54,8 @@ namespace WebAPI.Controllers
             _fileManager = fileManager;
             _messageService = messageService;
             _projectsHubContext = projectsHubContext;
+            _hubContext = hubContext;
+            _usersHubContext = usersHubContext;
         }
 
         [HttpGet]
@@ -128,10 +134,13 @@ namespace WebAPI.Controllers
             {
                 await _taskService.UpdateAsync(model);
 
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("Updated", id, dto);
+
                 if (oldStatus != model.Status)
                 {
-                    var connectionIds = Request.Headers["ProjectsConnectionId"];
-                    await _projectsHubContext.Clients.GroupExcept(model.ProjectId.ToString(), connectionIds)
+                    var projectsHubConnectionIds = Request.Headers["ProjectsConnectionId"];
+                    await _projectsHubContext.Clients.GroupExcept(model.ProjectId.ToString(), projectsHubConnectionIds)
                         .SendAsync("TaskStatusChanged", model.ProjectId, new StatusChangeDTO
                         {
                             Id = id,
@@ -457,6 +466,13 @@ namespace WebAPI.Controllers
             {
                 await _taskService.AddExecutorToTaskAsync(id, dto.Id);
 
+                await _usersHubContext.Clients.User(dto.Id.ToString())
+                    .SendAsync("AddedAsExecutor", _mapper.Map<UserTaskDTO>(model));
+
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("AddedExecutor", id, dto.Id);
+
                 var methodName = StatusToMethodName(model.Status);
                 await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
                         .SendAsync(methodName, new StatsChangeDTO
@@ -512,6 +528,9 @@ namespace WebAPI.Controllers
             try
             {
                 await _taskService.DeleteExecutorFromTaskAsync(id, userId);
+
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("DeletedExecutor", id, userId);
 
                 var methodName = StatusToMethodName(model.Status);
                 await _projectsHubContext.Clients.Group(model.ProjectId.ToString())
