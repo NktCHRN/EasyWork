@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from 'src/app/services/project.service';
@@ -17,7 +17,7 @@ import { ConnectionContainer } from 'src/app/shared/other/connection-container';
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss']
 })
-export class ProjectComponent implements OnInit {
+export class ProjectComponent implements OnInit, OnDestroy {
   projectId: number = undefined!;
   projectName: string = undefined!;
   me: UserOnProjectReducedModel = undefined!;
@@ -76,7 +76,7 @@ export class ProjectComponent implements OnInit {
       this.connectionContainer.connection.on("ConnectionId", (result: string | null) => 
       {
         this.connectionContainer.id = result;
-      })
+      });
       try {
       return await this.connectionContainer.connection.start().then(() => {
           this.addProject();

@@ -79,6 +79,7 @@ export class TaskComponent implements OnInit {
   };
 
   projectsConnectionContainer: ConnectionContainer = new ConnectionContainer();
+  connectionContainer: ConnectionContainer = new ConnectionContainer();
 
   constructor(private _dialogRef: MatDialogRef<TaskComponent>, @Inject(MAT_DIALOG_DATA) public data: TaskDialogSettingsModel, 
   private _taskService: TaskService, private _snackBar: MatSnackBar, 
@@ -88,6 +89,7 @@ export class TaskComponent implements OnInit {
     this.limits = data.limits;
     this.tasksCount = data.tasksCount;
     this.projectsConnectionContainer = data.projectsConnectionContainer;
+    this.connectionContainer = data.connectionContainer;
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(true);
     this.priorities = this._taskService.getSortedPriorities();
     this.createForm();
@@ -166,6 +168,19 @@ export class TaskComponent implements OnInit {
         this._dialogRef.close();
       }
     });
+    this.connectionContainer.connection.on("Updated", (taskId: number, model: UpdateTaskModel) => {
+      if (taskId == this._taskId)
+      {
+        this.task = {
+          ...this.task,
+          ...model
+        };
+        this.form.controls['deadline'].setValue(this.task.deadline);
+        this.form.controls['endDate'].setValue(this.task.endDate);
+        this.form.controls['status'].setValue(this.task.status);
+        this.form.controls['priority'].setValue(this._taskService.PriorityOrNullToExtendedPriority(this.task.priority));
+      }
+    });
   }
 
   private subscribeToLimitsChange(): void {
@@ -182,6 +197,14 @@ export class TaskComponent implements OnInit {
         this.changeTasksCountByStatus(model.old, -1);
         this.changeTasksCountByStatus(model.new, 1);
       }
+    });
+  }
+
+  private subscribeToAdd(): void
+  {
+    this.projectsConnectionContainer.connection.on("AddedTask", (id: number, model: TaskModel) => {
+      if (this.task && id == this.task.projectId)
+        this.changeTasksCountByStatus(model.status, 1);
     });
   }
 
@@ -236,6 +259,7 @@ export class TaskComponent implements OnInit {
             this.tasksCount[objectKey] = result[objectKey].length;
           };
           this.subscribeToStatusChange();
+          this.subscribeToAdd();
         },
         error: error => 
           this._snackBar.open("Tasks have not been loaded. Error: " + JSON.stringify(error), "Close", {duration: 5000})
@@ -245,6 +269,7 @@ export class TaskComponent implements OnInit {
     {
       this.tasksCount = {...this.tasksCount};
       this.subscribeToStatusChange();
+      this.subscribeToAdd();
     }
   }
 
@@ -282,7 +307,6 @@ export class TaskComponent implements OnInit {
     if (this.form.valid)
     {
       this.switchToLoadingMode();
-      const oldStatus = this.task.status;
       this.task = {
         ...this.task,
         ...this.form.value,
@@ -293,7 +317,7 @@ export class TaskComponent implements OnInit {
       };
       this._taskService.update({
         projectsId: this.projectsConnectionContainer.id,
-        tasksId: null    // CHANGE!!!
+        tasksId: this.connectionContainer.id
       }, this.task.id, updateModel)
       .subscribe({
         next: () => {

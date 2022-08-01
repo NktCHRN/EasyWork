@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Title } from '@angular/platform-browser';
@@ -21,13 +21,15 @@ import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { TaskModel } from 'src/app/shared/task/task.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskReducedComponent } from './task-reduced/task-reduced.component';
+import * as signalR from '@microsoft/signalr';
+import { TokenGuardService } from 'src/app/services/token-guard.service';
 
 @Component({
   selector: 'app-project-tasks',
   templateUrl: './project-tasks.component.html',
   styleUrls: ['./project-tasks.component.scss']
 })
-export class ProjectTasksComponent implements OnInit {
+export class ProjectTasksComponent implements OnInit, OnDestroy {
   projectId: number = undefined!;
   projectName: string = undefined!;
   me: UserOnProjectReducedModel = undefined!;
@@ -87,10 +89,21 @@ export class ProjectTasksComponent implements OnInit {
 
   usersOnPage: UserMiniWithAvatarModel[] = undefined!;
 
+  tasksConnectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, 
   private _fb: FormBuilder, private _snackBar: MatSnackBar, private _projectService: ProjectService,
-  private _taskService: TaskService, private _projectRoleService: ProjectRoleService) { 
+  private _taskService: TaskService, private _projectRoleService: ProjectRoleService, 
+  @Inject('signalRURL') private _signalRURL: string, private _tokenGuardService: TokenGuardService) { 
     this.statusesWithDescription = this._taskService.getStatusesWithDescriptions(false);
+    this.tasksConnectionContainer.connection = new signalR.HubConnectionBuilder()
+    .withUrl(this._signalRURL + "tasksHub", {
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets,
+      accessTokenFactory: () => this._tokenGuardService.getOrRefreshToken()
+    })
+    .withAutomaticReconnect()
+    .build();
     this.createForm();
   }
 
@@ -115,7 +128,7 @@ export class ProjectTasksComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this._titleService.setTitle(`${this.projectName} | Tasks - ${this._websiteName}`);
     this._projectService.getLimits(this.projectId)
     .subscribe({
@@ -198,6 +211,22 @@ export class ProjectTasksComponent implements OnInit {
           });
       }
     });
+
+    this.tasksConnectionContainer.connection.on("ConnectionId", (result: string | null) => 
+      {
+        this.tasksConnectionContainer.id = result;
+      })
+    this.tasksConnectionContainer.connection.onreconnected(() => this.getTasksConnectionId());
+    try {
+      return await this.tasksConnectionContainer.connection.start().then(() => this.getTasksConnectionId());
+    } catch (err) {
+      return console.error(err);
+    }
+  }
+
+  private getTasksConnectionId(): void {
+    this.tasksConnectionContainer.connection.invoke('GetConnectionId')
+      .catch(error => console.error(error));
   }
   
   public changeLimit(data: any): string
@@ -348,5 +377,13 @@ export class ProjectTasksComponent implements OnInit {
   {
     this.addExistingTask(task, task.status);
     this.subscribeToTask(task.id);
+  }
+
+  ngOnDestroy()
+  {
+    if (this.tasksConnectionContainer.connection && this.tasksConnectionContainer.connection.state == signalR.HubConnectionState.Connected)
+      this.tasksConnectionContainer.connection.stop().then(() => this.tasksConnectionContainer = null!);
+    else
+      this.tasksConnectionContainer = null!
   }
 }

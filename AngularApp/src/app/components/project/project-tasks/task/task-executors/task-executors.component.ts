@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from 'src/app/services/project.service';
 import { TaskService } from 'src/app/services/task.service';
+import { UserService } from 'src/app/services/user.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { AddExecutorModel } from 'src/app/shared/task/executor/add-executor.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
 import { TaskExecutorDeleteComponent } from './task-executor-delete/task-executor-delete.component';
@@ -40,8 +42,10 @@ export class TaskExecutorsComponent implements OnInit {
     }
   };
 
+  @Input() connectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _taskService: TaskService, private _dialog: MatDialog, 
-    private _projectService: ProjectService, private _fb: FormBuilder) {
+    private _projectService: ProjectService, private _fb: FormBuilder, private _userService: UserService) {
       this.createForm();
   }
 
@@ -78,20 +82,25 @@ export class TaskExecutorsComponent implements OnInit {
     }
   }
 
+  private addExecutor(executor: UserMiniWithAvatarModel): void
+  {
+    this.executors.push(executor);
+    const found = this.freeUsersOnProject.findIndex(u => u.id == executor.id);
+    if (found != -1)
+      this.freeUsersOnProject.splice(found, 1);
+  }
+
   onSubmit(): void {
     if (this.form.valid)
     {
       this.switchedToLoading.emit();
       const model: AddExecutorModel = this.form.value;
-      this._taskService.addExecutor(this.taskId, model)
+      this._taskService.addExecutor(this.connectionContainer.id, this.taskId, model)
       .subscribe({
         next: result => {
           this.switchedToSuccess.emit();
           this.addedExecutor.emit(result);
-          this.executors.push(result);
-          const found = this.freeUsersOnProject.findIndex(u => u.id == result.id);
-          if (found != -1)
-            this.freeUsersOnProject.splice(found, 1);
+          this.addExecutor(result);
           this.turnOffShowForm();
         },
         error: error => {
@@ -125,6 +134,22 @@ export class TaskExecutorsComponent implements OnInit {
         this.errorMessage = `$Executors have not been loaded. Error: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
       }
     });
+    this.connectionContainer.connection.on("AddedExecutor", (taskId: number, executorId: number) => {
+      if (taskId == this.taskId)
+        this._userService.getById(executorId)
+        .subscribe({
+          next: result => this.addExecutor({
+            id: executorId,
+            fullName: this._userService.getFullName(result.firstName, result.lastName),
+            ...result
+          }),
+          error: error => console.error(error)
+        });
+    });
+    this.connectionContainer.connection.on("DeletedExecutor", (taskId: number, executorId: number) => {
+      if (taskId == this.taskId)
+        this.deleteExecutor(executorId);
+    });
   }
 
   toggleEditable(): void {
@@ -147,17 +172,24 @@ export class TaskExecutorsComponent implements OnInit {
         panelClass: "dialog-responsive",
         data: {
           taskId: this.taskId,
-          user: user
+          user: user,
+          connectionContainer: this.connectionContainer
         }
       });
       dialogRef.componentInstance.succeeded
       .subscribe(() => {
-          this.executors.splice(this.executors.indexOf(user!), 1);
-          this.deletedExecutor.emit(user.id);
-          const found = this.usersOnProject.find(u => u.id == user.id);
-          if (found)
-            this.freeUsersOnProject.push(found);
+        this.deletedExecutor.emit(user.id);
+        this.deleteExecutor(user.id);
       });
     }
+  }
+
+  private deleteExecutor(id: number): void {
+    const foundExecutorById = this.executors.findIndex(e => e.id == id);
+    if (foundExecutorById != -1)
+      this.executors.splice(foundExecutorById, 1);
+    const found = this.usersOnProject.find(u => u.id == id);
+    if (found)
+      this.freeUsersOnProject.push(found);
   }
 }

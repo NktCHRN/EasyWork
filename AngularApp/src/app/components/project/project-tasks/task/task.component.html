@@ -98,6 +98,7 @@
                     <app-task-executors
                     [taskId]="task.id"
                     [projectId]="task.projectId"
+                    [connectionContainer]="connectionContainer"
                 (closeDialog)="close()"
                 (switchedToLoading)="switchToLoadingMode()"
                 (switchedToSuccess)="switchToSuccessMode()"

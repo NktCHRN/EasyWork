@@ -8,4 +8,5 @@ export interface TaskDialogSettingsModel {
     limits: ProjectLimitsModel;
     tasksCount: TasksCountModel;
     projectsConnectionContainer: ConnectionContainer;
+    connectionContainer: ConnectionContainer;
 }

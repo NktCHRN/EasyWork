@@ -8,4 +8,6 @@ export interface UserTaskModel extends TaskExtraReducedModel {
     endDate: string | null | undefined;
 
     status: string;
+
+    projectId: number;
 }

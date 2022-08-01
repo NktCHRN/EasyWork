@@ -102,24 +102,26 @@ export class TaskService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public deleteExecutor(id: number, userId: number) : Observable<Object>
+  public deleteExecutor(connectionId: string | null, id: number, userId: number) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.delete(this.serviceBaseURL + id + "/users/" + userId, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public addExecutor(id: number, model: AddExecutorModel) : Observable<UserMiniWithAvatarModel>
+  public addExecutor(connectionId: string | null, id: number, model: AddExecutorModel) : Observable<UserMiniWithAvatarModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<UserMiniWithAvatarModel>(this.serviceBaseURL + id + '/users', model, httpOptions)
