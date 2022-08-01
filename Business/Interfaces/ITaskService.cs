@@ -16,6 +16,6 @@ namespace Business.Interfaces
 
         Task DeleteExecutorFromTaskAsync(int taskId, int userId);
 
-        Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId);
+        IEnumerable<User> GetTaskExecutors(int taskId);
     }
 }

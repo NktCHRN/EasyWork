@@ -31,7 +31,7 @@ namespace Data.Entities
 
         public ICollection<UserOnProject> Projects { get; set; } = new List<UserOnProject>();
 
-        public ICollection<Task> Tasks { get; set; } = new List<Task>();
+        public ICollection<TaskExecutor> Tasks { get; set; } = new List<TaskExecutor>();
 
         public ICollection<Message> Messages { get; set; } = new List<Message>();
 

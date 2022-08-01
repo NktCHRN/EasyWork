@@ -50,6 +50,6 @@ namespace Data.Entities
 
         public ICollection<File> Files { get; set; } = new List<File>();
 
-        public ICollection<User> Executors { get; set; } = new List<User>();
+        public ICollection<TaskExecutor> Executors { get; set; } = new List<TaskExecutor>();
     }
 }

@@ -183,12 +183,7 @@ namespace Tests.BLLTests
                 Deadline = new DateTime(2022, 2, 1),
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
-                ProjectId = 1,
-                Executors = new List<User>
-                {
-                    _context.Users.Find(2)!, 
-                    _context.Users.Find(3)! 
-                }
+                ProjectId = 1
                 },
                 new TaskEntity()            // id 2
                 {
@@ -206,8 +201,7 @@ namespace Tests.BLLTests
                 EndDate = new DateTime(2022, 2, 3),
                 Status = TaskStatuses.ToDo,
                 Priority = TaskPriorities.Low,
-                ProjectId = 1,
-                Executors = new List<User>{_context.Users.Find(5)! }
+                ProjectId = 1
                 },
                 new TaskEntity()            // id 4
                 {
@@ -218,7 +212,6 @@ namespace Tests.BLLTests
                 Status = TaskStatuses.Validate,
                 Priority = TaskPriorities.Low,
                 ProjectId = 2,
-                Executors = new List<User>{_context.Users.Find(5)! }
                 },
                 new TaskEntity()            // id 5
                 {
@@ -228,8 +221,7 @@ namespace Tests.BLLTests
                 EndDate = new DateTime(2022, 3, 19),
                 Status = TaskStatuses.Complete,
                 Priority = TaskPriorities.Low,
-                ProjectId = 1,
-                Executors = new List<User>{_context.Users.Find(5)! },
+                ProjectId = 1
                 },
                 new TaskEntity()                // id 6
                 {
@@ -248,11 +240,39 @@ namespace Tests.BLLTests
                     EndDate = DateTime.MinValue.AddMonths(1)
                 }
             };
-            foreach (var task in tasks)
+            _context.Tasks.AddRange(tasks);
+            _context.SaveChanges();
+
+            var executors = new List<TaskExecutor>
             {
-                _context.Tasks.Add(task);
-                _context.SaveChanges();
-            }
+                new TaskExecutor
+                {
+                    TaskId = 1,
+                    UserId = 2
+                },
+                new TaskExecutor
+                {
+                    TaskId = 1,
+                    UserId = 3
+                },
+                new TaskExecutor
+                {
+                    TaskId = 3,
+                    UserId = 5
+                },
+                new TaskExecutor
+                {
+                    TaskId = 4,
+                    UserId = 5
+                },
+                new TaskExecutor
+                {
+                    TaskId = 5,
+                    UserId = 5
+                }
+            };
+            _context.TaskExecutors.AddRange(executors);
+            _context.SaveChanges();
 
             var messages = new Message[]
             {
@@ -823,10 +843,16 @@ namespace Tests.BLLTests
         {
             // Arrange
             SeedData();
-            _context.Tasks.Add(new TaskEntity
+            var task = new TaskEntity
             {
-                ProjectId = 3,
-                Executors = new List<User> { _context.Users.Find(1)! }
+                ProjectId = 3
+            };
+            _context.Tasks.Add(task);
+            _context.SaveChanges();
+            _context.TaskExecutors.Add(new TaskExecutor
+            {
+                UserId = 1,
+                TaskId = task.Id
             });
             _context.SaveChanges();
             var userId = 3;
@@ -925,7 +951,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task GetTaskExecutorsAsyncTest_ReturnsRightUsers()
+        public void GetTaskExecutorsAsyncTest_ReturnsRightUsers()
         {
             // Arrange
             SeedData();
@@ -933,7 +959,7 @@ namespace Tests.BLLTests
             var expected = new int[] { 2, 3 };
 
             // Act
-            var actual = (await _service.GetTaskExecutorsAsync(taskId)).Select(e => e.Id);
+            var actual = _service.GetTaskExecutors(taskId).Select(e => e.Id);
 
             // Assert
             Assert.IsTrue(expected.SequenceEqual(actual));
@@ -986,9 +1012,9 @@ namespace Tests.BLLTests
 
             // Assert
             var task = await _context.Tasks.Include(t => t.Executors).SingleAsync(t => t.Id == taskId);
-            var tag = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
+            var user = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
             Assert.AreEqual(expectedTaskUsersCount, task.Executors.Count, "Method does not delete a user from a task");
-            Assert.AreEqual(expectedUserTasksCount, tag.Tasks.Count, "Method does not delete a task from a user");
+            Assert.AreEqual(expectedUserTasksCount, user.Tasks.Count, "Method does not delete a task from a user");
         }
 
         [Test]
@@ -1057,13 +1083,23 @@ namespace Tests.BLLTests
             var task = new TaskEntity
             {
                 Name = "Add Executor Test Task",
-                Executors = new List<User>(),
                 ProjectId = 1
             };
-            for (int i = 0; i < 5; i++)
-                task.Executors.Add(new User() { FirstName=$"User{i+1}"});
             _context.Tasks.Add(task);
             _context.SaveChanges();
+            for (int i = 0; i < 5; i++)
+            {
+                var user = new User() { FirstName = $"User{i + 1}" };
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                _context.TaskExecutors.Add(new TaskExecutor
+                {
+                    UserId = user.Id,
+                    TaskId = task.Id
+                });
+                _context.SaveChanges();
+            }
+            
             var newUserId = 2;
 
             // Act & Assert
@@ -1080,17 +1116,16 @@ namespace Tests.BLLTests
             var userId = 3;
             var expectedExecutorsCount = 2;
             var oldUser = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
-            var expectedUserEmail = oldUser.Email;
 
             // Act
             await _service.AddExecutorToTaskAsync(taskId, userId);
 
             // Assert
-            var task = await _context.Tasks.SingleAsync(t => t.Id == taskId);
+            var task = await _context.Tasks.Include(t => t.Executors).SingleAsync(t => t.Id == taskId);
             var user = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
             Assert.AreEqual(expectedExecutorsCount, task.Executors.Count, "Method does not add the user to the task");
-            Assert.AreEqual(expectedUserEmail, task.Executors.Last().Email, "Method added wrong user to the task");
-            Assert.AreEqual(taskId, user.Tasks.Last().Id, "Method added wrong task to the user");
+            Assert.AreEqual(userId, task.Executors.Last().UserId, "Method added wrong user to the task");
+            Assert.AreEqual(taskId, user.Tasks.Last().TaskId, "Method added wrong task to the user");
         }
     }
 }

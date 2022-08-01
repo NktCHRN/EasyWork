@@ -14,10 +14,10 @@
 
         public DateTimeOffset? EndDate { get; init; }
 
-        public string Status { get; set; } = string.Empty;
+        public string Status { get; init; } = string.Empty;
 
-        public string? Priority { get; set; }
+        public string? Priority { get; init; }
 
-        public int ProjectId { get; set; }
+        public int ProjectId { get; init; }
     }
 }

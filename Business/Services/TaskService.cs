@@ -85,11 +85,11 @@ namespace Business.Services
         public IEnumerable<TaskModel> GetUserTasks(int userId)
         {
             return _mapper.Map<IEnumerable<TaskModel>>(_context.Tasks
-                .Include(t => t.Executors))
-                .Where(t => t.ExecutorsIds.Contains(userId)
+                .Include(t => t.Executors)
+                .Where(t => t.Executors.Select(e => e.UserId).Contains(userId)
                 && _context.UsersOnProjects.Any(uop => uop.ProjectId == t.ProjectId && uop.UserId == userId))
                 .OrderBy(t => HelperMethods.IsDoneTask(t.Status))
-                .ThenByDescending(t => t.Id);
+                .ThenByDescending(t => t.Id));
         }
 
         public bool IsValid(TaskModel model, out string? firstErrorMessage)
@@ -168,12 +168,14 @@ namespace Business.Services
             return _mapper.Map<IEnumerable<TaskModel>>(tasksExtended.Where(t => t.ProjectId == projectId && t.Status == status));
         }
 
-        public async Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId)
+        public IEnumerable<User> GetTaskExecutors(int taskId)
         {
-            var task = await _context.Tasks
-                .Include(t => t.Executors)
-                .SingleOrDefaultAsync(t => t.Id == taskId);
-            return (task is null) ? new List<User>() : task.Executors;
+            var executors = _context.TaskExecutors
+                .Include(t => t.User)
+                .Where(t => t.TaskId == taskId)
+                .OrderBy(e => e.Id)
+                .Select(e => e.User);
+            return (executors is null) ? new List<User>() : executors!;
         }
 
         const int _maxExecutorsCount = 5;
@@ -184,24 +186,27 @@ namespace Business.Services
             if (user is null)
                 throw new InvalidOperationException("User with such an id was not found");
             var task = await GetNotMappedByIdAsync(taskId);
-            if (task.Executors.Any(t => t.Id == userId))
+            if (task.Executors.Any(t => t.UserId == userId))
                 throw new InvalidOperationException("This task already has such a user");
             if (!_context.UsersOnProjects.Any(uop => uop.UserId == userId && uop.ProjectId == task.ProjectId))
                 throw new ArgumentException("The user with such an id (ExecutorId) does not work on this project",
                     nameof(userId));
             if (task.Executors.Count >= _maxExecutorsCount)
                 throw new InvalidOperationException($"Too many executors. Maximum: {_maxExecutorsCount}");
-            task.Executors.Add(user);
+            await _context.TaskExecutors.AddAsync(new TaskExecutor
+            {
+                TaskId = taskId,
+                UserId = userId
+            });
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteExecutorFromTaskAsync(int taskId, int userId)
         {
-            var task = await GetNotMappedByIdAsync(taskId);
-            var user = task.Executors.SingleOrDefault(t => t.Id == userId);
+            var user = await _context.TaskExecutors.SingleOrDefaultAsync(e => e.TaskId == taskId && e.UserId == userId);
             if (user is null)
                 throw new InvalidOperationException("User with such an id does not belong to the task");
-            task.Executors.Remove(user);
+            _context.TaskExecutors.Remove(user);
             await _context.SaveChangesAsync();
         }
     }

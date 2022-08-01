@@ -656,9 +656,14 @@ namespace WebAPI.Controllers
                 Status = status,
                 ProjectId = id
             };
+            TaskDTO mapped;
             try
             {
                 await _taskService.AddAsync(model);
+                mapped = _mapper.Map<TaskDTO>(model);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("AddedTask", id, mapped);
             }
             catch (ArgumentException exc)
             {
@@ -668,7 +673,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
-            return Created($"{this.GetApiUrl()}Tasks/{model.Id}", _mapper.Map<TaskDTO>(model));
+            return Created($"{this.GetApiUrl()}Tasks/{model.Id}", mapped);
         }
     }
 }

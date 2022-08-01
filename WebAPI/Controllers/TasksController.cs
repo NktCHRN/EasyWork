@@ -3,7 +3,6 @@ using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
 using Business.Other;
-using Business.Services;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +12,7 @@ using WebAPI.DTOs.File;
 using WebAPI.DTOs.Message;
 using WebAPI.DTOs.Task;
 using WebAPI.DTOs.Task.Executor;
+using WebAPI.DTOs.Task.Status;
 using WebAPI.DTOs.User;
 using WebAPI.Hubs;
 using WebAPI.Other;
@@ -78,6 +78,22 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
+        // GET api/<TasksController>/5/reduced
+        [HttpGet("{id}/reduced")]
+        public async Task<IActionResult> GetReducedById(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var model = await _taskService.GetByIdAsync(id);
+            if (model is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
+                return Forbid();
+            var result = _mapper.Map<TaskReducedDTO>(model);
+            return Ok(result);
+        }
+
         // PUT api/<TasksController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTaskDTO dto)
@@ -111,6 +127,18 @@ namespace WebAPI.Controllers
             try
             {
                 await _taskService.UpdateAsync(model);
+
+                if (oldStatus != model.Status)
+                {
+                    var connectionIds = Request.Headers["ProjectsConnectionId"];
+                    await _projectsHubContext.Clients.GroupExcept(model.ProjectId.ToString(), connectionIds)
+                        .SendAsync("TaskStatusChanged", model.ProjectId, new StatusChangeDTO
+                        {
+                            Id = id,
+                            Old = oldStatus.ToString(),
+                            New = model.Status.ToString()
+                        });
+                }
 
                 var newIsDone = HelperMethods.IsDoneTask(model.Status);
                 if (HelperMethods.IsDoneTask(oldStatus) != newIsDone)
@@ -173,6 +201,9 @@ namespace WebAPI.Controllers
             {
                 await _taskService.DeleteByIdAsync(id);
 
+                var connectionIds = Request.Headers["ProjectsConnectionId"];
+                await _projectsHubContext.Clients.GroupExcept(model.ProjectId.ToString(), connectionIds)
+                    .SendAsync("DeletedTask", model.ProjectId, id);
                 var methodName = StatusToMethodName(model.Status);
                 foreach (var executor in executors)
                 {
@@ -389,7 +420,7 @@ namespace WebAPI.Controllers
                 return NotFound();
             if (!await _userOnProjectService.IsOnProjectAsync(model.ProjectId, userId.Value))
                 return Forbid();
-            var result = await _taskService.GetTaskExecutorsAsync(id);
+            var result = _taskService.GetTaskExecutors(id);
             var mapped = new List<UserMiniWithAvatarDTO>();
             foreach (var user in result)
             {

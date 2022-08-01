@@ -21,6 +21,8 @@ namespace Data
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+        public DbSet<TaskExecutor> TaskExecutors => Set<TaskExecutor>();
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
             Database.EnsureCreated();
@@ -66,6 +68,20 @@ namespace Data
             builder.Entity<RefreshToken>()
             .HasOne(u => u.User)
             .WithMany(p => p.RefreshTokens)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<TaskExecutor>()
+            .HasIndex(u => new { u.UserId, u.TaskId })
+            .IsUnique();
+
+            builder.Entity<TaskExecutor>()
+            .HasOne(e => e.Task)
+            .WithMany(t => t.Executors)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<TaskExecutor>()
+            .HasOne(e => e.User)
+            .WithMany(u => u.Tasks)
             .OnDelete(DeleteBehavior.Cascade);
         }
     }
