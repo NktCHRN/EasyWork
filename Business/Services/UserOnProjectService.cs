@@ -59,8 +59,8 @@ namespace Business.Services
 
             var teamMembers = _context.UsersOnProjects
                 .Include(uop => uop.User)
-                .AsEnumerable()
                 .Where(uop => uop.ProjectId == projectId)
+                .AsEnumerable()
                 .Select(uop => new UserOnProjectModelExtended()
                 {
                     UserId = uop.UserId,

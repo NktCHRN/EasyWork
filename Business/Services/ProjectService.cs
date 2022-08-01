@@ -79,7 +79,7 @@ namespace Business.Services
 
         public IEnumerable<ProjectModel> GetUserProjects(int userId)
         {
-            var projectsIds =  _context.UsersOnProjects.AsEnumerable()
+            var projectsIds =  _context.UsersOnProjects
                 .Where(uop => uop.UserId == userId)
                 .OrderByDescending(p => p.AdditionDate)
                 .Select(uop => uop.ProjectId);
