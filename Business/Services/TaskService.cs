@@ -88,6 +88,7 @@ namespace Business.Services
                 .Include(t => t.Executors)
                 .Where(t => t.Executors.Select(e => e.UserId).Contains(userId)
                 && _context.UsersOnProjects.Any(uop => uop.ProjectId == t.ProjectId && uop.UserId == userId))
+                .AsEnumerable()
                 .OrderBy(t => HelperMethods.IsDoneTask(t.Status))
                 .ThenByDescending(t => t.Id));
         }
