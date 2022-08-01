@@ -307,6 +307,7 @@ export class TaskComponent implements OnInit {
     if (this.form.valid)
     {
       this.switchToLoadingMode();
+      const oldStatus = this.task.status;
       this.task = {
         ...this.task,
         ...this.form.value,
@@ -314,6 +315,11 @@ export class TaskComponent implements OnInit {
       };
       const updateModel: UpdateTaskModel = {
         ...this.task
+      };
+      if (oldStatus != this.task.status)
+      {
+        this.changeTasksCountByStatus(oldStatus, -1);
+        this.changeTasksCountByStatus(this.task.status, 1);
       };
       this._taskService.update({
         projectsId: this.projectsConnectionContainer.id,
