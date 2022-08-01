@@ -73,6 +73,7 @@ export class TaskReducedComponent implements OnInit {
     this.model.endDate = model.endDate;
     this.model.name = model.name;
     this.model.priority = model.priority;
+    this.status = model.status;
   }
 
   openDialog()
@@ -90,7 +91,6 @@ export class TaskReducedComponent implements OnInit {
     });
     dialogRef.componentInstance.updatedTask.subscribe(
       task => {
-        this.updateTask(task);
         if (this.status != task.status)
         {
           if (this.status == TaskStatus.Archived)
@@ -105,8 +105,8 @@ export class TaskReducedComponent implements OnInit {
             new: task.status,
             id: this.model.id
           });
-          this.status = task.status;
         }
+        this.updateTask(task);
       }
     );
     dialogRef.componentInstance.deletedTask.subscribe(
