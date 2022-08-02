@@ -247,6 +247,7 @@ namespace WebAPI.Controllers
             return Ok(_mapper.Map<IEnumerable<FileDTO>>(files));
         }
 
+        [Obsolete("Use the chunk file upload instead")]
         [HttpPost("{id}/files")]
         public async Task<IActionResult> AddFile(int id, IFormFile file)
         {
@@ -265,9 +266,21 @@ namespace WebAPI.Controllers
                 Name = file.FileName,
                 TaskId = id
             };
+            FileDTO dto;
             try
             {
                 await _fileService.AddAsync(fileModel, file);
+                dto = new FileDTO()
+                {
+                    Id = fileModel.Id,
+                    Name = fileModel.Name,
+                    Size = file.Length,
+                    IsFull = fileModel.IsFull
+                };
+
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("UploadedFile", id, dto);
             }
             catch (ArgumentException exc)
             {
@@ -277,13 +290,6 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
-            var dto = new FileDTO()
-            {
-                Id = fileModel.Id,
-                Name = fileModel.Name,
-                Size = file.Length,
-                IsFull = fileModel.IsFull
-            };
             return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", dto);
         }
 
@@ -305,15 +311,21 @@ namespace WebAPI.Controllers
                 Name = dto.Name,
                 TaskId = id
             };
+            FileReducedDTO mapped;
             try
             {
                 await _fileService.ChunkAddStartAsync(fileModel);
+                mapped = _mapper.Map<FileReducedDTO>(fileModel);
+
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("StartedFileUpload", id, mapped);
             }
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
             }
-            return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", _mapper.Map<FileReducedDTO>(fileModel));
+            return Created($"{this.GetApiUrl()}Files/{fileModel.Id}", mapped);
         }
 
         [HttpGet("{id}/messages")]
@@ -381,40 +393,46 @@ namespace WebAPI.Controllers
                 Date = DateTimeOffset.UtcNow,
                 TaskId = id
             };
+            MessageDTO result;
             try
             {
                 await _messageService.AddAsync(message);
+
+                result = _mapper.Map<MessageDTO>(message);
+                var userModel = await _userManager.FindByIdAsync(message.SenderId.ToString());
+                var sender = new UserMiniWithAvatarDTO()
+                {
+                    Id = message.SenderId
+                };
+                if (userModel is not null)
+                {
+                    string? avatarType = null;
+                    string? avatarURL = null;
+                    if (userModel.AvatarFormat is not null)
+                    {
+                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
+                    }
+                    sender = sender with
+                    {
+                        FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
+                        MIMEAvatarType = avatarType,
+                        AvatarURL = avatarURL
+                    };
+                }
+                result = result with
+                {
+                    Sender = sender
+                };
+
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("AddedMessage", id, result);
             }
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
             }
-            var result = _mapper.Map<MessageDTO>(message);
-            var userModel = await _userManager.FindByIdAsync(message.SenderId.ToString());
-            var sender = new UserMiniWithAvatarDTO()
-            {
-                Id = message.SenderId
-            };
-            if (userModel is not null)
-            {
-                string? avatarType = null;
-                string? avatarURL = null;
-                if (userModel.AvatarFormat is not null)
-                {
-                    avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
-                    avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
-                }
-                sender = sender with
-                {
-                    FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
-                    MIMEAvatarType = avatarType,
-                    AvatarURL = avatarURL
-                };
-            }
-            result = result with
-            {
-                Sender = sender
-            };
             return Created($"{this.GetApiUrl()}Messages/{message.Id}", result);
         }
 

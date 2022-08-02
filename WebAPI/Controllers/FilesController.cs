@@ -4,8 +4,10 @@ using Business.Models;
 using Business.Other;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.StaticFiles;
 using WebAPI.DTOs.File;
+using WebAPI.Hubs;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -25,14 +27,21 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
+        private readonly IHubContext<TasksHub> _tasksHubContext;
+
+        private readonly IHubContext<FilesHub> _hubContext;
+
         public FilesController(IFileService service, IFileManager manager,
-            ITaskService taskService, IUserOnProjectService uopService, IMapper mapper)
+            ITaskService taskService, IUserOnProjectService uopService, IMapper mapper,
+            IHubContext<TasksHub> tasksHubContext, IHubContext<FilesHub> hubContext)
         {
             _service = service;
             _manager = manager;
             _taskService = taskService;
             _uopService = uopService;
             _mapper = mapper;
+            _tasksHubContext = tasksHubContext;
+            _hubContext = hubContext;
         }
 
         [Route("{id}")]
@@ -124,9 +133,17 @@ namespace WebAPI.Controllers
             if (!await _uopService.IsOnProjectAsync(taskModel.ProjectId, userId.Value))
                 return Forbid();
             FileModelExtended result;
+            FileDTO mapped;
             try
             {
                 result = await _service.ChunkAddEndAsync(id);
+                mapped = _mapper.Map<FileDTO>(result);
+
+                if (mapped.Size is not null && mapped.Size <= 1048576L)     // 1 MB
+                    Thread.Sleep(2000);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("EndedFileUpload", id, mapped);
             }
             catch (ArgumentException exc)
             {
@@ -140,7 +157,7 @@ namespace WebAPI.Controllers
             {
                 return NotFound();
             }
-            return Created($"{this.GetApiUrl()}Files/{id}", _mapper.Map<FileDTO>(result));
+            return Created($"{this.GetApiUrl()}Files/{id}", mapped);
         }
 
         [HttpDelete("{id}")]
@@ -159,6 +176,10 @@ namespace WebAPI.Controllers
             try
             {
                 await _service.DeleteByIdAsync(id);
+
+                var connectionIds = Request.Headers["TasksConnectionId"];
+                await _tasksHubContext.Clients.GroupExcept(task.Id.ToString(), connectionIds)
+                    .SendAsync("DeletedFile", task.Id, id);
             }
             catch (InvalidOperationException)
             {

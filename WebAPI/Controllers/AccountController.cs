@@ -4,7 +4,6 @@ using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using WebAPI.DTOs;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +11,7 @@ using WebAPI.Other;
 using Business.Models;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.Token;
+using WebAPI.Interfaces;
 
 namespace WebAPI.Controllers
 {
@@ -39,13 +39,15 @@ namespace WebAPI.Controllers
 
         private readonly IRefreshTokenService _refreshTokenService;
 
+        private readonly ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> _bansMapper;
+
         private int EmailConfirmationLifeTime => 
             int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
 
         private int RefreshTokenLifeTime =>
             int.Parse(_configuration.GetSection("TokenProvidersSetting:RefreshTokenLifetimeInDays").Value);
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IRefreshTokenService refreshTokenService)
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IRefreshTokenService refreshTokenService, ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> bansMapper)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -57,6 +59,7 @@ namespace WebAPI.Controllers
             _userAvatarService = userAvatarService;
             _userStatsService = userStatsService;
             _refreshTokenService = refreshTokenService;
+            _bansMapper = bansMapper;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -99,7 +102,7 @@ namespace WebAPI.Controllers
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "You are banned from this website",
-                    ErrorDetails = await MapBansAsync(bans)
+                    ErrorDetails = await _bansMapper.MapAsync(bans)
                 });
             }
             user.LastSeen = DateTimeOffset.UtcNow;
@@ -119,31 +122,6 @@ namespace WebAPI.Controllers
                     RefreshToken = refreshToken
                 }
             });
-        }
-
-        internal async Task<IEnumerable<BannedUserDTO>> MapBansAsync(IEnumerable<BanModel> bans)
-        {
-            var mappedBans = new List<BannedUserDTO>();
-            foreach (var ban in bans)
-            {
-                var mappedBan = _mapper.Map<BannedUserDTO>(ban);
-                var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
-                if (admin is not null)
-                {
-                    var adminModel = new UserMiniDTO()
-                    {
-                        Id = admin.Id,
-                        Email = admin.Email,
-                        FullName = $"{admin.FirstName} {admin.LastName}".TrimEnd(),
-                    };
-                    mappedBan = mappedBan with
-                    {
-                        Admin = adminModel
-                    };
-                }
-                mappedBans.Add(mappedBan);
-            }
-            return mappedBans;
         }
 
         [HttpPost]
@@ -355,7 +333,7 @@ namespace WebAPI.Controllers
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "You are banned from this website",
-                    ErrorDetails = await MapBansAsync(bans)
+                    ErrorDetails = await _bansMapper.MapAsync(bans)
                 });
             }
 

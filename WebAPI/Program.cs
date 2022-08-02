@@ -2,6 +2,7 @@ using Business;
 using Business.Identity;
 using Business.Interfaces;
 using Business.Managers;
+using Business.Models;
 using Business.Other;
 using Business.Services;
 using Data;
@@ -20,9 +21,11 @@ using System.Text;
 using WebAPI;
 using WebAPI.Authorization;
 using WebAPI.Data;
+using WebAPI.DTOs.User;
 using WebAPI.Hubs;
 using WebAPI.Hubs.HelperClasses;
 using WebAPI.Interfaces;
+using WebAPI.Other;
 using WebAPI.TokenProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -85,7 +88,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 if (!string.IsNullOrEmpty(accessToken) && 
                 (path.StartsWithSegments("/usersHub")
                 || path.StartsWithSegments("/projectsHub")
-                || path.StartsWithSegments("/tasksHub")))
+                || path.StartsWithSegments("/tasksHub")
+                || path.StartsWithSegments("/filesHub")
+                || path.StartsWithSegments("/messagesHub")))
                     context.Token = accessToken;
                 return System.Threading.Tasks.Task.CompletedTask;
             }
@@ -121,6 +126,7 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IUserConnectionsContainer, UserConnectionsContainer>();
 builder.Services.AddSingleton<IProjectUsersContainer, ProjectUsersContainer>();
+builder.Services.AddScoped<ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>>, BansMapper>();
 builder.Services.AddAutoMapper(typeof(AutoMapperBusinessProfile), typeof(AutoMapperWebAPIProfile));
 builder.Services.AddCors(setup =>
 {
@@ -174,6 +180,8 @@ app.MapControllers();
 app.MapHub<UsersHub>("/usersHub");
 app.MapHub<ProjectsHub>("/projectsHub");
 app.MapHub<TasksHub>("/tasksHub");
+app.MapHub<FilesHub>("/filesHub");
+app.MapHub<MessagesHub>("/messagesHub");
 
 using var serviceScope = app.Services.CreateScope();
 var seeder = new DataSeeder()

@@ -64,7 +64,10 @@ namespace Business.Services
                 await _context.SaveChangesAsync();
                 try
                 {
-                    _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                    if (file.IsFull)
+                        _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                    else
+                        _manager.DeleteChunks(file.Id.ToString());
                 }
                 catch (Exception) { }
             }

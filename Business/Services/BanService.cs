@@ -153,15 +153,6 @@ namespace Business.Services
             return true;
         }
 
-        /// <summary>
-        /// Returns all bans by admin id
-        /// </summary>
-        /// <param name="adminId"></param>
-        /// <returns>IEnumerable of all ban models with given admin id</returns>
-        public IEnumerable<BanModel> GetAdminBans(int adminId)
-        {
-            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.AdminId == adminId)).Reverse();
-        }
 
         /// <summary>
         /// Returns all bans by user id
@@ -174,10 +165,5 @@ namespace Business.Services
         }
 
         public bool IsBanned(int userId) => GetNotMappedActiveUserBans(userId).Any();
-
-        public IEnumerable<BanModel> GetLast(int quantity)
-        {
-            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.AsEnumerable().TakeLast(quantity)).Reverse();
-        }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.User.Profile;
+using WebAPI.Interfaces;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -26,13 +27,16 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, UserManager<User> userManager, IMapper mapper, IBanService banService)
+        private readonly ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> _bansMapper;
+
+        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, UserManager<User> userManager, IMapper mapper, IBanService banService, ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> bansMapper)
         {
             _userStatsService = userStatsService;
             _fileManager = fileManager;
             _userManager = userManager;
             _mapper = mapper;
             _banService = banService;
+            _bansMapper = bansMapper;
         }
 
         [HttpGet]
@@ -114,33 +118,9 @@ namespace WebAPI.Controllers
             if (user is null || !user.EmailConfirmed)
                 return NotFound();
             var bans = _banService.GetUserBans(user.Id);
-            return Ok(await MapBansAsync(bans));
+            return Ok(await _bansMapper.MapAsync(bans));
         }
 
-        internal async Task<IEnumerable<BannedUserDTO>> MapBansAsync(IEnumerable<BanModel> bans)
-        {
-            var mappedBans = new List<BannedUserDTO>();
-            foreach (var ban in bans)
-            {
-                var mappedBan = _mapper.Map<BannedUserDTO>(ban);
-                var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
-                if (admin is not null)
-                {
-                    var adminModel = new UserMiniDTO()
-                    {
-                        Id = admin.Id,
-                        Email = admin.Email,
-                        FullName = $"{admin.FirstName} {admin.LastName}".TrimEnd(),
-                    };
-                    mappedBan = mappedBan with
-                    {
-                        Admin = adminModel
-                    };
-                }
-                mappedBans.Add(mappedBan);
-            }
-            return mappedBans;
-        }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}/activeBans")]
@@ -150,7 +130,7 @@ namespace WebAPI.Controllers
             if (user is null || !user.EmailConfirmed)
                 return NotFound();
             var bans = _banService.GetActiveUserBans(user.Id);
-            return Ok(await MapBansAsync(bans));
+            return Ok(await _bansMapper.MapAsync(bans));
         }
 
         [Authorize(Roles = "Admin")]

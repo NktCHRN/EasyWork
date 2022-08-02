@@ -32,25 +32,6 @@ namespace WebAPI.Controllers
             _refreshTokenService = refreshTokenService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetLastBans([FromQuery] int? quantity)
-        {
-            int count = (quantity is null) ? int.MaxValue : quantity.Value;
-            var bans = _banService.GetLast(count);
-            var banDTOs = new List<BanDTO>();
-            foreach (var ban in bans)
-            {
-                var mapped = _mapper.Map<BanDTO>(ban);
-                mapped = mapped with
-                {
-                    User = (await GetUserMiniDTOAsync(ban.UserId))!,
-                    Admin = await GetUserMiniDTOAsync(ban.AdminId)
-                };
-                banDTOs.Add(mapped);
-            }
-            return Ok(banDTOs);
-        }
-
         private async Task<UserMiniDTO?> GetUserMiniDTOAsync(int? userId)
         {
             var user = await _userManager.FindByIdAsync(userId.GetValueOrDefault().ToString());

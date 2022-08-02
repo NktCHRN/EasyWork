@@ -601,6 +601,8 @@ namespace WebAPI.Controllers
         {
             if (from >= to)
                 return BadRequest("\"From\" should be earlier than \"to\"");
+            if (to > DateTimeOffset.Now)
+                return BadRequest("\"From\" should be earlier than or equal the current date");
             var userId = User.GetId();
             if (userId is null)
                 return Unauthorized();
