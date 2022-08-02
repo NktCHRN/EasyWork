@@ -29,12 +29,13 @@ export class FileService extends BaseService {
     .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public delete(id: number) : Observable<Object>
+  public delete(tasksConnectionId: string | null, id: number) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'TasksConnectionId': tasksConnectionId ?? ''
       })
     };
     return this._http.delete(this.serviceBaseURL + id, httpOptions)
@@ -51,11 +52,12 @@ export class FileService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public endUpload(id: number): Observable<FileModel> {
+  public endUpload(connectionId: string | null, id: number): Observable<FileModel> {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<FileModel>(this.serviceBaseURL + id + "/end", httpOptions)

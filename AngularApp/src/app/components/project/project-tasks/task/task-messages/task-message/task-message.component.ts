@@ -7,6 +7,7 @@ import { TokenService } from 'src/app/services/token.service';
 import { AddMessageModel } from 'src/app/shared/message/add-message.model';
 import { MessagePageMode } from 'src/app/shared/message/message-page-mode';
 import { MessageModel } from 'src/app/shared/message/message.model';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { UserOnProjectRole } from 'src/app/shared/project/user-on-project/role/user-on-project-role';
 import { UserOnProjectReducedModel } from 'src/app/shared/project/user-on-project/user-on-project-reduced.model';
 import { TaskMessageDeleteComponent } from '../task-message-delete/task-message-delete.component';
@@ -46,18 +47,34 @@ export class TaskMessageComponent implements OnInit {
     },
   };
 
+  @Input() tasksConnectionContainer: ConnectionContainer = new ConnectionContainer();
+  @Input() connectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _tokenService: TokenService, private _dialog: MatDialog, private _fb: FormBuilder, private _messageService: MessageService) {
     this.myId = this._tokenService.getMyId()!;
     this.createForm();
   }
 
   ngOnInit(): void {
+    this.connectionContainer.connection.on("Updated", (id: number, model: AddMessageModel) =>
+    {
+      if (id == this.message.id)
+      {
+        this.message.text = model.text;
+        if (this.mode == this.modes.Edit)
+          this.form.controls['text'].setValue(this.message.text);
+      };
+    });
   }
 
   openDeleteDialog(): void {
     const dialogRef = this._dialog.open(TaskMessageDeleteComponent, {
       panelClass: "mini-dialog-responsive",
-      data: this.message.id
+      data: 
+      {
+        id: this.message.id,
+        tasksConnectionContainer: this.tasksConnectionContainer
+      }
     });
     dialogRef.componentInstance.succeeded
     .subscribe(() => this.deletedMessage.emit(this.message.id));
@@ -100,7 +117,7 @@ export class TaskMessageComponent implements OnInit {
     {
       this.switchedToLoading.emit();
       const model: AddMessageModel = this.form.value;
-      this._messageService.update(this.message.id, model)
+      this._messageService.update(this.connectionContainer.id, this.message.id, model)
       .subscribe({
         next: () => {
           this.switchedToSuccess.emit();

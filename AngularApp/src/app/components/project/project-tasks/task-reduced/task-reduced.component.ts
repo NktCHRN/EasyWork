@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
 import { ConnectionContainer } from 'src/app/shared/other/connection-container';
@@ -62,6 +62,30 @@ export class TaskReducedComponent implements OnInit {
     this.connectionContainer.connection.on("DeletedExecutor", (taskId: number, executorId: number) => {
       if (taskId == this.model.id)
         this.deleteExecutor(executorId);
+    });
+    this.connectionContainer.connection.on("StartedFileUpload", (taskId: number, _) =>
+    {
+      if (taskId == this.model.id)
+        this.model.filesCount++;
+    });
+    this.connectionContainer.connection.on("UploadedFile", (taskId: number, _) =>   // deprecated
+    {
+      if (taskId == this.model.id)
+        this.model.filesCount++;
+    });
+    this.connectionContainer.connection.on("DeletedFile", (taskId: number, _) =>
+    {
+      if (taskId == this.model.id)
+        this.model.filesCount--;
+    });
+    this.connectionContainer.connection.on("AddedMessage", (taskId: number, _) => {
+      if (taskId == this.model.id)
+        this.model.messagesCount++;
+    });
+    this.connectionContainer.connection.on("DeletedMessage", (taskId: number, _) =>
+    {
+      if (taskId == this.model.id)
+        this.model.messagesCount--;
     });
     this._connectionService.getOpenConnection(this.connectionContainer.connection)
     .then(() => this.startListening())

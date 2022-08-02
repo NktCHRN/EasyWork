@@ -164,12 +164,13 @@ export class TaskService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public startFileUpload(id: number, model: AddFileModel) : Observable<FileModel>
+  public startFileUpload(connectionId: string | null, id: number, model: AddFileModel) : Observable<FileModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<FileModel>(this.serviceBaseURL + id + '/files/start', model, httpOptions)
@@ -177,12 +178,13 @@ export class TaskService extends BaseService {
   }
 
 
-  public addMessage(id: number, model: AddMessageModel) : Observable<MessageModel>
+  public addMessage(connectionId: string | null, id: number, model: AddMessageModel) : Observable<MessageModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<MessageModel>(this.serviceBaseURL + id + '/messages', model, httpOptions)

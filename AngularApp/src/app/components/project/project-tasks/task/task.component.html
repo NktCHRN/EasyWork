@@ -108,6 +108,7 @@
                     <mat-divider></mat-divider>
                     <app-task-files
                     [taskId]="task.id"
+                    [tasksConnectionContainer]="connectionContainer"
                     (deletedFile)="deletedFile.emit()"
                     (addedFile)="addedFile.emit()"></app-task-files>
                     <mat-divider></mat-divider>
@@ -127,6 +128,7 @@
                 <app-task-messages 
                 [taskId]="task.id" 
                 [projectId]="task.projectId" 
+                [tasksConnectionContainer]="connectionContainer"
                 (closeDialog)="close()"
                 (switchedToLoading)="switchToLoadingMode()"
                 (switchedToSuccess)="switchToSuccessMode()"

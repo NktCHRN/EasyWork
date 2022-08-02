@@ -37,6 +37,8 @@
     *ngFor="let message of messages" 
     [message]="message" 
     [meOnProject]="meOnProject" 
+    [tasksConnectionContainer]="tasksConnectionContainer"
+    [connectionContainer]="connectionContainer"
     (closeDialog)="onCloseDialog()" 
     (deletedMessage)="onDeletedMessage($event)"
     (switchedToLoading)="switchedToLoading.emit()"

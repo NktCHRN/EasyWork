@@ -17,24 +17,26 @@ export class MessageService extends BaseService {
     super();
   }
 
-  public delete(id: number) : Observable<Object>
+  public delete(tasksConnectionId: string | null, id: number) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'TasksConnectionId': tasksConnectionId ?? ''
       })
     };
     return this._http.delete(this.serviceBaseURL + id, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
-  public update(id: number, model: AddMessageModel) : Observable<Object>
+  public update(connectionId: string | null, id: number, model: AddMessageModel) : Observable<Object>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.put(this.serviceBaseURL + id, model, httpOptions)
