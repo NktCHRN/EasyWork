@@ -1,1 +1,37 @@
-<p>project-gantt works!</p>
+<div class="gantt-full-container">
+    <div fxLayoutAlign="end center" *ngIf="!errorMessage">
+        <div class="gantt-container" #ganttContainer>
+            <div class="gantt-inner-container" *ngIf="model">
+                <div class="gantt-header" *ngIf="months">
+                    <div class="month-and-days-container" *ngFor="let month of months">
+                        <div class="month-container" [style]="{'max-width' : month.days.length * 40 + 'px'}">
+                            {{month.month | date:month.days.length > 2 ? 'MMMM, y' : 'MMM'}}
+                        </div>
+                        <div class="days-container">
+                            <div class="day-container" *ngFor="let day of month.days">
+                                {{day.number}}
+                                <br>
+                                <span style="color: gray">{{day.dayOfWeek | dayOfWeek:'short'}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="gantt-row" *ngFor="let task of model.tasks">
+                    <div [style.margin-left]="task.offset + '%'" [style.width]="task.endDateWidth + '%'" class="gantt-task" [matTooltip]="task.name"
+                    matTooltipClass="bg-black" matTooltipPosition="before">
+                        <span class="gantt-task-text">{{task.name}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="errorMessage" class="text-md" [ngClass]="isErrorCritical ? 'red' : 'text-muted'">
+        {{errorMessage}}
+    </div>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>
+<button type="button" mat-icon-button class="gantt-getinfo" (click)="openInfoDialog()">
+    <mat-icon>question_mark</mat-icon>
+</button>

@@ -50,9 +50,14 @@ export class ProjectComponent implements OnInit, OnDestroy {
       .subscribe({
         next: result => this.me = result,
         error: error => {
+          let message = JSON.stringify(error);
+          if (error.status == 404)
+            message = "Your account on the project was not found. Most likely, you are not a member of this project or an error occured.\n" + message;
+          else
+            message += '\nPlease, reload the page';
           this._dialog.open(ErrorDialogComponent, {
             panelClass: "dialog-responsive",
-            data: JSON.stringify(error) + '\nPlease, reload the page'
+            data: message
           });
         }
       });

@@ -1,0 +1,16 @@
+.gantt-task
+{
+    border-radius: 15px;
+    padding: 5px 0px;
+    background-color: orange;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.gantt-task-text
+{
+    margin: 0 15px;
+}

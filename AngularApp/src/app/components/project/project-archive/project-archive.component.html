@@ -1,4 +1,4 @@
-<div class="container" style="overflow-x: hidden">
+<div class="container archive-container" style="overflow-x: hidden">
     <h1 class="text-center" style="font-size: 20pt">Archive <span *ngIf="tasks">({{tasks.length}})</span></h1>
     <div *ngIf="tasks" fxLayout="column" fxLayout.gt-sm="row wrap" fxLayoutGap="35px" fxLayoutGap.gt-sm="35px grid" style="overflow-x: hidden">
         <app-task-reduced [ngClass.gt-sm]="'task-card'" *ngFor="let task of tasks" [model]="task" [status]="taskStatuses.Archived"

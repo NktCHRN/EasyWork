@@ -12,3 +12,9 @@
     display: block;
 }
 
+@import '../../../../variables';
+
+.archive-container
+{
+    min-height: calc($min-height-main - 70px);
+}

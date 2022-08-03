@@ -1,0 +1,28 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title class="orange">What is this?</h1>
+<mat-dialog-content class="text-sm">
+    <p>
+        This is a <strong>Gantt chart</strong> of your project. With it, you can easily control how effectively your team members are working on tasks 
+        in order to plan your further work and schedule new tasks smarter.<br><br>
+        To generate a task, you project's lifetime should be at least one day.<br><br>
+        At the top of the chart you can see a timeline. If you project has been existing for more than one 365 days,
+        it will start from the day that was 365 days ago. In another case, it will start from the day when the project was created.<br>
+        The end of the line is the current date.<br><br>
+        Most likely, you do not see the full timeline on your screen, so, you can scroll the chart left or right. If you have too many tasks on the chart, 
+        you will also be able to scroll it up and down.<br><br>
+        You can also see some orange rectangles on your chart, like this one:<br>
+    </p>
+        <div style="width: fit-content" class="gantt-task" matTooltip="Sample task"
+                    matTooltipClass="bg-black" matTooltipPosition="after">
+            <span class="gantt-task-text">Sample task</span>
+        </div><br>
+    <p>
+        They are project tasks. Each rectangle starts at the date when the task was created and ends at the 'End date', 
+        which you can see and edit on the Task dialog. If the end date is not defined, the rectangle will be continued up to the end of the timeline.
+        If the name of the task is too big, it will be cut and end with three dots (...), but you can view the full name by hovering on it.
+        Task rectanges are not clickable.<br><br>
+        This chart is not updated dynamically when someone creates, changes or deletes a task. So, you need to reload this page in order to see the changes
+    </p>
+</mat-dialog-content>

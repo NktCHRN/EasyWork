@@ -1,10 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
 import { MatToolbarModule } from '@angular/material/toolbar'; 
 import {MatIconModule} from '@angular/material/icon';
 import { HeaderComponent } from './components/header/header.component';
@@ -117,6 +115,9 @@ import { DragDropFileUploadDirective } from './directives/drag-drop-file-upload.
 import { TaskFileTooBigErrorComponent } from './components/project/project-tasks/task/task-files/task-file-too-big-error/task-file-too-big-error.component';
 import { TaskFileUploadCancelComponent } from './components/project/project-tasks/task/task-files/task-file-upload-cancel/task-file-upload-cancel.component'; 
 import { signalRBaseURL } from './shared/constants/signalr-baseurl';
+import { GanttService } from './services/gantt.service';
+import { DayOfWeekPipe } from './pipes/day-of-week.pipe';
+import { ProjectGanttInfoComponent } from './components/project/project-gantt/project-gantt-info/project-gantt-info.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -176,7 +177,9 @@ export function tokenGetter() {
     FileSizePipe,
     DragDropFileUploadDirective,
     TaskFileTooBigErrorComponent,
-    TaskFileUploadCancelComponent
+    TaskFileUploadCancelComponent,
+    DayOfWeekPipe,
+    ProjectGanttInfoComponent
   ],
   imports: [
     BrowserModule,
@@ -262,7 +265,8 @@ export function tokenGetter() {
       deps: [MAT_DATE_LOCALE, NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS]
     },
     { provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS },
-    MessageService
+    MessageService,
+    GanttService
   ],
   bootstrap: [AppComponent]
 })
