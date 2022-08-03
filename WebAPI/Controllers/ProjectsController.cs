@@ -613,18 +613,17 @@ namespace WebAPI.Controllers
                 return Forbid();
             var tasks = _taskService.GetProjectTasksByDate(id, from, to);
             var mappedTasks = new List<GanttTaskDTO>();
+            var fullWidth = to - from;
             foreach (var task in tasks)
             {
                 var startDate = (task.StartDate >= from) ? task.StartDate : from;
                 var endDate = (task.EndDate is not null && task.EndDate <= to) ? task.EndDate.Value : to;
-                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : to;
                 mappedTasks.Add(new GanttTaskDTO()
                 {
                     Id = task.Id,
                     Name = task.Name,
-                    GanttStartDate = startDate,
-                    GanttDeadline = deadline,
-                    GanttEndDate = endDate,
+                    Offset = startDate == from ? 0 : (startDate - from) / fullWidth * 100,
+                    EndDateWidth = (endDate - startDate) / fullWidth * 100,
                 });
             }
             var result = new GanttDTO()
