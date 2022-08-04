@@ -32,7 +32,7 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
   errorMessage: string | null | undefined;
   isErrorCritical = false;
   loading: boolean = true;
-  loaded: ReplaySubject<boolean> = new ReplaySubject();
+  loaded: ReplaySubject<boolean> = new ReplaySubject(1);
 
   @ViewChild('ganttContainer') private ganttContainer: ElementRef = undefined!;
 
@@ -75,6 +75,7 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this._titleService.setTitle(`${this.projectName} | Gantt chart - ${this._websiteName}`);
+    this.loaded.subscribe(() => this.loading = false);
     this._projectService.getById(this.projectId)
     .subscribe({
       next: result => 
@@ -85,7 +86,6 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
           if (new Date().getTime() - projectStartDate.getTime() <= this.daysToMilliseconds(1))
           {
             this.errorMessage = "Your project should have been existing for at least one day to generate a Gantt chart";
-            this.loading = false;
             this.loaded.next(false);
             return;
           }
@@ -98,12 +98,10 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
           {
             next: result => 
             {
-              this.loading = false;
               this.model = result;
               this.loaded.next(true);
             },
             error: error => {
-              this.loading = false;
               this.isErrorCritical = true;
               const message = `An error occured: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
               this.errorMessage = message;
@@ -115,7 +113,6 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
       },
       error: error =>
       {
-        this.loading = false;
         this.isErrorCritical = true;
         const message = `An error occured: ${error.status} - ${error.statusText || ''}\n${JSON.stringify(error.error)}`;
         this.errorMessage = message;
