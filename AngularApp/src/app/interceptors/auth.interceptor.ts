@@ -37,6 +37,11 @@ export class AuthInterceptor implements HttpInterceptor {
         return this.handleBannedError(error);
       }
       else if (error instanceof HttpErrorResponse 
+        && error.status === 403 
+        && req.method === "GET") {
+        return this.handle403Error(error);
+      }
+      else if (error instanceof HttpErrorResponse 
         && error.status === 404
         && req.method === "GET")
       {
@@ -48,6 +53,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private handle404Error(error: HttpErrorResponse) : Observable<HttpEvent<any>> {
     this._router.navigate(["**"], {skipLocationChange: true}); 
+    console.error(error);
+    return throwError(() => error);
+  }
+
+  private handle403Error(error: HttpErrorResponse) : Observable<HttpEvent<any>> {
+    this._dialog.closeAll();
+    this._router.navigate(["/forbidden"], {skipLocationChange: true}); 
     console.error(error);
     return throwError(() => error);
   }

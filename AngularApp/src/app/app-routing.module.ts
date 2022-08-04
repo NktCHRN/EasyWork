@@ -19,6 +19,9 @@ import { ProjectTasksComponent } from './components/project/project-tasks/projec
 import { ProjectArchiveComponent } from './components/project/project-archive/project-archive.component';
 import { ProjectGanttComponent } from './components/project/project-gantt/project-gantt.component';
 import { ProjectParticipantsComponent } from './components/project/project-participants/project-participants.component';
+import { ForbiddenComponent } from './components/forbidden/forbidden.component';
+import { AdminComponent } from './components/admin/admin.component';
+import { AdminGuard } from './guards/admin.guard';
 
 const routes: Routes = [
   { path: 'home',  component: HomeComponent, data: { title: 'Easy project management' } },
@@ -40,6 +43,9 @@ const routes: Routes = [
         { path: '', redirectTo: 'tasks', pathMatch: 'full' }
       ] },
   { path: 'invite/:code',  component: InviteComponent, data: { title: 'Invite' }, canActivate: [AuthGuard] },
+  { path: 'admin',  component: AdminComponent, data: { title: 'Admin panel' }, canActivate: [AdminGuard] },
+  { path: 'forbidden', pathMatch: 'full', 
+  component: ForbiddenComponent, data: { title: 'Forbidden' } },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', pathMatch: 'full', 
   component: NotfoundComponent, data: { title: 'Not found' } },

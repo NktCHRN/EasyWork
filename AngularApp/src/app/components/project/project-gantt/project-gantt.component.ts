@@ -4,6 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { first, Observable, ReplaySubject } from 'rxjs';
 import { GanttService } from 'src/app/services/gantt.service';
 import { ProjectService } from 'src/app/services/project.service';
+import { TimeService } from 'src/app/services/time.service';
 import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { GanttModel } from 'src/app/shared/project/gantt/gantt.model';
 import { Month } from 'src/app/shared/project/gantt/month';
@@ -37,13 +38,8 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
   @ViewChild('ganttContainer') private ganttContainer: ElementRef = undefined!;
 
   constructor(private _titleService: Title, @Inject('projectName') private _websiteName: string, private _ganttService: GanttService,
-  private _projectService: ProjectService, private _dialog: MatDialog) {
-    this.startDate = new Date(this.endDate.getTime() - this.daysToMilliseconds(365));
-   }
-
-   private daysToMilliseconds(days: number)
-   {
-    return days * 24 * 60 * 60 * 1000;
+  private _projectService: ProjectService, private _dialog: MatDialog, private _timeService: TimeService) {
+    this.startDate = new Date(this.endDate.getTime() - this._timeService.daysToMilliseconds(365));
    }
 
   ngAfterViewInit(): void {
@@ -83,7 +79,7 @@ export class ProjectGanttComponent implements OnInit, AfterViewInit {
         const projectStartDate = new Date(result.startDate);
         if (projectStartDate > this.startDate)
         {
-          if (new Date().getTime() - projectStartDate.getTime() <= this.daysToMilliseconds(1))
+          if (new Date().getTime() - projectStartDate.getTime() <= this._timeService.daysToMilliseconds(1))
           {
             this.errorMessage = "Your project should have been existing for at least one day to generate a Gantt chart";
             this.loaded.next(false);

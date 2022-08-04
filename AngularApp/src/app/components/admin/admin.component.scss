@@ -1,0 +1,33 @@
+.search-container
+{
+    width: 100%;
+    height: 50px;
+    background-color: orange;
+    border-radius: 15px;
+}
+
+$btn-size: 40px;
+.search-button
+{
+    width: $btn-size;
+}
+
+.search-input
+{
+    $margin-left: 7px;
+    margin-left: $margin-left;
+    width: calc(100% - $btn-size - $margin-left);
+    height: 70%;
+    border: none;
+    border-radius: 5px;
+}
+
+.search-input:focus
+{
+    outline: 1px solid #D84315;
+}
+
+.results-container
+{
+    margin-top: 20px;
+}

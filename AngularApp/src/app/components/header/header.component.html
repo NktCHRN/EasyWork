@@ -16,6 +16,11 @@
                 <mat-icon aria-hidden="false" aria-label="task icon" class="icon-medium deep-orange">task_alt</mat-icon>
                 <div class="orange">Tasks</div>
               </a>
+              <a fxLayoutAlign="center center" fxLayout="column" routerLink="/admin" style="text-decoration: none;" routerLinkActive="active"
+              class="header-up-btn" *ngIf="isAdmin">
+                <mat-icon aria-hidden="false" aria-label="admin panel icon" class="icon-medium deep-orange">admin_panel_settings</mat-icon>
+                <div class="orange">Admin</div>
+              </a>
             </div>
           <span class="spacer"></span>
           <div fxHide fxShow.gt-sm>
@@ -55,6 +60,10 @@
             <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows" fxHide.gt-sm>
               <a mat-flat-button routerLink="/tasks" class="deep-orange full" fxLayoutAlign="start center">
                 <mat-icon aria-hidden="false" aria-label="task icon">task_alt</mat-icon> Tasks</a>
+            </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows && isAdmin" fxHide.gt-sm>
+              <a mat-flat-button routerLink="/admin" class="deep-orange full" fxLayoutAlign="start center">
+                <mat-icon aria-hidden="false" aria-label="admin panel icon">admin_panel_settings</mat-icon> Admin</a>
             </mat-toolbar-row>
             <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows" fxHide.gt-sm>
               <a mat-flat-button routerLink="/cabinet" class="full" fxLayoutAlign="start center">

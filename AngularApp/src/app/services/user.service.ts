@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
+import { BannedModel } from '../shared/user/banned.model';
 import { UserProfileReducedModel } from '../shared/user/user-profile-reduced.model';
 import { UserModel } from '../shared/user/user.model';
 import { BaseService } from './base.service';
@@ -25,6 +26,17 @@ export class UserService extends BaseService {
       })
     };
     return this._http.get<UserModel>(this.serviceBaseURL + id, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public getActiveBansById(id: number) : Observable<BannedModel[]>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
+    return this._http.get<BannedModel[]>(this.serviceBaseURL + id + '/activeBans', httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 

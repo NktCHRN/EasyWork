@@ -118,6 +118,11 @@ import { signalRBaseURL } from './shared/constants/signalr-baseurl';
 import { GanttService } from './services/gantt.service';
 import { DayOfWeekPipe } from './pipes/day-of-week.pipe';
 import { ProjectGanttInfoComponent } from './components/project/project-gantt/project-gantt-info/project-gantt-info.component';
+import { ForbiddenComponent } from './components/forbidden/forbidden.component';
+import { AdminComponent } from './components/admin/admin.component';
+import { AdminUserComponent } from './components/admin/admin-user/admin-user.component';
+import { AdminUserBansComponent } from './components/admin/admin-user/admin-user-bans/admin-user-bans.component';
+import { BanAddComponent } from './components/admin/admin-user/admin-user-bans/ban-add/ban-add.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -179,7 +184,12 @@ export function tokenGetter() {
     TaskFileTooBigErrorComponent,
     TaskFileUploadCancelComponent,
     DayOfWeekPipe,
-    ProjectGanttInfoComponent
+    ProjectGanttInfoComponent,
+    ForbiddenComponent,
+    AdminComponent,
+    AdminUserComponent,
+    AdminUserBansComponent,
+    BanAddComponent
   ],
   imports: [
     BrowserModule,

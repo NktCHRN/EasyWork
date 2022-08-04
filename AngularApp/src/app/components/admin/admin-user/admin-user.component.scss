@@ -1,0 +1,16 @@
+a {
+    text-decoration: none !important;
+    color: orange !important;
+}
+
+.user-card-content
+{
+    $padding-size: 5px;
+    padding-top: $padding-size;
+    padding-bottom: $padding-size;
+}
+
+.custom-title
+{
+    margin-bottom: 0 !important;
+}

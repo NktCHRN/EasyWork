@@ -98,4 +98,12 @@ export class TokenService extends BaseService {
     }
     return id;
   }
+
+  public isAdmin(): boolean
+  {
+    const decoded = this._jwtService.decodeToken();
+    return decoded 
+    && decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] 
+    && decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"].includes("Admin");
+  }
 }

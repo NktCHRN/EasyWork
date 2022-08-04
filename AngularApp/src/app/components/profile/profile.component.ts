@@ -4,6 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { UserModel } from '../../shared/user/user.model';
 import * as signalR from "@microsoft/signalr";
+import { TokenService } from 'src/app/services/token.service';
+import { AccountService } from 'src/app/services/account.service';
+import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduced.model';
 
 @Component({
   selector: 'app-profile',
@@ -16,8 +19,12 @@ export class ProfileComponent implements OnInit {
   connection: signalR.HubConnection | null | undefined;
   isFirstEvent: boolean = true;
 
+  public isAdmin: boolean = false;
+  public userReduced: UserProfileReducedModel = undefined!;
+
   constructor(private _titleService: Title, private _route: ActivatedRoute, public usersService: UserService, private _router: Router, 
-    @Inject('projectName') private _projectName: string, @Inject('signalRURL') private _signalRURL: string) { }
+    @Inject('projectName') private _projectName: string, @Inject('signalRURL') private _signalRURL: string,
+    private _tokenService: TokenService, private _accountService: AccountService) { }
 
   ngOnInit(): void {
     this._route.paramMap.subscribe(params => {
@@ -27,6 +34,12 @@ export class ProfileComponent implements OnInit {
         next: user => 
         {
           this.user = user;
+          this.userReduced = 
+          {
+            ...user,
+            id: this.id, 
+            fullName: this.usersService.getFullName(this.user.firstName, this.user.lastName)
+          }
           this.user.isOnline = false;
           this._titleService.setTitle(`${this._projectName} - ${this.usersService.getFullName(user.firstName, user.lastName)}'s profile`);
           this.connection = new signalR.HubConnectionBuilder()
@@ -54,7 +67,16 @@ export class ProfileComponent implements OnInit {
         error: () => this._router.navigate(["**"], { skipLocationChange: true })
       });
     });
+    this._accountService.authChanged
+    .subscribe(() => {
+      this.onAuthChange();
+    })
+    this._accountService.isUserAuthenticated().then(() => this.onAuthChange());
   }
+
+  private onAuthChange(): void {
+    this.isAdmin = this._tokenService.isAdmin();
+   }
 
   private startListening(): void {
     this.connection!.invoke('StartListening', this.id)

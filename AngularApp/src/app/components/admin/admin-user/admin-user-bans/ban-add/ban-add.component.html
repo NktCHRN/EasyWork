@@ -1,0 +1,50 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title class="red">Ban {{user.fullName}}</h1>
+<mat-dialog-content>
+    <div fxLayout="column" fxLayoutGap="30px" *ngIf="!success && !loading && !errorMessage">
+        <form novalidate method="POST" [formGroup]="form" #bform="ngForm" (ngSubmit)="onSubmit()">
+            <mat-form-field class="w-100" appearance="outline">
+                <mat-label>Reason</mat-label>
+                <textarea matInput
+                        class="text-sm"
+                        cdkTextareaAutosize
+                        #reasonAutosize="cdkTextareaAutosize"
+                        formControlName="reason"
+                        cdkAutosizeMinRows="3"></textarea>
+                <mat-error *ngIf="formErrors.reason">{{formErrors.reason}}</mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-100" appearance="outline">
+                <mat-label>End date</mat-label>
+                <input matInput [ngxMatDatetimePicker]="endDatePicker" formControlName="endDate" [min]="minDate">
+                <mat-datepicker-toggle matSuffix [for]="$any(endDatePicker)"></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker #endDatePicker [touchUi]="true"></ngx-mat-datetime-picker>
+                <mat-hint>DD.MM.YYYY, HH:mm:ss</mat-hint>
+            </mat-form-field>
+            <div fxLayoutGap="30px" style="margin-top: 25px;">
+                <button mat-flat-button type="button" [mat-dialog-close]="true">Cancel</button>
+                <button mat-flat-button color="warn" type="submit">Ban!</button>
+            </div>
+        </form>
+    </div>
+    <div *ngIf="success">
+        <div class="header-container">
+            <h3>You have successfully banned the user</h3>
+        </div>
+        <div>
+            <button mat-flat-button [mat-dialog-close]="true">Close</button>
+        </div>
+    </div>
+    <div *ngIf="errorMessage">
+        <div class="header-container">
+            <h3 class="red">An error occured: {{errorMessage}}</h3>
+        </div>
+        <div>
+            <button mat-flat-button [mat-dialog-close]="true">Close</button>
+        </div>
+    </div>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</mat-dialog-content>

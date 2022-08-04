@@ -18,6 +18,8 @@ export class HeaderComponent implements OnInit {
   public isExternalAuth: boolean = false;
   public isUserAuthenticated: boolean | null | undefined;
   public user: UserReducedModel | null | undefined;
+
+  public isAdmin: boolean = false;
   
   logOut = () => {
     let model = new RevokeTokenModel();
@@ -51,6 +53,7 @@ export class HeaderComponent implements OnInit {
 
    private onAuthChange(res: boolean): void {
     this.isUserAuthenticated = res;
+    this.isAdmin = this._tokenService.isAdmin();
    }
 
   showBtns() : void {
