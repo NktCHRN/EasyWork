@@ -2,6 +2,8 @@
 {
     public record BannedUserDTO
     {
+        public int Id { get; init; }
+
         public DateTimeOffset DateFrom { get; init; }
 
         public DateTimeOffset DateTo { get; init; }
