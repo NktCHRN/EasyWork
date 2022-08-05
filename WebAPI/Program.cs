@@ -90,7 +90,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 || path.StartsWithSegments("/projectsHub")
                 || path.StartsWithSegments("/tasksHub")
                 || path.StartsWithSegments("/filesHub")
-                || path.StartsWithSegments("/messagesHub")))
+                || path.StartsWithSegments("/messagesHub")
+                || path.StartsWithSegments("/userBansHub")))
                     context.Token = accessToken;
                 return System.Threading.Tasks.Task.CompletedTask;
             }
@@ -182,6 +183,7 @@ app.MapHub<ProjectsHub>("/projectsHub");
 app.MapHub<TasksHub>("/tasksHub");
 app.MapHub<FilesHub>("/filesHub");
 app.MapHub<MessagesHub>("/messagesHub");
+app.MapHub<UserBansHub>("/userBansHub");
 
 using var serviceScope = app.Services.CreateScope();
 var seeder = new DataSeeder()

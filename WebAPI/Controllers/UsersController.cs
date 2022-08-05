@@ -6,8 +6,10 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using WebAPI.DTOs.User;
 using WebAPI.DTOs.User.Profile;
+using WebAPI.Hubs;
 using WebAPI.Interfaces;
 using WebAPI.Other;
 
@@ -29,7 +31,12 @@ namespace WebAPI.Controllers
 
         private readonly ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> _bansMapper;
 
-        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, UserManager<User> userManager, IMapper mapper, IBanService banService, ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> bansMapper)
+        private readonly IHubContext<UserBansHub> _bansHubContext;
+
+        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, 
+            UserManager<User> userManager, IMapper mapper, IBanService banService, 
+            ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> bansMapper, 
+            IHubContext<UserBansHub> bansHubContext)
         {
             _userStatsService = userStatsService;
             _fileManager = fileManager;
@@ -37,6 +44,7 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _banService = banService;
             _bansMapper = bansMapper;
+            _bansHubContext = bansHubContext;
         }
 
         [HttpGet]
@@ -143,6 +151,9 @@ namespace WebAPI.Controllers
             if (!_banService.IsBanned(id))
                 return NotFound("This user is not banned");
             await _banService.DeleteActiveUserBansAsync(user.Id);
+            var connectionIds = Request.Headers["UserBansConnectionId"];
+            await _bansHubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                .SendAsync("Unbanned", id);
             return NoContent();
         }
     }
