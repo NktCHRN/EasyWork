@@ -33,8 +33,8 @@
                     <p>Participates in <strong class="orange"> {{user.projects}} </strong> projects</p>
                 </div>
             </div>
-            <div class="info" *ngIf="userReduced && isAdmin" style="margin-top: 50px">
-                <app-admin-user-bans [user]="userReduced"></app-admin-user-bans>
+            <div class="info" *ngIf="userReduced && isAdmin && userBansConnectionContainer" style="margin-top: 50px">
+                <app-admin-user-bans [user]="userReduced" [connectionContainer]="userBansConnectionContainer"></app-admin-user-bans>
             </div>
         </div>
     </div>

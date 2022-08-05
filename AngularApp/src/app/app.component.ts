@@ -6,9 +6,10 @@ import { AccountService } from './services/account.service';
 import { TokenService } from './services/token.service';
 import { UserInfoService } from './services/userinfo.service';
 import * as signalR from '@microsoft/signalr';
-import { AnonymousGuard } from './guards/anonymous.guard';
-import { AuthGuard } from './guards/auth.guard';
 import { TokenGuardService } from './services/token-guard.service';
+import { MatDialog } from '@angular/material/dialog';
+import { BannedComponent } from './components/banned/banned.component';
+import { BannedModel } from './shared/user/banned.model';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,8 @@ export class AppComponent {
     @Inject('signalRURL') private _signalRURL: string,
     private _tokenService: TokenService,
     private _tokenGuardService: TokenGuardService,
-    private _route: ActivatedRoute
+    private _route: ActivatedRoute,
+    private _dialog: MatDialog
   ) {}
 
   private _lastAuthStatus: boolean = false;
@@ -42,6 +44,17 @@ export class AppComponent {
         .withAutomaticReconnect()
         .build();
         this.connection.onreconnected(() => this.login());
+        this.connection.on("Banned", (banModel: BannedModel) =>
+        {
+          this._accountService.logout();
+          this._accountService.sendAuthStateChangeNotification(false);
+          this._dialog.closeAll();
+          this._router.navigate(["login"]);
+          this._dialog.open(BannedComponent, {
+            panelClass: "dialog-responsive",
+            data: [banModel]
+          });
+        });
         this.connection.start().then(() => this.login()).catch(err => document.write(err));
     }
 

@@ -3,9 +3,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { TimeService } from 'src/app/services/time.service';
 import { TokenService } from 'src/app/services/token.service';
 import { UserService } from 'src/app/services/user.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { BannedModel } from 'src/app/shared/user/banned.model';
 import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduced.model';
 import { BanAddComponent } from './ban-add/ban-add.component';
+import { BanDeleteComponent } from './ban-delete/ban-delete.component';
+import { UnbanComponent } from './unban/unban.component';
 
 @Component({
   selector: 'app-admin-user-bans',
@@ -17,6 +20,7 @@ export class AdminUserBansComponent implements OnInit {
   myId: number = undefined!;
   bans: BannedModel[] = undefined!;
   errorMessage: string | null | undefined;
+  @Input() connectionContainer: ConnectionContainer = undefined!;
 
   constructor(private _tokenService: TokenService, private _userService: UserService, private _timeService: TimeService,
     private _dialog: MatDialog) { }
@@ -37,6 +41,21 @@ export class AdminUserBansComponent implements OnInit {
         console.error(message);
       }
     });
+    this.connectionContainer.connection.on("AddedBan", (userId: number, model: BannedModel) =>
+    {
+      if (userId == this.user.id)
+        this.addBan(model);
+    });
+    this.connectionContainer.connection.on("DeletedBan", (userId: number, banId: number) =>
+    {
+      if (userId == this.user.id)
+        this.deleteBan(banId);
+    });
+    this.connectionContainer.connection.on("Unbanned", (userId: number) =>
+    {
+      if (userId == this.user.id)
+        this.unban();
+    });
   }
 
   private waitForTheEndOfBan(model: BannedModel)
@@ -47,11 +66,18 @@ export class AdminUserBansComponent implements OnInit {
     {
       setTimeout(() => 
       {
-        const foundIndex = this.bans.findIndex(b => b.id == model.id);
-        if (foundIndex != -1)
-          this.bans.splice(foundIndex, 1);
+        this.deleteBan(model.id);
       }, subtractionResult + 2000);
     }
+  }
+
+  private deleteBan(id: number)
+  {
+    if (!this.bans)
+      return;
+    const foundIndex = this.bans.findIndex(b => b.id == id);
+    if (foundIndex != -1)
+      this.bans.splice(foundIndex, 1);
   }
 
   private addBan(model: BannedModel): void
@@ -62,17 +88,54 @@ export class AdminUserBansComponent implements OnInit {
     this.waitForTheEndOfBan(model);
   }
 
+  private unban(): void
+  {
+    this.bans = [];
+  }
+
   public openBanDialog(): void
   {
     const dialogRef = this._dialog.open(BanAddComponent, {
       panelClass: "dialog-responsive",
       data: {
-        user: this.user
+        user: this.user,
+        connectionContainer: this.connectionContainer
       }
     });
     dialogRef.componentInstance.succeeded
     .subscribe(ban => {
         this.addBan(ban);
+    });
+  }
+
+  public openDeleteDialog(id: number): void
+  {
+    const dialogRef = this._dialog.open(BanDeleteComponent, {
+      panelClass: "dialog-responsive",
+      data: {
+        id: id,
+        userId: this.user.id,
+        connectionContainer: this.connectionContainer
+      }
+    });
+    dialogRef.componentInstance.succeeded
+    .subscribe(() => {
+        this.deleteBan(id);
+    });
+  }
+
+  public openUnbanDialog(): void
+  {
+    const dialogRef = this._dialog.open(UnbanComponent, {
+      panelClass: "dialog-responsive",
+      data: {
+        user: this.user,
+        connectionContainer: this.connectionContainer
+      }
+    });
+    dialogRef.componentInstance.succeeded
+    .subscribe(() => {
+        this.unban();
     });
   }
 }

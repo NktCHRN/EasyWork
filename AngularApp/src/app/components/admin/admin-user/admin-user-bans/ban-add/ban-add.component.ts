@@ -5,6 +5,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BanService } from 'src/app/services/ban.service';
 import { AddBanModel } from 'src/app/shared/ban/add-ban.model';
 import { BanAddPageModel } from 'src/app/shared/ban/ban-add-page.model';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { BannedModel } from 'src/app/shared/user/banned.model';
 import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduced.model';
 
@@ -34,9 +35,12 @@ export class BanAddComponent implements OnInit {
     }
   };
 
+  connectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _dialogRef: MatDialogRef<BanAddComponent>, @Inject(MAT_DIALOG_DATA) public data: BanAddPageModel, 
   private _fb: FormBuilder, private _banService: BanService) {
     this.user = data.user;
+    this.connectionContainer = data.connectionContainer;
     this.minDate = new Date();
     this.minDate.setMinutes(this.minDate.getMinutes() + 1);
     this.createForm();
@@ -90,7 +94,7 @@ export class BanAddComponent implements OnInit {
       userId: this.user.id
     };
     this.loading = true;
-    this._banService.add(model)
+    this._banService.add(this.connectionContainer.id, model)
     .subscribe({
       next: result =>
       {

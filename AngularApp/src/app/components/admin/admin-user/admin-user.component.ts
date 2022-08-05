@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { TokenService } from 'src/app/services/token.service';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
 import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduced.model';
 
 @Component({
@@ -9,6 +9,7 @@ import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduce
 })
 export class AdminUserComponent implements OnInit {
   @Input() user: UserProfileReducedModel = undefined!;
+  @Input() connectionContainer: ConnectionContainer = undefined!;
 
   constructor() { }
 

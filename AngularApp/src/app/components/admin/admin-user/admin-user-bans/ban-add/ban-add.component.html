@@ -1,7 +1,7 @@
 <button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
     <mat-icon class="close-icon">close</mat-icon>
 </button>
-<h1 mat-dialog-title class="red">Ban {{user.fullName}}</h1>
+<h1 mat-dialog-title class="red">Ban {{user.fullName}} (<a title="user's email" href="mailto:{{user.email}}">{{user.email}}</a>)</h1>
 <mat-dialog-content>
     <div fxLayout="column" fxLayoutGap="30px" *ngIf="!success && !loading && !errorMessage">
         <form novalidate method="POST" [formGroup]="form" #bform="ngForm" (ngSubmit)="onSubmit()">

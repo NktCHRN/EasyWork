@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';	
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';	
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
@@ -7,13 +7,15 @@ import * as signalR from "@microsoft/signalr";
 import { TokenService } from 'src/app/services/token.service';
 import { AccountService } from 'src/app/services/account.service';
 import { UserProfileReducedModel } from 'src/app/shared/user/user-profile-reduced.model';
+import { ConnectionContainer } from 'src/app/shared/other/connection-container';
+import { TokenGuardService } from 'src/app/services/token-guard.service';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   user: UserModel = undefined!;
   id: number = undefined!;
   connection: signalR.HubConnection | null | undefined;
@@ -22,13 +24,48 @@ export class ProfileComponent implements OnInit {
   public isAdmin: boolean = false;
   public userReduced: UserProfileReducedModel = undefined!;
 
+  userBansConnectionContainer: ConnectionContainer = new ConnectionContainer();
+
   constructor(private _titleService: Title, private _route: ActivatedRoute, public usersService: UserService, private _router: Router, 
     @Inject('projectName') private _projectName: string, @Inject('signalRURL') private _signalRURL: string,
-    private _tokenService: TokenService, private _accountService: AccountService) { }
+    private _tokenService: TokenService, private _accountService: AccountService, private _tokenGuardService: TokenGuardService) { 
+    this.userBansConnectionContainer.connection = new signalR.HubConnectionBuilder()
+    .withUrl(this._signalRURL + "userBansHub", {
+      skipNegotiation: true,
+      transport: signalR.HttpTransportType.WebSockets,
+      accessTokenFactory: () => this._tokenGuardService.getOrRefreshToken()
+    })
+    .withAutomaticReconnect()
+    .build();
+  }
+
+  private getConnectionId(): void
+  {
+    if (!this.userBansConnectionContainer.connection)
+      return;
+    this.userBansConnectionContainer.connection.invoke('GetConnectionId')
+    .catch(error => console.error(error));
+  }
+
+  private subscribeToBans(): void
+  {
+    if (!this.userBansConnectionContainer.connection)
+      return;
+    this.userBansConnectionContainer.connection.invoke('StartListening', this.id)
+    .catch(error => console.error(error));
+  }
 
   ngOnInit(): void {
     this._route.paramMap.subscribe(params => {
       this.id = parseInt(params.get('id')!);
+      this.userBansConnectionContainer.connection.on("ConnectionId", (result: string | null) => 
+      {
+        this.userBansConnectionContainer.id = result;
+      });
+      this.userBansConnectionContainer.connection.onreconnected(() => {
+        this.getConnectionId();
+        this.subscribeToBans();
+      });
       this.usersService.getById(this.id)
       .subscribe({
         next: user => 
@@ -76,7 +113,21 @@ export class ProfileComponent implements OnInit {
 
   private onAuthChange(): void {
     this.isAdmin = this._tokenService.isAdmin();
-   }
+    if (this.userBansConnectionContainer && this.userBansConnectionContainer.connection)
+    {
+      if (this.isAdmin && this.userBansConnectionContainer.connection.state == signalR.HubConnectionState.Disconnected)
+      {
+        this.userBansConnectionContainer.connection.start().then(() => {
+            this.getConnectionId();
+            this.subscribeToBans();
+          });
+      }
+      else if (!this.isAdmin && this.userBansConnectionContainer.connection.state == signalR.HubConnectionState.Connected)
+      {
+        this.userBansConnectionContainer.connection.stop();
+      }
+    }
+  }
 
   private startListening(): void {
     this.connection!.invoke('StartListening', this.id)
@@ -85,9 +136,13 @@ export class ProfileComponent implements OnInit {
 
   ngOnDestroy() {
     if (this.connection && this.connection.state == signalR.HubConnectionState.Connected)
-    {
-      this.connection.invoke('StopListening', this.id).then(() => this.connection!.stop())
+      this.connection.stop().then(() => this.connection = null)
           .catch(error => console.error(error));
-    }
+    else
+      this.connection = null;
+    if (this.userBansConnectionContainer.connection && this.userBansConnectionContainer.connection.state == signalR.HubConnectionState.Connected)
+      this.userBansConnectionContainer.connection.stop().then(() => this.userBansConnectionContainer.connection = null!);
+    else
+      this.userBansConnectionContainer.connection = null!
   }
 }

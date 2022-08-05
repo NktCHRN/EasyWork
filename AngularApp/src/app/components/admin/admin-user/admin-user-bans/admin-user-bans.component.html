@@ -3,7 +3,7 @@
         <h1 class="mb-0" style="font-size: 16pt">Active bans: {{bans.length}}</h1>
         <div fxLayout="row" fxLayoutGap="5px">
             <button mat-flat-button color="accent" type="button" *ngIf="user.id != myId" (click)="openBanDialog()">Ban</button>
-            <button mat-flat-button color="primary" type="button" *ngIf="bans.length > 0">Unban</button>
+            <button mat-flat-button color="primary" type="button" *ngIf="bans.length > 0" (click)="openUnbanDialog()">Unban</button>
         </div>
     </div>
     <div class="bans-content" fxLayoutGap="20px" fxLayout="column">
@@ -11,11 +11,13 @@
             <div>
                 <p class="mb-0"><strong>From: </strong>{{ban.dateFrom | date:'d MMM y, HH:mm'}}</p>
                 <p class="mb-0"><strong>To: </strong>{{ban.dateTo | date:'d MMM y, HH:mm'}}</p>
-                <p class="mb-0"><strong>Reason: </strong>{{ban.hammer}}</p>
-                <p class="mb-0"><strong>Admin: </strong><a title="admin" [routerLink]="['/users', ban.admin.id]">{{ban.admin.fullName}}</a></p>
+                <p class="mb-0 break-all"><strong>Reason: </strong>{{ban.hammer}}</p>
+                <p class="mb-0"><strong>Admin: </strong><a title="admin's page" [routerLink]="['/users', ban.admin.id]">{{ban.admin.fullName}}</a></p>
             </div>
             <div>
-                <button type="button" mat-mini-fab color="warn" style="box-shadow: none" matTooltip="Delete this ban"><mat-icon>delete</mat-icon></button>
+                <button type="button" mat-mini-fab color="warn" style="box-shadow: none" matTooltip="Delete this ban" (click)="openDeleteDialog(ban.id)">
+                    <mat-icon>delete</mat-icon>
+                </button>
             </div>
         </div>
     </div>

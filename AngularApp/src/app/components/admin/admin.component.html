@@ -10,7 +10,7 @@
                 <button mat-icon-button type="submit" class="search-button"><mat-icon class="white">search</mat-icon></button>
             </form>
         </div>
-        <div *ngIf="formError" class="text-muted text-xxs">
+        <div *ngIf="formError" class="text-muted text-xxs" style="margin-left: 10px">
             {{formError}}
         </div>
     </div>
@@ -22,9 +22,9 @@
         <div *ngIf="errorMessage" class="red text-sm">
             {{errorMessage}}
         </div>
-        <div *ngIf="users" fxLayout="column" fxLayoutGap="30px">
+        <div *ngIf="users && connectionContainer" fxLayout="column" fxLayoutGap="30px">
             <p *ngIf="users.length == 0" class="text-sm text-muted">No users were found</p>
-            <app-admin-user *ngFor="let user of users" [user]="user"></app-admin-user>
+            <app-admin-user *ngFor="let user of users" [user]="user" [connectionContainer]="connectionContainer"></app-admin-user>
         </div>
     </div>
 </div>

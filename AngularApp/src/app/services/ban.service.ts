@@ -20,15 +20,29 @@ export class BanService extends BaseService {
 
   override serviceBaseURL: string = this.baseURL + 'Bans/';
 
-  public add(model: AddBanModel): Observable<BannedModel>
+  public add(connectionId: string | null, model: AddBanModel): Observable<BannedModel>
   {
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type':  'application/json',
-        'Authorization': this._tokenService.getAuthHeaderValue()
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
       })
     };
     return this._http.post<BannedModel>(this.serviceBaseURL, model, httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
+  public delete(connectionId: string | null, id: number): Observable<any>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'ConnectionId': connectionId ?? ''
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + id, httpOptions)
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 }

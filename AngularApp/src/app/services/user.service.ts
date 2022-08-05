@@ -6,6 +6,7 @@ import { UserProfileReducedModel } from '../shared/user/user-profile-reduced.mod
 import { UserModel } from '../shared/user/user.model';
 import { BaseService } from './base.service';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { TokenService } from './token.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,8 @@ export class UserService extends BaseService {
   override serviceBaseURL: string = this.baseURL + 'Users/';
 
   constructor(private _http: HttpClient,
-    private _processHTTPMsgService: ProcessHTTPMsgService) {
+    private _processHTTPMsgService: ProcessHTTPMsgService,
+    private _tokenService: TokenService) {
     super();
   }
 
@@ -29,11 +31,25 @@ export class UserService extends BaseService {
       .pipe(catchError(this._processHTTPMsgService.handleError));
   }
 
+  public unbanById(userBansConnectionId: string | null, id: number) : Observable<any>
+  {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': this._tokenService.getAuthHeaderValue(),
+        'UserBansConnectionId': userBansConnectionId ?? ''
+      })
+    };
+    return this._http.delete(this.serviceBaseURL + id + '/unban', httpOptions)
+      .pipe(catchError(this._processHTTPMsgService.handleError));
+  }
+
   public getActiveBansById(id: number) : Observable<BannedModel[]>
   {
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type':  'application/json'
+        'Content-Type':  'application/json',
+        'Authorization': this._tokenService.getAuthHeaderValue()
       })
     };
     return this._http.get<BannedModel[]>(this.serviceBaseURL + id + '/activeBans', httpOptions)

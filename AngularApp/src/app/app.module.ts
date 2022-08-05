@@ -123,6 +123,8 @@ import { AdminComponent } from './components/admin/admin.component';
 import { AdminUserComponent } from './components/admin/admin-user/admin-user.component';
 import { AdminUserBansComponent } from './components/admin/admin-user/admin-user-bans/admin-user-bans.component';
 import { BanAddComponent } from './components/admin/admin-user/admin-user-bans/ban-add/ban-add.component';
+import { BanDeleteComponent } from './components/admin/admin-user/admin-user-bans/ban-delete/ban-delete.component';
+import { UnbanComponent } from './components/admin/admin-user/admin-user-bans/unban/unban.component';
 
 export function tokenGetter() { 
   return localStorage.getItem("jwt"); 
@@ -189,7 +191,9 @@ export function tokenGetter() {
     AdminComponent,
     AdminUserComponent,
     AdminUserBansComponent,
-    BanAddComponent
+    BanAddComponent,
+    BanDeleteComponent,
+    UnbanComponent
   ],
   imports: [
     BrowserModule,
