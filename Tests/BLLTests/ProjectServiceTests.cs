@@ -272,12 +272,14 @@ namespace Tests.BLLTests
                 new File()
                 {
                     Name = "File1.fl",
-                    TaskId = 1
+                    TaskId = 1,
+                    IsFull = true
                 },
                 new File()
                 {
                     Name = "File2.fl",
-                    TaskId = 1
+                    TaskId = 1,
+                    IsFull = true
                 },
                 new File()
                 {
@@ -292,7 +294,8 @@ namespace Tests.BLLTests
                 new File()
                 {
                     Name = "File5.fl",
-                    TaskId = 1
+                    TaskId = 1,
+                    IsFull = true
                 },
                 new File()
                 {
@@ -302,7 +305,8 @@ namespace Tests.BLLTests
                 new File()
                 {
                     Name = "File7.fl",
-                    TaskId = 2
+                    TaskId = 2,
+                    IsFull = true
                 }
             };
             foreach (var file in files)
@@ -397,12 +401,15 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedTasksCount, actualTasksCount, "Method does not delete all tasks cascadely");
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
             Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
-            var deletedFilesIds = new int[] { 1, 2, 4, 5, 6 };
+            var deletedFilesIds = new int[] { 1, 2, 5 };      // 4, 6 - chunks
             foreach (var fileId in deletedFilesIds)
             {
                 _managerMock.Verify(t => t.DeleteFile($"{fileId}.fl", Business.Enums.EasyWorkFileTypes.File),
                 "Method does not remove the file from file system");
             }
+            var deletedChunksIds = new int[] { 4, 6 };
+            foreach (var fileId in deletedChunksIds)
+                _managerMock.Verify(t => t.DeleteChunks(fileId.ToString()), "Method does not remove chunks from file system");
         }
 
         [Test]

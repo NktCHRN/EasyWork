@@ -303,7 +303,8 @@ namespace Tests.BLLTests
                 new File()
                 {
                     TaskId = 1,
-                    Name = "file1.file"
+                    Name = "file1.file",
+                    IsFull = true
                 },
                 new File()
                 {
@@ -489,8 +490,8 @@ namespace Tests.BLLTests
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
             _managerMock.Verify(t => t.DeleteFile("1.file", Business.Enums.EasyWorkFileTypes.File),
                 "Method does not remove the file from file system");
-            _managerMock.Verify(t => t.DeleteFile("2.file", Business.Enums.EasyWorkFileTypes.File),
-                "Method does not remove the file from file system");
+            _managerMock.Verify(t => t.DeleteChunks("2"),
+                "Method does not remove chunks from file system");
         }
 
         [Test]
