@@ -41,7 +41,6 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
     private _userService: UserService) { }
 
   ngOnInit(): void {
-    console.log(this.model);
     this.prioritiesWithColors = this._taskService.getPrioritiesWithColors();
     this._taskService.getExecutors(this.model.id)
     .subscribe(result => this.executors = result);
