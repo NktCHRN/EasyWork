@@ -133,7 +133,6 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
           });
         }
         this.updateTask(task);
-        console.log(this.model);
       }
     );
     dialogRef.componentInstance.deletedTask.subscribe(
