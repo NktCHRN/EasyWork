@@ -71,7 +71,7 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.ToDo" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"
+                        (movedFromArchived)="onAddFromArchive($event.task, $event.status)"
                         [projectsConnectionContainer]="connectionContainer"
                         [connectionContainer]="tasksConnectionContainer"></app-task-reduced>
                         <app-task-add 
@@ -111,7 +111,7 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.InProgress" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"
+                        (movedFromArchived)="onAddFromArchive($event.task, $event.status)"
                         [projectsConnectionContainer]="connectionContainer"
                         [connectionContainer]="tasksConnectionContainer"></app-task-reduced>
                         <app-task-add 
@@ -151,7 +151,7 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.Validate" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"
+                        (movedFromArchived)="onAddFromArchive($event.task, $event.status)"
                         [projectsConnectionContainer]="connectionContainer"
                         [connectionContainer]="tasksConnectionContainer"></app-task-reduced>
                         <app-task-add 
@@ -190,7 +190,7 @@
                         [tasksCount]="tasksCount" 
                         [status]="taskStatuses.Complete" 
                         (updatedStatus)="onTaskStatusUpdate($event)" 
-                        (movedFromArchived)="onAddFromArchive($event)"
+                        (movedFromArchived)="onAddFromArchive($event.task, $event.status)"
                         [projectsConnectionContainer]="connectionContainer"
                         [connectionContainer]="tasksConnectionContainer"></app-task-reduced>
                         <app-task-add 

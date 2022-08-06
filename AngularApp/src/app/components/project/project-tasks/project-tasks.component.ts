@@ -203,10 +203,7 @@ export class ProjectTasksComponent implements OnInit, OnDestroy {
         else
           this._taskService.getReducedById(model.id)
           .subscribe({
-            next: result => this.onAddFromArchive({
-              status: model.new,
-              ...result
-            }),
+            next: result => this.onAddFromArchive(result, model.new),
             error: error => console.error(error)
           });
       }
@@ -370,12 +367,12 @@ export class ProjectTasksComponent implements OnInit, OnDestroy {
   private subscribeToTask(taskId: number): void {
     const foundViewTask = this.viewTasks.find(t => t.model.id == taskId);
     foundViewTask?.updatedStatus.subscribe(m => this.onTaskStatusUpdate(m));
-    foundViewTask?.movedFromArchived.subscribe(m => this.onAddFromArchive(m));
+    foundViewTask?.movedFromArchived.subscribe(m => this.onAddFromArchive(m.task, m.status));
   }
 
-  onAddFromArchive(task: TaskReducedWithStatusModel): void
+  onAddFromArchive(task: TaskReducedModel, status: TaskStatus): void
   {
-    this.addExistingTask(task, task.status);
+    this.addExistingTask(task, status);
     this.subscribeToTask(task.id);
   }
 

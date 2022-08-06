@@ -150,7 +150,7 @@ export class ProjectArchiveComponent implements OnInit, OnDestroy {
   private subscribeToTask(taskId: number) {
     const foundViewTask = this.viewTasks.find(t => t.model.id == taskId);
     foundViewTask?.movedToArchived.subscribe(m => this.onMovedToArchive(m));
-    foundViewTask?.movedFromArchived.subscribe(m => this.onMovedFromArchive(m.id));
+    foundViewTask?.movedFromArchived.subscribe(m => this.onMovedFromArchive(m.task.id));
   }
 
   ngOnDestroy()

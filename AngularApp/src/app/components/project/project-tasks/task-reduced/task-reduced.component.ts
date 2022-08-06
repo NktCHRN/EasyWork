@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from 'src/app/services/task.service';
 import { ConnectionContainer } from 'src/app/shared/other/connection-container';
@@ -20,7 +20,7 @@ import { UserService } from 'src/app/services/user.service';
   templateUrl: './task-reduced.component.html',
   styleUrls: ['./task-reduced.component.scss']
 })
-export class TaskReducedComponent implements OnInit {
+export class TaskReducedComponent implements OnInit, OnDestroy {
   @Input() model: TaskReducedModel = undefined!;
   @Input() status: TaskStatus = undefined!
   executors: UserMiniWithAvatarModel[] = [];
@@ -35,20 +35,23 @@ export class TaskReducedComponent implements OnInit {
   @Input() projectsConnectionContainer: ConnectionContainer = new ConnectionContainer();
   @Input() connectionContainer: ConnectionContainer = new ConnectionContainer();
 
+  turnedOffConnection: boolean = false;
+
   constructor(private _taskService: TaskService, private _dialog: MatDialog, private _connectionService: ConnectionService,
     private _userService: UserService) { }
 
   ngOnInit(): void {
+    console.log(this.model);
     this.prioritiesWithColors = this._taskService.getPrioritiesWithColors();
     this._taskService.getExecutors(this.model.id)
     .subscribe(result => this.executors = result);
     this.connectionContainer.connection.onreconnected(() => this.startListening());
     this.connectionContainer.connection.on("Updated", (taskId: number, model: UpdateTaskModel) => {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.updateTask(model);
     });
     this.connectionContainer.connection.on("AddedExecutor", (taskId: number, executorId: number) => {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this._userService.getById(executorId)
         .subscribe({
           next: result => this.addExecutor({
@@ -60,31 +63,31 @@ export class TaskReducedComponent implements OnInit {
         });
     });
     this.connectionContainer.connection.on("DeletedExecutor", (taskId: number, executorId: number) => {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.deleteExecutor(executorId);
     });
     this.connectionContainer.connection.on("StartedFileUpload", (taskId: number, _) =>
     {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.model.filesCount++;
     });
     this.connectionContainer.connection.on("UploadedFile", (taskId: number, _) =>   // deprecated
     {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.model.filesCount++;
     });
     this.connectionContainer.connection.on("DeletedFile", (taskId: number, _) =>
     {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.model.filesCount--;
     });
     this.connectionContainer.connection.on("AddedMessage", (taskId: number, _) => {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.model.messagesCount++;
     });
     this.connectionContainer.connection.on("DeletedMessage", (taskId: number, _) =>
     {
-      if (taskId == this.model.id)
+      if (taskId == this.model.id && !this.turnedOffConnection)
         this.model.messagesCount--;
     });
     this._connectionService.getOpenConnection(this.connectionContainer.connection)
@@ -115,11 +118,13 @@ export class TaskReducedComponent implements OnInit {
     });
     dialogRef.componentInstance.updatedTask.subscribe(
       task => {
+        console.log("ex");
+        console.log(task)
         if (this.status != task.status)
         {
           if (this.status == TaskStatus.Archived)
             this.movedFromArchived.emit({
-              ...this.model,
+              task: this.model,
               status: task.status
             });
           if (task.status == TaskStatus.Archived)
@@ -131,6 +136,7 @@ export class TaskReducedComponent implements OnInit {
           });
         }
         this.updateTask(task);
+        console.log(this.model);
       }
     );
     dialogRef.componentInstance.deletedTask.subscribe(
@@ -167,5 +173,10 @@ export class TaskReducedComponent implements OnInit {
   {
     this.connectionContainer.connection.invoke('StartListening', this.model.id)
     .catch(error => console.error(error));
+  }
+
+  ngOnDestroy()
+  {
+    this.turnedOffConnection = true;
   }
 }
