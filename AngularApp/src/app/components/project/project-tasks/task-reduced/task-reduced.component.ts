@@ -118,8 +118,6 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
     });
     dialogRef.componentInstance.updatedTask.subscribe(
       task => {
-        console.log("ex");
-        console.log(task)
         if (this.status != task.status)
         {
           if (this.status == TaskStatus.Archived)
