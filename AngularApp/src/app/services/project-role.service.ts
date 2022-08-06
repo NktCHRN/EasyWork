@@ -40,12 +40,12 @@ export class ProjectRoleService {
         {
           role: UserOnProjectRole.Manager,
           description: 'Manager has all user\'s abilities and also ' +
-          'can update an invite-code and its\' status, add users, kick participants with role "User", delete tags of the whole project and change tasks\' limits'
+          'can update an invite-code and its\' status, add users, kick participants with role "User" and change tasks\' limits'
         },
         {
           role: UserOnProjectRole.Owner,
           description: 'Owner has full access to the project, including abilities to change the project information, to delete the project, ' +
-          'to add, edit or kick any user. Be careful with granting this role!'
+          'to add, edit or kick any user (even another Owner). Be careful with granting this role!'
         }
       ]);
     };
