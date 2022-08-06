@@ -1,0 +1,36 @@
+    <mat-card>
+        <mat-card-title class="orange"><a title="{{model.name}}" (click)="openDialog()">{{model.name}}</a></mat-card-title>
+        <mat-card-subtitle>Started: {{model.startDate | date:'d MMM y, HH:mm'}}</mat-card-subtitle>
+        <mat-card-content>
+            <p *ngIf="model.priority"><strong>Priority: </strong><span [ngStyle]="{'color': prioritiesWithColors[model.priority]}">{{model.priority}}</span></p>
+            <p *ngIf="model.deadline"><strong class="deep-orange">Deadline:</strong> {{model.deadline | date:'d MMM y, HH:mm'}}</p>
+            <p *ngIf="model.endDate"><strong>Ended:</strong> {{model.endDate | date:'d MMM y, HH:mm'}}</p>
+            <p fxLayoutAlign="start center" fxLayoutGap="30px">
+                <a title="{{model.name}}" (click)="openDialog()" fxLayoutAlign="center center"><mat-icon>attach_file</mat-icon>{{model.filesCount}}</a>
+                <a title="{{model.name}}" (click)="openDialog()" fxLayoutAlign="center center"><mat-icon>chat</mat-icon>{{model.messagesCount}}</a>
+            </p>
+            <mat-divider inset *ngIf="model.executors && model.executors.length > 0"></mat-divider>
+            <a 
+            *ngIf="model.executors && model.executors.length == 1" 
+            fxLayoutAlign="start center" 
+            fxLayoutGap="10px" 
+            fxLayout="row" 
+            class="avatars text-md black" 
+            title="{{model.executors[0].fullName}}" 
+            [routerLink]="['/users', model.executors[0].id]">
+                <img alt="avatar" src="{{model.executors[0].avatarURL ? model.executors[0].avatarURL : '../../assets/default-avatar.png'}}" class="avatar task-reduced-avatar">
+                {{model.executors[0].fullName}}
+            </a>
+            <p *ngIf="model.executors && model.executors.length > 1" fxLayout="row" fxLayoutGap="-23px">
+                <a 
+                *ngFor="let executor of model.executors; index as i" 
+                [ngStyle]="{'z-index': model.executors.length - i}"
+                class="avatars text-md black"
+                [matTooltip]="executor.fullName"
+                matTooltipClass="bg-black"
+                [routerLink]="['/users', executor.id]">
+                    <img alt="avatar" src="{{executor.avatarURL ? executor.avatarURL : '../../assets/default-avatar.png'}}" class="avatar task-reduced-avatar avatar-bordered-white">
+                </a>
+            </p>
+        </mat-card-content>
+      </mat-card>

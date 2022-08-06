@@ -1,0 +1,62 @@
+<div class="profile container no-shadow" fxLayoutAlign="center center">
+    <div fxLayout="column" fxFlex="100" fxLayoutGap="35px">
+        <div fxLayout="row" fxFlex="100">
+            <div fxFlex="30" fxFlex.gt-sm="20" class="full">
+                <a *ngIf="miniUser" fxLayoutAlign="center center" (click)="openAvatarDialog()" style="cursor: pointer">
+                    <span class="avatar-wrapper avatar-img-wrapper w-75" matBadge="edit" matBadgePosition="below" matBadgeColor="accent" matBadgeSize="large">
+                    <img alt="avatar" src="{{miniUser.avatarURL ? miniUser.avatarURL : '../../assets/default-avatar.png'}}" class="img-cover-center avatar full">
+                    </span>
+                </a> 
+            </div>
+            <div fxFlex="70" fxFlex.gt-sm="80" fxLayoutAlign="center center">
+                <h1 *ngIf="miniUser" fxLayoutAlign="center center" class="truncate-content">
+                    <span class="truncate" [ngClass.gt-sm]="'text-xl'">{{miniUser.fullName}}</span>
+                </h1> 
+            </div>
+        </div>
+        <div fxFlex="100" fxLayout="column" fxLayoutGap="35px" *ngIf="user">
+            <form fxLayout="column" class="container mb-0" style="width:100%" novalidate method="POST" [formGroup]="form" #cform="ngForm" fxFlex>
+                <p fxLayout="column" fxLayout.gt-sm="row" fxLayoutAlign="space-between center" fxFlex>
+                    <mat-form-field appearance="outline" class="resp-width mb-12">
+                        <mat-label>First name</mat-label>
+                        <input matInput formControlName="firstName" (focusout)="onSubmit($event)">
+                        <mat-error *ngIf="formErrors.firstName">{{formErrors.firstName}}</mat-error>
+                    </mat-form-field>    
+                    <mat-form-field appearance="outline" class="resp-width">
+                        <mat-label>Last name (optional)</mat-label>
+                        <input matInput formControlName="lastName" (focusout)="onSubmit($event)">
+                        <mat-error *ngIf="formErrors.lastName">{{formErrors.lastName}}</mat-error>
+                    </mat-form-field>
+                </p>
+                <p>
+                    <mat-form-field appearance="outline" style="width:100%">
+                        <mat-label>Phone number (optional; numbers only)</mat-label>
+                        <input matInput formControlName="phoneNumber" (input)="changeNumber($event)" (focusout)="onSubmit($event)">
+                        <mat-error *ngIf="formErrors.phoneNumber">{{formErrors.phoneNumber}}</mat-error>
+                    </mat-form-field>
+                </p>
+                <p>
+                    <mat-form-field appearance="outline" style="width:100%">
+                        <mat-label>Email address</mat-label>
+                        <input matInput  value="{{user.email}}" disabled class="black">
+                    </mat-form-field>
+                </p>
+            </form>
+            <div class="info" fxLayout="column" fxLayout.gt-sm="row">
+                <div fxFlex="50" fxLayoutAlign.gt-sm="start center">
+                    <p>
+                        <br>Tasks done: <strong class="orange">{{user.tasksDone}}</strong><br>
+                        Not yet done: <strong class="deep-orange">{{user.tasksNotDone}}</strong><br>
+                        Totally: <strong class="orange">{{user.tasksDone + user.tasksNotDone}}</strong>
+                    </p>
+                </div>
+                <div fxFlex="50" fxLayoutAlign.gt-sm="end center">
+                    <p>Participates in <strong class="orange"> {{user.projects}} </strong> projects</p>
+                </div>
+            </div>
+            <div class="info">
+                <p>With us from <i class="orange">{{user.registrationDate | date:'d MMM y'}}</i></p>
+            </div>
+        </div>
+    </div>
+</div>

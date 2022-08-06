@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.DTOs;
+using WebAPI.DTOs.User;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -37,7 +38,7 @@ namespace WebAPI.Controllers
                     avatarType = _fileManager.GetImageMIMEType(user.AvatarFormat);
                     avatarURL = $"{this.GetApiUrl()}Users/{user.Id}/Avatar";
                 }    
-                return Ok(new UserReducedDTO()
+                return Ok(new UserReducedDTO
                 {
                     FullName = name,
                     MIMEAvatarType = avatarType,

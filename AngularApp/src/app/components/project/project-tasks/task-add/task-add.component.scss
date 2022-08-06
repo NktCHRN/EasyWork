@@ -1,0 +1,19 @@
+.adder {
+    $padding-size: 5px;
+    padding-top: $padding-size;
+    padding-bottom: $padding-size;
+}
+
+$close-size: 36px;
+
+.close-icon {
+        height: $close-size !important;
+        width: $close-size !important;
+        font-size: $close-size !important;
+}
+
+$button-size: 60px;
+.close-button {
+    height: $button-size !important;
+    width: $button-size !important;
+}

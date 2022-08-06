@@ -31,7 +31,7 @@ namespace WebAPI.Data
                 Email = "14nik20@gmail.com",
                 FirstName = "Nikita",
                 LastName = "Chernikov",
-                RegistrationDate = DateTime.UtcNow
+                RegistrationDate = DateTimeOffset.UtcNow
             };
             // you may also add a phone number
             user.NormalizedEmail = user.Email.ToUpperInvariant();
@@ -45,7 +45,7 @@ namespace WebAPI.Data
                 foundUser = await UserManager.FindByEmailAsync(user.Email);
             }
             var role = "Admin";
-            if (!(await UserManager.IsInRoleAsync(foundUser, role)))
+            if (!await UserManager.IsInRoleAsync(foundUser, role))
                 await UserManager.AddToRoleAsync(foundUser, role);
         }
     }

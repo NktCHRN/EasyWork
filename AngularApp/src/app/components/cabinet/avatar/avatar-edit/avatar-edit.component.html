@@ -1,0 +1,49 @@
+<h1 mat-dialog-title>Choose a new avatar</h1>
+<mat-dialog-content>
+    <div fxLayout="column" fxLayoutGap="30px" *ngIf="!loading && !success">
+        <input type="file" (change)="fileChangeEvent($event)" />
+
+        <div *ngIf="showCropper">
+            <button mat-flat-button [disabled]="scale <= minScale" (click)="zoomOut()"><mat-icon>zoom_out</mat-icon></button>
+            <button mat-flat-button [disabled]="scale >= maxScale" (click)="zoomIn()"><mat-icon>zoom_in</mat-icon></button>
+        </div>
+        
+        <div fxLayout="row" class="w-100" fxLayoutAlign="center center">
+            <div class="w-75">
+                <image-cropper
+                #imageCropper
+                    [imageChangedEvent]="imageChangedEvent"
+                    [maintainAspectRatio]="true"
+                    [containWithinAspectRatio]="containWithinAspectRatio"
+                    [aspectRatio]="1"
+                    [cropperMinWidth]="350"
+                    [onlyScaleDown]="true"
+                    [roundCropper]="false"
+                    [transform]="transform"
+                    [alignImage]="'center'"
+                    [cropper]="cropperPositions"
+                    [style.display]="showCropper ? null : 'none'"
+                    format="png"
+                    (imageCropped)="imageCropped($event)"
+                    (imageLoaded)="imageLoaded()"
+                    (loadImageFailed)="loadImageFailed()"
+                ></image-cropper>
+            </div>
+        </div>
+        <div fxLayoutGap="30px">
+            <button mat-flat-button (click)="changeToShow()">Cancel</button>
+            <button mat-flat-button color="primary" [disabled]="!showCropper" (click)="onSubmit()">Submit</button>
+        </div>
+    </div>
+    <div *ngIf="success">
+        <div class="header-container">
+            <h3>The avatar has been successfully updated</h3>
+        </div>
+        <div>
+            <button mat-flat-button [mat-dialog-close]="true">Close</button>
+        </div>
+    </div>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</mat-dialog-content>

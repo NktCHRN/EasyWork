@@ -1,0 +1,51 @@
+<mat-drawer-container>
+    <mat-drawer #drawer [mode]="'side'" class="bg-orange white project-sidenav">
+        <div style="position: relative !important" class="h-100">
+            <div class="mh-10 close-btn" fxLayoutAlign="end center">
+                <button mat-icon-button (click)="drawer.close()">
+                    <mat-icon aria-hidden="false" aria-label="opes/close the side-menu">arrow_back_ios</mat-icon>
+                </button>
+            </div>
+            <div class="mh-80 sidenav-main" fxLayout="column" fxLayoutGap="12px">
+                <a fxLayout="column" fxLayoutAlign="center center" routerLink="info" routerLinkActive="active">
+                    <div class="sidenav-icon-wrapper" fxLayoutAlign="center center">
+                        <span style="font-size: 35px; transform: scale(1.5, 0.75)">i</span>
+                    </div>
+                    <p>Info</p>
+                </a>
+                <a fxLayout="column" fxLayoutAlign="center center" routerLink="tasks" routerLinkActive="active">
+                    <div class="sidenav-icon-wrapper" fxLayoutAlign="center center">
+                        <mat-icon aria-hidden="false" aria-label="task icon" class="sidenav-icon">task_alt</mat-icon>
+                    </div>
+                    <p>Tasks</p>
+                </a>
+                <a fxLayout="column" fxLayoutAlign="center center" routerLink="archive" routerLinkActive="active">
+                    <div class="sidenav-icon-wrapper" fxLayoutAlign="center center">
+                        <mat-icon aria-hidden="false" aria-label="archive icon" class="sidenav-icon">collections_bookmark</mat-icon>
+                    </div>
+                    <p>Archive</p>
+                </a>
+                <a fxLayout="column" fxLayoutAlign="center center" routerLink="gantt" routerLinkActive="active">
+                    <div class="sidenav-icon-wrapper" fxLayoutAlign="center center">
+                        <mat-icon aria-hidden="false" aria-label="chart icon" class="sidenav-icon" style="transform: rotate(90deg)">signal_cellular_alt</mat-icon>
+                    </div>
+                    <p>Gantt chart</p>
+                </a>
+                <a fxLayout="column" fxLayoutAlign="center center" routerLink="participants" routerLinkActive="active">
+                    <div class="sidenav-icon-wrapper" fxLayoutAlign="center center">
+                        <mat-icon aria-hidden="false" aria-label="participants icon" class="sidenav-icon">person</mat-icon>
+                    </div>
+                    <p>Participants</p>
+                </a>
+            </div>
+        </div>
+    </mat-drawer>
+    <mat-drawer-content>
+        <button mat-icon-button class="project-sidenav-button" (click)="drawer.open()" fxShow="{{!drawer.opened}}">
+            <mat-icon aria-hidden="false" aria-label="opes/close the side-menu">arrow_forward_ios</mat-icon>
+        </button>
+        <router-outlet 
+        *ngIf="projectId && projectName && me && connectionContainer && connectionContainer.connection && connectionContainer.id" 
+        (activate)="onOutletLoaded($event)"></router-outlet>
+    </mat-drawer-content>
+</mat-drawer-container>

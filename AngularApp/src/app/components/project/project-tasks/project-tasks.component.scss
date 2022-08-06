@@ -1,0 +1,100 @@
+@import '../../../../variables';
+
+$min-height: calc(100vh - $footer-height - $heaher-height);
+$min-height-phone: calc(100vh - $footer-height - $heaher-phone-height);
+
+.container {
+    width: 100%;
+    min-height: $min-height;
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        min-height: $min-height-phone;
+    }
+}
+
+.to-do {
+    background-color: rgba(yellow, 0.25);
+}
+
+.in-progress {
+    background-color: rgba(orange, 0.25);
+}
+
+.validate {
+    background-color: rgba(#D84315, 0.25);
+}
+
+.complete {
+    background-color: rgba(green, 0.25);
+}
+
+.column {
+    min-height: $min-height;
+    margin-bottom: 50px;
+}
+
+$padding-size: 5px;
+.column-header {
+    padding-top: $padding-size;
+    padding-bottom: $padding-size;
+    width: 100%;
+}
+
+.column-header>h1 {
+    margin: 0;
+    margin-bottom: $padding-size;
+}
+
+@media screen and (max-width: 600px) {
+    .column {
+        min-height: $min-height-phone;
+    }
+}
+
+.row {
+    $padding-size: 50px;
+    padding-left: $padding-size;
+    padding-right: $padding-size;
+}
+
+.task-card {
+    width: 90%;
+    display: block;
+}
+
+.header-container {
+    $padding-size: 10px;
+    padding-top: $padding-size;
+    padding-bottom: $padding-size;
+}
+
+.list{
+    overflow: hidden;
+    width: 100%;
+  }
+
+::ng-deep {
+    .mat-chip-list-wrapper {
+        flex-wrap: nowrap !important;
+        flex-shrink: 0;
+      }
+    .mat-menu-panel {
+        min-width: fit-content !important;
+    }
+    .invite-menu>.mat-menu-content {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    
+}
+
+.user-on-page-avatar {
+    width: 36px;
+    margin-right: 10px;
+}
+
+.avatar-bordered-orange {
+    border: 3px solid orange
+}

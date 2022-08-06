@@ -33,11 +33,11 @@ namespace Data.Migrations
                     b.Property<int?>("AdminId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("DateFrom")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("DateFrom")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("DateTo")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("DateTo")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Hammer")
                         .HasColumnType("nvarchar(400)");
@@ -62,6 +62,9 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<bool>("IsFull")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(256)");
@@ -84,8 +87,8 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
@@ -136,15 +139,15 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
                     b.ToTable("Projects");
                 });
 
-            modelBuilder.Entity("Data.Entities.Release", b =>
+            modelBuilder.Entity("Data.Entities.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -152,41 +155,21 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("ExpiryTime")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Token")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("ProjectId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("Releases");
-                });
-
-            modelBuilder.Entity("Data.Entities.Tag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tags");
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Data.Entities.Task", b =>
@@ -197,14 +180,14 @@ namespace Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime?>("Deadline")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("Deadline")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("EndDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -216,8 +199,8 @@ namespace Data.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
@@ -227,6 +210,30 @@ namespace Data.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("Data.Entities.TaskExecutor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("UserId", "TaskId")
+                        .IsUnique();
+
+                    b.ToTable("TaskExecutors");
                 });
 
             modelBuilder.Entity("Data.Entities.User", b =>
@@ -264,8 +271,8 @@ namespace Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("LastSeen")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("LastSeen")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -290,14 +297,8 @@ namespace Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("RegistrationDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -329,6 +330,9 @@ namespace Data.Migrations
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("AdditionDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -473,36 +477,6 @@ namespace Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TagTask", b =>
-                {
-                    b.Property<int>("TagsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TasksId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TagsId", "TasksId");
-
-                    b.HasIndex("TasksId");
-
-                    b.ToTable("TagTask");
-                });
-
-            modelBuilder.Entity("TaskUser", b =>
-                {
-                    b.Property<int>("ExecutorsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TasksId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ExecutorsId", "TasksId");
-
-                    b.HasIndex("TasksId");
-
-                    b.ToTable("TaskUser");
-                });
-
             modelBuilder.Entity("Data.Entities.Ban", b =>
                 {
                     b.HasOne("Data.Entities.User", "Admin")
@@ -550,15 +524,15 @@ namespace Data.Migrations
                     b.Navigation("Task");
                 });
 
-            modelBuilder.Entity("Data.Entities.Release", b =>
+            modelBuilder.Entity("Data.Entities.RefreshToken", b =>
                 {
-                    b.HasOne("Data.Entities.Project", "Project")
-                        .WithMany("Releases")
-                        .HasForeignKey("ProjectId")
+                    b.HasOne("Data.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Project");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Data.Entities.Task", b =>
@@ -570,6 +544,25 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Data.Entities.TaskExecutor", b =>
+                {
+                    b.HasOne("Data.Entities.Task", "Task")
+                        .WithMany("Executors")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Data.Entities.User", "User")
+                        .WithMany("Tasks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Data.Entities.UserOnProject", b =>
@@ -642,40 +635,8 @@ namespace Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TagTask", b =>
-                {
-                    b.HasOne("Data.Entities.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Data.Entities.Task", null)
-                        .WithMany()
-                        .HasForeignKey("TasksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TaskUser", b =>
-                {
-                    b.HasOne("Data.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("ExecutorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Data.Entities.Task", null)
-                        .WithMany()
-                        .HasForeignKey("TasksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Data.Entities.Project", b =>
                 {
-                    b.Navigation("Releases");
-
                     b.Navigation("Tasks");
 
                     b.Navigation("TeamMembers");
@@ -683,6 +644,8 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.Task", b =>
                 {
+                    b.Navigation("Executors");
+
                     b.Navigation("Files");
 
                     b.Navigation("Messages");
@@ -697,6 +660,10 @@ namespace Data.Migrations
                     b.Navigation("Messages");
 
                     b.Navigation("Projects");
+
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

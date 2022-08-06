@@ -1,27 +1,26 @@
 ﻿using Business.Interfaces;
-using Business.Other;
-using Data;
 using Data.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Task = System.Threading.Tasks.Task;
 
 namespace Business.Services
 {
     public class UserAvatarService : IUserAvatarService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
         private readonly IFileManager _manager;
 
-        public UserAvatarService(ApplicationDbContext context, IFileManager manager)
+        public UserAvatarService(UserManager<User> userManager, IFileManager manager)
         {
-            _context = context;
+            _userManager = userManager;
             _manager = manager;
         }
 
         private async Task<User> GetNotMappedByIdAsync(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
             if (user is null)
                 throw new InvalidOperationException("User with such an id was not found");
             return user;
@@ -36,8 +35,7 @@ namespace Business.Services
             {
                 _manager.DeleteFile(user.Id.ToString() + '.' + user.AvatarFormat, Enums.EasyWorkFileTypes.UserAvatar);
                 user.AvatarFormat = null;
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
+                await _userManager.UpdateAsync(user);
             }
             catch (Exception) { }
         }
@@ -56,8 +54,7 @@ namespace Business.Services
                 if (oldFileName != newFileName)
                 {
                     user.AvatarFormat = extension[1..];
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
+                    await _userManager.UpdateAsync(user);
                     if (!string.IsNullOrEmpty(oldFileName))
                         _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 }
@@ -78,8 +75,7 @@ namespace Business.Services
                 if (oldFileName != newFileName)
                 {
                     user.AvatarFormat = imageType[1..];
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
+                    await _userManager.UpdateAsync(user);
                     if (!string.IsNullOrEmpty(oldFileName))
                         _manager.DeleteFile(oldFileName, Enums.EasyWorkFileTypes.UserAvatar);
                 }

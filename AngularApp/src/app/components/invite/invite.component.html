@@ -1,0 +1,8 @@
+<div class="profile-reduced">
+    <p class="red text-md" *ngIf="errorMessage">
+        An error occured: {{errorMessage}}
+    </p>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>

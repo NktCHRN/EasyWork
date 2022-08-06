@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Business.Other;
-
 namespace Business.Interfaces
 {
     public interface IUserAvatarService

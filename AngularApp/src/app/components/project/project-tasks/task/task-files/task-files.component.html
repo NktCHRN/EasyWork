@@ -1,0 +1,110 @@
+<h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center">
+    <mat-icon>attach_file</mat-icon><span>&nbsp;Files</span>
+    <button type="button" mat-icon-button (click)="toggleEditable()">
+        <mat-icon *ngIf="!editable">edit</mat-icon>
+        <mat-icon *ngIf="editable">visibility</mat-icon>
+    </button>
+</h2>
+<div *ngIf="files">
+    <mat-list>
+        <mat-list-item *ngFor="let file of files" class="file-list-item">
+            <a mat-list-avatar class="pointer" title="{{file.name}}" *ngIf="file.isFull" (click)="download(file.id)">
+                <mat-icon class="file-icon" mat-list-avatar>description</mat-icon>
+            </a>
+            <mat-icon class="file-icon" mat-list-avatar *ngIf="!file.isFull && !file.loadingParameters">error</mat-icon>
+            <mat-icon class="file-icon" mat-list-avatar *ngIf="file.loadingParameters">post_add</mat-icon>
+            <div mat-line>
+                <a class="orange no-decor text-md pointer" title="{{file.name}}" *ngIf="file.isFull" (click)="download(file.id)">
+                    {{file.name}}
+                </a>
+                <p class="text-md mb-0" *ngIf="!file.isFull">{{file.name}}</p>
+            </div>
+            <div mat-line class="w-100">
+                <div *ngIf="file.loadingParameters" class="w-100" fxLayoutAlign="center start" fxLayoutGap="3px" fxLayout="column">
+                    <mat-progress-bar mode="determinate" [value]="(file.size) ? file.loadingParameters.currentSize / file.size * 100 : 100"></mat-progress-bar>
+                    <span class="text-xxs text-muted">{{file.loadingParameters.currentSize | fileSize}} of {{file.size! | fileSize}}</span>
+                </div>
+                <p *ngIf="file.isFull && file.size != null && file.size != undefined" class="mb-0 text-xxs text-muted">
+                    {{file.size | fileSize}}
+                </p>
+                <p class="red mb-0 text-xxs" *ngIf="!file.isFull && !file.loadingParameters" style="overflow-x: scroll; padding-bottom: 5px !important;">
+                    This file is not fully loaded or damaged
+                </p>
+            </div>
+            <div class="spacer"></div>
+            <div *ngIf="editable && !file.loadingParameters">
+                <button type="button" mat-icon-button (click)="openDeleteDialog(file)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+            <div *ngIf="file.loadingParameters">
+                <button type="button" mat-icon-button (click)="openCancelUploadDialog(file)">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+        </mat-list-item>
+    </mat-list>
+    <button mat-flat-button type="button" color="primary" class="w-100 file-adder" (click)="toggleIsFormOpened()" *ngIf="!isFormOpened"
+    [disabled]="files.length >= 10" matTooltip="There can be at maximum 10 files" [matTooltipDisabled]="files.length < 10">Add</button>
+    <form *ngIf="isFormOpened" class="file-add-form" fxLayout="column" fxLayoutGap="10px" (ngSubmit)="onSubmit()">
+        <h3 fxLayout="row" fxLayoutAlign="start center" class="mb-0">
+            <mat-icon>file_upload</mat-icon><span>To add</span>
+        </h3>
+        <mat-list>
+            <mat-list-item *ngFor="let file of toAdd, index as i" class="file-list-item">
+                <mat-icon class="file-icon" mat-list-avatar>post_add</mat-icon>
+                <div mat-line>
+                    <p class="text-md mb-0">{{file.file.name}}</p>
+                </div>
+                <div mat-line class="w-100">
+                    <p class="mb-0 text-xxs text-muted">
+                        {{file.file.size | fileSize}}
+                    </p>
+                </div>
+                <div class="spacer"></div>
+                <div><button type="button" mat-icon-button (click)="deleteToAdd(file.tempId)" *ngIf="!file.locked"><mat-icon>close</mat-icon></button></div>
+            </mat-list-item>
+        </mat-list>
+        <div *ngIf="!uploading">
+          <div fxHide fxShow.gt-sm *ngIf="files.length + toAdd.length < 10">
+            <div
+              class="fileupload"
+              appDragDropFileUpload
+              (click)="fileField.click()"
+              (fileDropped)="onToAddChange($event)"
+            >
+              <span class="ddinfo">Choose file(s) or drag here</span>
+              <input
+                type="file"
+                #fileField
+                (change)="onToAddChange($any($event).target.files)"
+                hidden
+                multiple
+              />
+            </div>
+          </div>
+          <div fxShow fxHide.gt-sm *ngIf="files.length + toAdd.length < 10">
+            <input
+            type="file"
+            (change)="onToAddChange($any($event).target.files)"
+            hidden
+            multiple
+            #fileField
+          />
+            <button type="button" mat-flat-button (click)="fileField.click()" color="primary">Choose file(s)</button>
+          </div>
+        </div>
+        <p class="red" *ngIf="showEmptyError">Please, select at least one file</p>
+        <div fxLayout="row" fxLayoutGap="10px" *ngIf="!uploading">
+            <button type="button" mat-flat-button (click)="toggleIsFormOpened()"><mat-icon>close</mat-icon></button>
+            <button type="submit" mat-flat-button color="primary"
+            [disabled]="files.length + toAdd.length > 10" matTooltip="There can be at maximum 10 files" [matTooltipDisabled]="files.length + toAdd.length <= 10"><mat-icon>check</mat-icon></button>
+          </div>
+      </form>
+</div>
+<div *ngIf="!files && !errorMessage">
+    <mat-spinner></mat-spinner>
+</div>
+<div *ngIf="errorMessage">
+    <h1 class="red">{{errorMessage}}</h1>
+</div>

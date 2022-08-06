@@ -1,0 +1,5 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<app-avatar-show *ngIf="mode==modes.Show" (closeOuter)="close()" (changeMode)="onModeChange($event)"></app-avatar-show>
+<app-avatar-edit *ngIf="mode==modes.Edit" (changeMode)="onModeChange($event)"></app-avatar-edit>

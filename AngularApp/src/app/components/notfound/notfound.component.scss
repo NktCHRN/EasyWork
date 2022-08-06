@@ -1,0 +1,17 @@
+$heading-size: 72pt;
+$text-size: 24pt;
+
+h1 {
+    font-weight: 900;
+    font-size: $heading-size;
+    line-height: $heading-size;
+}
+
+p {
+    font-size: $text-size;
+    line-height: $text-size;
+}
+
+.warning {
+    min-height: 100vh;
+}

@@ -1,0 +1,30 @@
+<div class="profile container no-shadow my-10" fxLayout="column">
+    <div>
+        <div class="search-container">
+            <form novalidate method="GET" fxLayoutAlign="start center" style="height: 100%" class="search-form" [formGroup]="form" (ngSubmit)="onSubmit()" #sform="ngForm">
+                <input 
+                class="search-input" 
+                type="search" 
+                placeholder="Enter an email or a full name of the user you want to find (at least, 3 characters)"
+                [formControl]="search">
+                <button mat-icon-button type="submit" class="search-button"><mat-icon class="white">search</mat-icon></button>
+            </form>
+        </div>
+        <div *ngIf="formError" class="text-muted text-xxs" style="margin-left: 10px">
+            {{formError}}
+        </div>
+    </div>
+    <div class="results-container" *ngIf="searchOldValue && searchOldValue.length >= minLength">
+        <h1 class="font-extra-thin text-lg">Results for {{searchOldValue}}:</h1>
+        <div *ngIf="loading">
+            <mat-spinner *ngIf="loading"></mat-spinner>
+        </div>
+        <div *ngIf="errorMessage" class="red text-sm">
+            {{errorMessage}}
+        </div>
+        <div *ngIf="users && connectionContainer" fxLayout="column" fxLayoutGap="30px">
+            <p *ngIf="users.length == 0" class="text-sm text-muted">No users were found</p>
+            <app-admin-user *ngFor="let user of users" [user]="user" [connectionContainer]="connectionContainer"></app-admin-user>
+        </div>
+    </div>
+</div>

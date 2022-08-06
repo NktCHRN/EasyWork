@@ -6,20 +6,16 @@ namespace Business.Interfaces
 {
     public interface ITaskService : ICRUD<TaskModel>, IModelValidator<TaskModel>
     {
-        IEnumerable<TaskModel> GetProjectTasksByDate(int projectId, DateTime from, DateTime to);
+        IEnumerable<TaskModel> GetProjectTasksByDate(int projectId, DateTimeOffset from, DateTimeOffset to);
 
-        IEnumerable<TaskModel> GetProjectTasksByStatusAndTag(int projectId, TaskStatuses status, int? tagId = null);
+        IEnumerable<TaskModel> GetProjectTasksByStatus(int projectId, TaskStatuses status);
 
         IEnumerable<TaskModel> GetUserTasks(int userId);
-
-        Task AddTagToTaskAsync(int taskId, int tagId);
-
-        Task DeleteTagFromTaskAsync(int taskId, int tagId);
 
         Task AddExecutorToTaskAsync(int taskId, int userId);
 
         Task DeleteExecutorFromTaskAsync(int taskId, int userId);
 
-        Task<IEnumerable<User>> GetTaskExecutorsAsync(int taskId);
+        IEnumerable<User> GetTaskExecutors(int taskId);
     }
 }

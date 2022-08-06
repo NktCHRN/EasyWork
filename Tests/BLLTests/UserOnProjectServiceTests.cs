@@ -191,50 +191,77 @@ namespace Tests.BLLTests
                 {
                     Name = "Task 1",
                     ProjectId = 1,
-                    Executors = new List<User>() {_context.Users.Find(1)!},
                     Status = TaskStatuses.InProgress
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 2",
                     ProjectId = 1,
-                    Executors = new List<User>() {_context.Users.Find(1)!},
                     Status = TaskStatuses.Validate
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 3",
                     ProjectId = 1,
-                    Executors = new List<User>() {_context.Users.Find(7)!},
                     Status = TaskStatuses.ToDo
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 4",
                     ProjectId = 1,
-                    Executors = new List<User>() {_context.Users.Find(7)!},
                     Status = TaskStatuses.Complete
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 5",
                     ProjectId = 1,
-                    Executors = new List<User>() {_context.Users.Find(7)!},
                     Status = TaskStatuses.Complete
                 },
                 new Data.Entities.Task()
                 {
                     Name = "Task 6",
                     ProjectId = 3,
-                    Executors = new List<User>() {_context.Users.Find(5)!},
                     Status = TaskStatuses.Archived
                 }
             };
-            foreach (var task in tasks)
+            _context.Tasks.AddRange(tasks);
+            _context.SaveChanges();
+
+            var executors = new List<TaskExecutor>
             {
-                _context.Tasks.Add(task);
-                _context.SaveChanges();
-            }
+                new TaskExecutor
+                {
+                    TaskId = 1,
+                    UserId = 1
+                },
+                new TaskExecutor
+                {
+                    TaskId = 2,
+                    UserId = 1
+                },                
+                new TaskExecutor
+                {
+                    TaskId = 3,
+                    UserId = 7
+                },
+                new TaskExecutor
+                {
+                    TaskId = 4,
+                    UserId = 7
+                },
+                new TaskExecutor
+                {
+                    TaskId = 5,
+                    UserId = 7
+                },
+                new TaskExecutor
+                {
+                    TaskId = 6,
+                    UserId = 5
+                }
+            };
+            _context.TaskExecutors.AddRange(executors);
+            _context.SaveChanges();
         }
 
         private readonly IEnumerable<UserOnProjectModel> _invalidForAddUoP = new UserOnProjectModel[]
@@ -541,7 +568,7 @@ new UserOnProjectModelExtended()
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        public void GetTaskTagsTest_ReturnsRealTaskTags(int index)
+        public void GetProjectUsersTest_ReturnsRealUsers(int index)
         {
             // Arrange
             SeedData();

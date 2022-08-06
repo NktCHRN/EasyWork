@@ -15,13 +15,13 @@ namespace Data
 
         public DbSet<Project> Projects => Set<Project>();
 
-        public DbSet<Release> Releases => Set<Release>();
-
         public DbSet<Entities.Task> Tasks => Set<Entities.Task>();
 
         public DbSet<UserOnProject> UsersOnProjects => Set<UserOnProject>();
 
-        public DbSet<Tag> Tags => Set<Tag>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+        public DbSet<TaskExecutor> TaskExecutors => Set<TaskExecutor>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -50,11 +50,6 @@ namespace Data
             .WithMany(p => p.Tasks)
             .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Release>()
-            .HasOne(r => r.Project)
-            .WithMany(p => p.Releases)
-            .OnDelete(DeleteBehavior.Cascade);
-
             builder.Entity<UserOnProject>()
             .HasOne(u => u.Project)
             .WithMany(p => p.TeamMembers)
@@ -68,6 +63,25 @@ namespace Data
             builder.Entity<Ban>()
             .HasOne(u => u.User)
             .WithMany(p => p.Bans)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<RefreshToken>()
+            .HasOne(u => u.User)
+            .WithMany(p => p.RefreshTokens)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<TaskExecutor>()
+            .HasIndex(u => new { u.UserId, u.TaskId })
+            .IsUnique();
+
+            builder.Entity<TaskExecutor>()
+            .HasOne(e => e.Task)
+            .WithMany(t => t.Executors)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<TaskExecutor>()
+            .HasOne(e => e.User)
+            .WithMany(u => u.Tasks)
             .OnDelete(DeleteBehavior.Cascade);
         }
     }

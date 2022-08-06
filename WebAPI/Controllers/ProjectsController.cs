@@ -5,8 +5,18 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.DTOs;
+using WebAPI.DTOs.Project;
+using WebAPI.DTOs.Project.Gantt;
+using WebAPI.DTOs.Project.InviteCode;
+using WebAPI.DTOs.Project.Limits;
+using WebAPI.DTOs.Project.Tasks;
+using WebAPI.DTOs.Task;
+using WebAPI.DTOs.User;
+using WebAPI.DTOs.UserOnProject;
+using WebAPI.Hubs;
+using WebAPI.Interfaces;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -24,23 +34,24 @@ namespace WebAPI.Controllers
 
         private readonly IUserOnProjectService _userOnProjectService;
 
-        private readonly IReleaseService _releaseService;
-
-        private readonly ITagService _tagService;
-
         private readonly ITaskService _taskService;
 
         private readonly IMapper _mapper;
-        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, IReleaseService releaseService, ITagService tagService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService)
+
+        private readonly IHubContext<ProjectsHub> _hubContext;
+
+        private readonly IProjectUsersContainer _projectUsersContainer;
+
+        public ProjectsController(IProjectService projectService, IMapper mapper, IUserOnProjectService userOnProjectService, UserManager<User> userManager, IFileManager fileManager, ITaskService taskService, IHubContext<ProjectsHub> hubContext, IProjectUsersContainer projectUsersContainer)
         {
             _projectService = projectService;
             _mapper = mapper;
             _userOnProjectService = userOnProjectService;
-            _releaseService = releaseService;
-            _tagService = tagService;
             _userManager = userManager;
             _fileManager = fileManager;
             _taskService = taskService;
+            _hubContext = hubContext;
+            _projectUsersContainer = projectUsersContainer;
         }
 
         [HttpGet]
@@ -66,6 +77,62 @@ namespace WebAPI.Controllers
             return Ok(_mapper.Map<ProjectDTO>(project));
         }
 
+        [HttpGet("{id}/reduced")]
+        public async Task<IActionResult> GetReducedInfoById(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(project.Id, userId.Value))
+                return Forbid();
+            return Ok(_mapper.Map<ProjectReducedDTO>(project));
+        }
+
+        [HttpGet("{id}/limits")]
+        public async Task<IActionResult> GetProjectLimits(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var limits = await _projectService.GetLimitsByIdAsync(id);
+            if (limits is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
+                return Forbid();
+            return Ok(_mapper.Map<ProjectLimitsDTO>(limits));
+        }
+
+        [HttpPut("{id}/limits")]
+        public async Task<IActionResult> UpdateProjectLimits(int id, [FromBody]ProjectLimitsDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            try
+            {
+                await _projectService.UpdateLimitsByIdAsync(id, _mapper.Map<ProjectLimitsModel>(dto));
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("UpdatedLimits", id, dto);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            catch(InvalidOperationException)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] AddProjectDTO dto)
         {
@@ -78,9 +145,10 @@ namespace WebAPI.Controllers
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                StartDate = DateTime.UtcNow,
+                StartDate = DateTimeOffset.UtcNow,
                 InviteCode = Guid.NewGuid()
             };
+            ProjectDTO mapped;
             try
             {
                 await _projectService.AddAsync(project);
@@ -90,12 +158,14 @@ namespace WebAPI.Controllers
                     ProjectId = project.Id,
                     Role = UserOnProjectRoles.Owner
                 });
+                mapped = _mapper.Map<ProjectDTO>(project);
+                await _hubContext.Clients.User(userId.Value.ToString()).SendAsync("Added", mapped);
             }
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
             }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}", _mapper.Map<ProjectDTO>(project));
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}", mapped);
         }
 
         [HttpPut("{id}")]
@@ -107,17 +177,17 @@ namespace WebAPI.Controllers
             if (userId is null)
                 return Unauthorized();
             var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
+            if (role is null || role < UserOnProjectRoles.Owner)
                 return Forbid();
             var project = await _projectService.GetByIdAsync(id);
             if (project is null)
                 return NotFound();
-            if (role == UserOnProjectRoles.Manager && (project.Name != dto.Name || project.Description != dto.Description))
-                return Forbid();
             project = _mapper.Map(dto, project);
             try
             {
                 await _projectService.UpdateAsync(project);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("Updated", id, dto);
             }
             catch (ArgumentException exc)
             {
@@ -141,12 +211,57 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.DeleteByIdAsync(id);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("Deleted", id);
             }
             catch (InvalidOperationException)
             {
                 return NotFound();
             }
             return NoContent();
+        }
+
+        [HttpPut("{id}/inviteStatus")]
+        public async Task<IActionResult> UpdateInviteCodeStatus(int id, [FromBody] UpdateInviteCodeStatusDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
+            if (role is null || role < UserOnProjectRoles.Manager)
+                return Forbid();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            project = _mapper.Map(dto, project);
+            try
+            {
+                await _projectService.UpdateAsync(project);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("InviteStatusChanged", id, dto.IsActive);
+            }
+            catch (ArgumentException exc)
+            {
+                return BadRequest(exc.Message);
+            }
+            return NoContent();
+        }
+
+        [HttpGet("{id}/invite")]
+        public async Task<IActionResult> GetInviteCodeById(int id)
+        {
+            var userId = User.GetId();
+            if (userId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            if (!await _userOnProjectService.IsOnProjectAsync(project.Id, userId.Value))
+                return Forbid();
+            return Ok(_mapper.Map<InviteCodeDTO>(project));
         }
 
         [HttpPost("{id}/invite")]
@@ -165,82 +280,53 @@ namespace WebAPI.Controllers
             try
             {
                 await _projectService.UpdateAsync(project);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("InviteChanged", id, project.InviteCode);
             }
             catch (ArgumentException exc)
             {
                 return BadRequest(exc.Message);
             }
-            return NoContent();
+            return Created($"{this.GetApiUrl()}Invites/{project.InviteCode}", project.InviteCode);
         }
 
-        [HttpGet("{id}/releases")]
-        public async Task<IActionResult> GetProjectReleases(int id)
+        [HttpGet("{id}/page/users")]
+        public async Task<IActionResult> GetUsersOnPage(int id)
         {
             var userId = User.GetId();
             if (userId is null)
                 return Unauthorized();
             if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
                 return Forbid();
-            return Ok(_mapper.Map<IEnumerable<ReleaseDTO>>(_releaseService.GetProjectReleases(id)));
-        }
-
-        [HttpPost("{id}/releases")]
-        public async Task<IActionResult> AddRelease(int id, [FromBody]AddReleaseDTO dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
-                return Forbid();
-            var release = _mapper.Map<ReleaseModel>(dto);
-            release.Date = DateTime.UtcNow;
-            release.ProjectId = id;
-            try
+            var users = _projectUsersContainer.GetUsersOnProject(id);
+            var usersMapped = new List<UserMiniWithAvatarDTO>();
+            foreach (var user in users)
             {
-                await _releaseService.AddAsync(release);
+                var userModel = await _userManager.FindByIdAsync(user.ToString());
+                var userDTO = new UserMiniWithAvatarDTO
+                {
+                    Id = user
+                };
+                if (userModel is not null)
+                {
+                    string? avatarType = null;
+                    string? avatarURL = null;
+                    if (userModel.AvatarFormat is not null)
+                    {
+                        avatarType = _fileManager.GetImageMIMEType(userModel.AvatarFormat);
+                        avatarURL = $"{this.GetApiUrl()}Users/{userModel.Id}/Avatar";
+                    }
+                    userDTO = userDTO with
+                    {
+                        FullName = $"{userModel.FirstName} {userModel.LastName}".TrimEnd(),
+                        MIMEAvatarType = avatarType,
+                        AvatarURL = avatarURL
+                    };
+                }
+                usersMapped.Add(userDTO);
             }
-            catch (ArgumentException exc)
-            {
-                return BadRequest(exc.Message);
-            }
-            return Created($"{this.GetApiUrl()}Releases/{release.Id}", _mapper.Map<ReleaseDTO>(release));
-        }
-
-        [HttpGet("{id}/tags")]
-        public async Task<IActionResult> GetProjectTags(int id)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
-                return Forbid();
-            return Ok(_mapper.Map<IEnumerable<TagDTO>>(_tagService.GetProjectTags(id)));
-        }
-
-        [HttpDelete("{id}/tags/{tagId}")]
-        public async Task<IActionResult> DeleteTagFromProject(int id, int tagId)
-        {
-            var userId = User.GetId();
-            if (userId is null)
-                return Unauthorized();
-            var project = await _projectService.GetByIdAsync(id);
-            if (project is null)
-                return NotFound();
-            var role = await _userOnProjectService.GetRoleOnProjectAsync(id, userId.Value);
-            if (role is null || role < UserOnProjectRoles.Manager)
-                return Forbid();
-            try
-            {
-                await _tagService.DeleteFromProjectByIdAsync(tagId, id);
-            }
-            catch (InvalidOperationException)
-            {
-                return NotFound();
-            }
-            return NoContent();
+            return Ok(usersMapped);
         }
 
         [HttpGet("{id}/users")]
@@ -259,7 +345,7 @@ namespace WebAPI.Controllers
             foreach (var user in users)
             {
                 var userModel = await _userManager.FindByIdAsync(user.UserId.ToString());
-                var userDTO = new UserMiniWithAvatarDTO()
+                var userDTO = new UserMiniWithAvatarDTO
                 {
                     Id = user.UserId
                 };
@@ -304,7 +390,22 @@ namespace WebAPI.Controllers
             var uop = await _userOnProjectService.GetByIdAsync(id, userId);
             if (uop is null)
                 return NotFound();
-            return Ok(_mapper.Map<UserOnProjectDTO>(uop));
+            return Ok(_mapper.Map<UserOnProjectReducedDTO>(uop));
+        }
+
+        [HttpGet("{id}/me")]
+        public async Task<IActionResult> GetMeAsProjectUser(int id)
+        {
+            var myId = User.GetId();
+            if (myId is null)
+                return Unauthorized();
+            var project = await _projectService.GetByIdAsync(id);
+            if (project is null)
+                return NotFound();
+            var uop = await _userOnProjectService.GetByIdAsync(id, myId.Value);
+            if (uop is null)
+                return NotFound();
+            return Ok(_mapper.Map<UserOnProjectReducedDTO>(uop));
         }
 
         [HttpDelete("{id}/users/{userId}")]
@@ -325,6 +426,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _userOnProjectService.DeleteByIdAsync(id, userId);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("DeletedUser", id, userId);
             }
             catch (InvalidOperationException)
             {
@@ -344,6 +447,8 @@ namespace WebAPI.Controllers
             try
             {
                 await _userOnProjectService.DeleteByIdAsync(id, userId.Value);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("DeletedUser", id, userId);
             }
             catch (InvalidOperationException exc)
             {
@@ -376,9 +481,14 @@ namespace WebAPI.Controllers
                 UserId = dto.UserId,
                 Role = toAddRole
             };
+            UserOnProjectDTO mapped;
             try
             {
                 await _userOnProjectService.AddAsync(model);
+                mapped = _mapper.Map<UserOnProjectDTO>(model);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds).SendAsync("AddedUser", mapped);
+                await _hubContext.Clients.User(dto.UserId.ToString()).SendAsync("AddedUser", mapped);
             }
             catch (ArgumentException exc)
             {
@@ -392,7 +502,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest("This user is already on the project");
             }
-            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{dto.UserId}", _mapper.Map<UserOnProjectDTO>(model));
+            return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{dto.UserId}", mapped);
         }
 
         [HttpPut("{id}/users/{userId}")]
@@ -416,6 +526,9 @@ namespace WebAPI.Controllers
             try
             {
                 await _userOnProjectService.UpdateAsync(model);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("UpdatedUser", _mapper.Map<UserOnProjectDTO>(model));
             }
             catch (ArgumentException exc)
             {
@@ -429,7 +542,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}/tasks")]
-        public async Task<IActionResult> GetTasks(int id, [FromQuery] int? tagId)
+        public async Task<IActionResult> GetTasks(int id)
         {
             var userId = User.GetId();
             if (userId is null)
@@ -442,7 +555,7 @@ namespace WebAPI.Controllers
             var tasks = new List<IEnumerable<TaskModel>>();
             var mappedTasks = new List<List<TaskReducedDTO>>();
             for (short i = 0; i < 4; i++)
-                tasks.Add(_taskService.GetProjectTasksByStatusAndTag(id, (TaskStatuses)i, tagId));
+                tasks.Add(_taskService.GetProjectTasksByStatus(id, (TaskStatuses)i));
             foreach (var tasksElement in tasks)
             {
                 mappedTasks.Add(new List<TaskReducedDTO>());
@@ -473,7 +586,7 @@ namespace WebAPI.Controllers
                 return NotFound();
             if (!await _userOnProjectService.IsOnProjectAsync(id, userId.Value))
                 return Forbid();
-            var tasks = _taskService.GetProjectTasksByStatusAndTag(id, TaskStatuses.Archived);
+            var tasks = _taskService.GetProjectTasksByStatus(id, TaskStatuses.Archived);
             var mappedTasks = new List<TaskReducedDTO>();
             foreach (var task in tasks)
             {
@@ -484,10 +597,12 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("{id}/gantt")]
-        public async Task<IActionResult> GetGanttChart(int id, [FromQuery]DateTime from, [FromQuery]DateTime to)
+        public async Task<IActionResult> GetGanttChart(int id, [FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to)
         {
             if (from >= to)
                 return BadRequest("\"From\" should be earlier than \"to\"");
+            if (to > DateTimeOffset.Now)
+                return BadRequest("\"From\" should be earlier than or equal the current date");
             var userId = User.GetId();
             if (userId is null)
                 return Unauthorized();
@@ -498,18 +613,17 @@ namespace WebAPI.Controllers
                 return Forbid();
             var tasks = _taskService.GetProjectTasksByDate(id, from, to);
             var mappedTasks = new List<GanttTaskDTO>();
+            var fullWidth = to - from;
             foreach (var task in tasks)
             {
                 var startDate = (task.StartDate >= from) ? task.StartDate : from;
                 var endDate = (task.EndDate is not null && task.EndDate <= to) ? task.EndDate.Value : to;
-                var deadline = (task.Deadline is not null && task.Deadline <= to) ? task.Deadline.Value : endDate;
                 mappedTasks.Add(new GanttTaskDTO()
                 {
                     Id = task.Id,
                     Name = task.Name,
-                    GanttStartDate = startDate,
-                    GanttDeadline = deadline,
-                    GanttEndDate = endDate,
+                    Offset = startDate == from ? 0 : (startDate - from) / fullWidth * 100,
+                    EndDateWidth = (endDate - startDate) / fullWidth * 100,
                 });
             }
             var result = new GanttDTO()
@@ -543,9 +657,14 @@ namespace WebAPI.Controllers
                 Status = status,
                 ProjectId = id
             };
+            TaskDTO mapped;
             try
             {
                 await _taskService.AddAsync(model);
+                mapped = _mapper.Map<TaskDTO>(model);
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("AddedTask", id, mapped);
             }
             catch (ArgumentException exc)
             {
@@ -555,7 +674,7 @@ namespace WebAPI.Controllers
             {
                 return BadRequest(exc.Message);
             }
-            return Created($"{this.GetApiUrl()}Tasks/{model.Id}", _mapper.Map<TaskDTO>(model));
+            return Created($"{this.GetApiUrl()}Tasks/{model.Id}", mapped);
         }
     }
 }

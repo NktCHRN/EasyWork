@@ -1,0 +1,381 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$AngularApp-primary: mat.define-palette(mat.$orange-palette);
+$AngularApp-accent: mat.define-palette(mat.$deep-orange-palette);
+
+// The warn palette is optional (defaults to red).
+$AngularApp-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$AngularApp-theme: mat.define-light-theme((
+  color: (
+    primary: $AngularApp-primary,
+    accent: $AngularApp-accent,
+    warn: $AngularApp-warn,
+  )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($AngularApp-theme);
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+@import 'variables';
+@import '../node_modules/font-awesome/scss/font-awesome';
+html, body { height: 100%; }
+body { margin: 0; font-family: 'Open sans', sans-serif !important; line-height: 1.6 !important; }
+
+.bg-white {
+    background-color: white;
+}
+
+.white {
+    color: white
+}
+
+.bg-orange {
+    background-color: orange;
+}
+
+.bg-black {
+    background-color: black;
+}
+
+$background-lightgray: #eeeeee;
+
+.btn-rounded {
+    border-radius: 20px !important;
+    font-weight: 400;
+    font-size: 0.8em;
+}
+
+.container-nav {
+    padding: 5px 20px;
+}
+
+main {
+    padding-top: 75px;
+    min-height: $min-height-main;
+}
+
+.navbar-with-delimiter {
+    box-shadow: 0 1rem 1rem rgba(0,0,0,0.05),inset 0 -1px 0 rgba(0,0,0,0.15);
+}
+
+.extra-rounded {
+    border-radius: 30px;
+}
+
+.img-cover-left {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left;
+}
+
+.img-cover-center {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+@mixin zero-margin($pad-up-dn, $pad-left-right)
+{
+    margin:0px auto;
+	padding: $pad-up-dn $pad-left-right;
+}
+
+.row-content {
+    @include zero-margin(50px, 0px);
+    min-height:350px;
+}
+
+.content {
+    padding: 50px 8%;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+.googleLogo {
+    margin-bottom: 4px;
+    height: 20px;
+}
+
+.orange {
+    color: orange;
+}
+
+.deep-orange {
+    color: #D84315;
+}
+
+.green {
+    color: green;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.brand {
+    height: 50px;
+    object-fit: cover;
+}
+
+.brand>img {
+    height: 100%;
+}
+
+.fixed {
+    position: fixed;
+}
+
+.full {
+    width: 100%;
+}
+
+$i: 0;
+@while $i <= 100 {
+    .w-#{$i} {
+        width: percentage($i/100);
+    }
+    $i: $i+ 5;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-extra-thin {
+    font-weight: 100 !important;
+}
+
+.font-thin {
+    font-weight: 300 !important;
+}
+
+.text-xl {
+    font-size: 30pt !important;
+    line-height: 1.2 !important;
+}
+
+.text-lg {
+    font-size: 26pt !important;
+}
+
+.text-md {
+    font-size: 14pt !important;
+}
+
+.text-sm {
+    font-size: 12pt !important;
+}
+
+.text-xs {
+    font-size: 10pt !important;
+    line-height: 10pt !important;
+}
+
+.text-xxs {
+    font-size: 9pt !important;
+    line-height: 9pt !important;
+}
+
+.mt-0 {
+    margin-top: 0 !important;
+  }
+
+.text-muted {
+    color: #6c757d;
+}
+
+.profile {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 25px 25px;
+    width: 90%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 15px;
+    box-shadow: 0 0 5px grey;
+}
+
+.no-shadow {
+    box-shadow: 0 0 0;
+}
+
+@media screen and (min-width: 960px) {
+    .profile {
+        width: 60%;
+    }
+}
+
+.red {
+    color: red;
+}
+
+.mb-0 {
+    margin-bottom: 0px !important;
+}
+
+.mb-30 {
+    margin-bottom: 30px !important;
+}
+
+.avatar {
+    border-radius: 100%;
+}
+
+$medium-icon-size: 30px;
+.icon-medium.mat-icon
+{
+    width: $medium-icon-size;
+    height: $medium-icon-size;
+    font-size: $medium-icon-size;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate-content {
+    width:100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resp-width {
+    max-width: 50%;
+    width: 48%;
+}
+
+@media screen and (max-width: 959px)
+{
+    .resp-width {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+.black {
+    color: black !important;
+}
+
+.snackbar-orange {
+    background-color: orange;
+    color: white;
+}
+
+.pre-wrap {
+    white-space: pre-wrap
+}
+
+.dialog-responsive {
+    width: 80%;
+}
+
+@media screen and (min-width: 960px) {
+    .dialog-responsive {
+        width: 60%;
+    }
+}
+
+.mini-dialog-responsive {
+    width: 60%;
+}
+
+@media screen and (min-width: 960px) {
+    .mini-dialog-responsive {
+        width: 40%;
+    }
+}
+
+
+.dialog-close-button {
+    float: right;
+    top:-15px;
+    right:-15px;
+}
+
+.info {
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14pt;
+    font-weight: 500;
+}
+
+.my-10 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+.no-decor {
+    text-decoration: none !important;
+}
+
+.formatted {
+    white-space: pre-wrap;
+}
+
+.h-100 {
+    height: 100%;
+}
+
+.project-profile {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 25px 25px;
+    width: 90%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 15px;
+    min-height: calc($min-height-main - 100px);
+}
+
+@media screen and (min-width: 960px) {
+    .project-profile {
+        width: 80%;
+    }
+}
+
+.search-avatar {
+    width: 20px;
+    margin-right: 10px;
+}
+
+.pb-0 {
+    padding-bottom: 0 !important;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.pt-0 {
+    padding-top: 0 !important;
+}
+
+.break-all {
+    word-break: break-all;
+}

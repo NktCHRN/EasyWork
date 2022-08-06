@@ -2,7 +2,7 @@
 using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using WebAPI.DTOs.GeneralInfo;
 
 namespace WebAPI.Controllers
 {

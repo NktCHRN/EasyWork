@@ -1,0 +1,150 @@
+<button mat-icon-button class="dialog-close-button" (click)="close()" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<form novalidate method="POST" [formGroup]="form" #tform="ngForm" *ngIf="task">
+    <h1 mat-dialog-title fxLayout="row" fxLayoutAlign="space-between center">
+        <div class="header-text">
+            <div *ngIf="!editName">
+                <span class="orange">{{task.name}}</span>
+                <button mat-icon-button (click)="toggleEditName()"><mat-icon>edit</mat-icon></button>
+            </div>
+            <div class="w-100" *ngIf="editName" fxLayout="row" fxLayoutAlign="start start">
+                <mat-form-field *ngIf="editName" class="header-textonly">
+                    <mat-label>Name</mat-label>
+                    <textarea matInput
+                            cdkTextareaAutosize
+                            #nameAutosize="cdkTextareaAutosize"
+                            (blur)="onSubmit($event)"
+                            formControlName="name"></textarea>
+                    <mat-error *ngIf="formErrors.name">{{formErrors.name}}</mat-error>
+                </mat-form-field>
+                <button mat-icon-button (click)="toggleEditName()"><mat-icon>cancel</mat-icon></button>
+            </div>
+        </div>
+        <div fxLayout="column" fxLayoutAlign="center center" *ngIf="savedIconState" [ngStyle]="{'color': savedIconColors[savedIconState]}">
+            <mat-icon class="saved-icon">save</mat-icon>
+            <span class="text-xs mb-0 saved-text">
+            <p *ngIf="savedIconState == iconStates.Fail">Error<br>The changes were not saved</p>
+            <p *ngIf="savedIconState == iconStates.Loading">Saving...</p>
+            <p *ngIf="savedIconState == iconStates.Success">Saved</p>
+            </span>
+        </div>
+    </h1>
+    <mat-dialog-content>
+        <div fxLayout="column" fxLayoutGap="20px"  style="padding-bottom: 30px">
+            <div fxLayout="column" fxLayout.gt-sm="row" fxLayoutGap="20px">
+                <div fxFlex="65" fxLayoutGap="10px" fxLayout="column">
+                    <div>
+                        <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>description</mat-icon><span>&nbsp;Description </span>
+                            <button type="button" mat-icon-button (click)="toggleEditDescription()">
+                                <mat-icon *ngIf="!editDescription">edit</mat-icon>
+                                <mat-icon *ngIf="editDescription">visibility</mat-icon>
+                            </button>
+                        </h2>
+                        <p *ngIf="!editDescription" class="w-100 text-muted text-sm formatted lh-16 break-all" [innerHTML]="task.description ?? '' | linky"></p>
+                        <mat-form-field *ngIf="editDescription" class="w-100" appearance="outline">
+                            <textarea matInput
+                            class="text-sm"
+                                    cdkTextareaAutosize
+                                    #descriptionAutosize="cdkTextareaAutosize"
+                                    (blur)="onSubmit($event)"
+                                    formControlName="description"
+                                    cdkAutosizeMinRows="3"></textarea>
+                        </mat-form-field>
+                    </div>
+                    <div>
+                    <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>event</mat-icon><span>&nbsp;Dates</span></h2>
+                    <p class="text-muted">Start date: {{task.startDate | date:'d MMM y, HH:mm'}}</p>
+                        <mat-form-field class="w-100" appearance="outline">
+                            <mat-label>Deadline</mat-label>
+                            <input matInput [ngxMatDatetimePicker]="deadlinePicker" formControlName="deadline"
+                            (dateChange)="send()" [min]="task.startDate">
+                            <mat-datepicker-toggle matSuffix [for]="$any(deadlinePicker)"></mat-datepicker-toggle>
+                            <ngx-mat-datetime-picker #deadlinePicker [touchUi]="true"></ngx-mat-datetime-picker>
+                            <mat-hint>DD.MM.YYYY, HH:mm:ss (or empty)</mat-hint>
+                        </mat-form-field>
+                      <mat-form-field class="w-100" appearance="outline">
+                        <mat-label>End date</mat-label>
+                        <input matInput [ngxMatDatetimePicker]="endDatePicker" formControlName="endDate"
+                        (dateChange)="send()" [min]="task.startDate">
+                        <mat-datepicker-toggle matSuffix [for]="$any(endDatePicker)"></mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #endDatePicker [touchUi]="true"></ngx-mat-datetime-picker>
+                        <mat-hint>DD.MM.YYYY, HH:mm:ss (or empty)</mat-hint>
+                      </mat-form-field>
+                      </div>
+                      <div>
+                      <h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center"><mat-icon>settings</mat-icon><span>&nbsp;Characteristics</span></h2>
+                        <mat-form-field class="w-100" appearance="outline">
+                            <mat-label>Status</mat-label>
+                            <mat-select matInput formControlName="status" (selectionChange)="send()">
+                                <mat-option 
+                                *ngFor="let status of statusesWithDescription" 
+                                [value]="status.status"
+                                [disabled]="limits && tasksCount && exceedsLimits(status.status)">{{status.description}}</mat-option>
+                              </mat-select>
+                        </mat-form-field>
+                        <mat-form-field class="w-100" appearance="outline">
+                            <mat-label>Priority</mat-label>
+                            <mat-select matInput formControlName="priority" (selectionChange)="send()">
+                                <mat-option *ngFor="let priority of priorities" [value]="priority">{{priority}}</mat-option>
+                              </mat-select>
+                        </mat-form-field>
+                      </div>
+                </div>
+                <mat-divider fxShow fxHide.gt-sm></mat-divider>
+                <div fxFlex="35" fxLayoutGap="10px" fxLayout="column">
+                    <button *ngIf="showToProject" mat-flat-button color="accent" class="w-100" type="button" (click)="toProject()">To project</button>
+                    <mat-divider *ngIf="showToProject"></mat-divider>
+                    <app-task-executors
+                    [taskId]="task.id"
+                    [projectId]="task.projectId"
+                    [connectionContainer]="connectionContainer"
+                (closeDialog)="close()"
+                (switchedToLoading)="switchToLoadingMode()"
+                (switchedToSuccess)="switchToSuccessMode()"
+                (switchedToFail)="switchToFailMode()"
+                (deletedExecutor)="this.deletedExecutor.emit($event)"
+                (addedExecutor)="this.addedExecutor.emit($event)"></app-task-executors>
+                    <mat-divider></mat-divider>
+                    <app-task-files
+                    [taskId]="task.id"
+                    [tasksConnectionContainer]="connectionContainer"
+                    (deletedFile)="deletedFile.emit()"
+                    (addedFile)="addedFile.emit()"></app-task-files>
+                    <mat-divider></mat-divider>
+                    <button 
+                    mat-flat-button 
+                    color="warn" 
+                    class="w-100" 
+                    type="button" 
+                    (click)="openDeleteDialog()" 
+                    [disabled]="task.status != taskStatuses.Archived"
+                    matTooltip="Only archived projects can be deleted"
+                    [matTooltipDisabled]="task.status == taskStatuses.Archived"><mat-icon>delete</mat-icon>Delete this task</button>
+                </div>
+            </div>
+            <mat-divider fxShow fxHide.gt-sm></mat-divider>
+            <div fxLayoutGap="10px" fxLayout="column">
+                <app-task-messages 
+                [taskId]="task.id" 
+                [projectId]="task.projectId" 
+                [tasksConnectionContainer]="connectionContainer"
+                (closeDialog)="close()"
+                (switchedToLoading)="switchToLoadingMode()"
+                (switchedToSuccess)="switchToSuccessMode()"
+                (switchedToFail)="switchToFailMode()"
+                (addedMessage)="addedMessage.emit()"
+                (deletedMessage)="deletedMessage.emit()"></app-task-messages>
+            </div>
+        </div>
+    </mat-dialog-content>
+</form>
+<div *ngIf="!task && !errorMessage">
+    <h1 mat-dialog-title>Loading...</h1>
+    <mat-dialog-content>
+        <mat-spinner></mat-spinner>
+    </mat-dialog-content>
+</div>
+<div *ngIf="errorMessage">
+    <h1 class="red" mat-dialog-title>{{errorMessage}}</h1>
+</div>

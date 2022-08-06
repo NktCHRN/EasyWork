@@ -1,0 +1,12 @@
+.or {
+    text-align: center;
+    font-size: 14pt;
+    line-height: 42pt !important;
+}
+
+@media screen and (max-width: 959px)
+{
+    .mb-12 {
+        margin-bottom: 12px;
+    }
+}

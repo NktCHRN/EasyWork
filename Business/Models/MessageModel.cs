@@ -11,7 +11,7 @@ namespace Business.Models
         public string Text { get; set; } = string.Empty;
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTimeOffset Date { get; set; }
 
         [Required]
         public int TaskId { get; set; }

@@ -1,11 +1,16 @@
 ﻿using AutoMapper;
+using Business.Algorithms;
 using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using Microsoft.AspNetCore.SignalR;
+using WebAPI.DTOs.User;
+using WebAPI.DTOs.User.Profile;
+using WebAPI.Hubs;
+using WebAPI.Interfaces;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -24,13 +29,22 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, UserManager<User> userManager, IMapper mapper, IBanService banService)
+        private readonly ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> _bansMapper;
+
+        private readonly IHubContext<UserBansHub> _bansHubContext;
+
+        public UsersController(IUserStatsService userStatsService, IFileManager fileManager, 
+            UserManager<User> userManager, IMapper mapper, IBanService banService, 
+            ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> bansMapper, 
+            IHubContext<UserBansHub> bansHubContext)
         {
             _userStatsService = userStatsService;
             _fileManager = fileManager;
             _userManager = userManager;
             _mapper = mapper;
             _banService = banService;
+            _bansMapper = bansMapper;
+            _bansHubContext = bansHubContext;
         }
 
         [HttpGet]
@@ -40,11 +54,13 @@ namespace WebAPI.Controllers
             if (search is not null)
             {
                 search = search.ToLowerInvariant();
-                users = users.Where(u => u.Id.ToString() == search
-                || u.Email.ToLowerInvariant().Contains(search)
+                users = users.Where(u => u.Email.ToLowerInvariant().Contains(search)
                 || search.Contains(u.FirstName.ToLowerInvariant()) 
-                || (u.LastName != null && (search.Contains(u.LastName.ToLowerInvariant()) 
-                    || u.LastName.ToLowerInvariant().Contains(search))));
+                || u.FirstName.ToLowerInvariant().Contains(search)
+                || (!string.IsNullOrEmpty(u.LastName) && (search.Contains(u.LastName.ToLowerInvariant()) 
+                    || u.LastName.ToLowerInvariant().Contains(search))))
+                    .OrderBy(u => LevenshteinDistance.Calculate(search, u.Email.ToLowerInvariant())
+                    + LevenshteinDistance.Calculate(search, $"{u.FirstName} {u.LastName}".TrimEnd().ToLowerInvariant()));
             }
             var profiles = new List<UserProfileReducedDTO>();
             foreach (var user in users)
@@ -110,33 +126,9 @@ namespace WebAPI.Controllers
             if (user is null || !user.EmailConfirmed)
                 return NotFound();
             var bans = _banService.GetUserBans(user.Id);
-            return Ok(await MapBansAsync(bans));
+            return Ok(await _bansMapper.MapAsync(bans));
         }
 
-        internal async Task<IEnumerable<BannedUserDTO>> MapBansAsync(IEnumerable<BanModel> bans)
-        {
-            var mappedBans = new List<BannedUserDTO>();
-            foreach (var ban in bans)
-            {
-                var mappedBan = _mapper.Map<BannedUserDTO>(ban);
-                var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
-                if (admin is not null)
-                {
-                    var adminModel = new UserMiniDTO()
-                    {
-                        Id = admin.Id,
-                        Email = admin.Email,
-                        FullName = $"{admin.FirstName} {admin.LastName}".TrimEnd(),
-                    };
-                    mappedBan = mappedBan with
-                    {
-                        Admin = adminModel
-                    };
-                }
-                mappedBans.Add(mappedBan);
-            }
-            return mappedBans;
-        }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}/activeBans")]
@@ -146,7 +138,7 @@ namespace WebAPI.Controllers
             if (user is null || !user.EmailConfirmed)
                 return NotFound();
             var bans = _banService.GetActiveUserBans(user.Id);
-            return Ok(await MapBansAsync(bans));
+            return Ok(await _bansMapper.MapAsync(bans));
         }
 
         [Authorize(Roles = "Admin")]
@@ -159,6 +151,9 @@ namespace WebAPI.Controllers
             if (!_banService.IsBanned(id))
                 return NotFound("This user is not banned");
             await _banService.DeleteActiveUserBansAsync(user.Id);
+            var connectionIds = Request.Headers["UserBansConnectionId"];
+            await _bansHubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                .SendAsync("Unbanned", id);
             return NoContent();
         }
     }

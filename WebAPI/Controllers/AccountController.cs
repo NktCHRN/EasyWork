@@ -4,12 +4,14 @@ using Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using WebAPI.DTOs;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Authorization;
 using WebAPI.Other;
 using Business.Models;
+using WebAPI.DTOs.User;
+using WebAPI.DTOs.Token;
+using WebAPI.Interfaces;
 
 namespace WebAPI.Controllers
 {
@@ -33,13 +35,19 @@ namespace WebAPI.Controllers
 
         private readonly IUserAvatarService _userAvatarService;
 
-        public readonly IUserStatsService _userStatsService;
+        private readonly IUserStatsService _userStatsService;
 
-        public readonly IMessageService _messageService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        private int EmailConfirmationLifeTime => int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
+        private readonly ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> _bansMapper;
 
-        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IMessageService messageService)
+        private int EmailConfirmationLifeTime => 
+            int.Parse(_configuration.GetSection("TokenProvidersSetting:EmailConfirmationLifetime").Value);
+
+        private int RefreshTokenLifeTime =>
+            int.Parse(_configuration.GetSection("TokenProvidersSetting:RefreshTokenLifetimeInDays").Value);
+
+        public AccountController(UserManager<User> userManager, ITokenService tokenService, IMapper mapper, IBanService banService, IFileManager fileManager, IMailService mailService, IConfiguration configuration, IUserAvatarService userAvatarService, IUserStatsService userStatsService, IRefreshTokenService refreshTokenService, ICustomAsyncMapper<IEnumerable<BanModel>, IEnumerable<BannedUserDTO>> bansMapper)
         {
             _userManager = userManager;
             _tokenService = tokenService;
@@ -50,7 +58,8 @@ namespace WebAPI.Controllers
             _configuration = configuration;
             _userAvatarService = userAvatarService;
             _userStatsService = userStatsService;
-            _messageService = messageService;
+            _refreshTokenService = refreshTokenService;
+            _bansMapper = bansMapper;
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
@@ -93,14 +102,17 @@ namespace WebAPI.Controllers
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "You are banned from this website",
-                    ErrorDetails = await MapBansAsync(bans)
+                    ErrorDetails = await _bansMapper.MapAsync(bans)
                 });
             }
-            user.LastSeen = DateTime.UtcNow;
+            user.LastSeen = DateTimeOffset.UtcNow;
             var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await _userManager.UpdateAsync(user);
+            await _refreshTokenService.AddAsync(new RefreshTokenModel
+            {
+                Token = refreshToken,
+                UserId = user.Id,
+                ExpiryTime = DateTimeOffset.UtcNow.AddDays(RefreshTokenLifeTime)
+        });
             return Ok(new LoginResponseDTO()
             {
                 IsAuthSuccessful = true,
@@ -112,31 +124,6 @@ namespace WebAPI.Controllers
             });
         }
 
-        internal async Task<IEnumerable<BannedUserDTO>> MapBansAsync(IEnumerable<BanModel> bans)
-        {
-            var mappedBans = new List<BannedUserDTO>();
-            foreach (var ban in bans)
-            {
-                var mappedBan = _mapper.Map<BannedUserDTO>(ban);
-                var admin = await _userManager.FindByIdAsync(ban.AdminId.GetValueOrDefault().ToString());
-                if (admin is not null)
-                {
-                    var adminModel = new UserMiniDTO()
-                    {
-                        Id = admin.Id,
-                        Email = admin.Email,
-                        FullName = $"{admin.FirstName} {admin.LastName}".TrimEnd(),
-                    };
-                    mappedBan = mappedBan with
-                    {
-                        Admin = adminModel
-                    };
-                }
-                mappedBans.Add(mappedBan);
-            }
-            return mappedBans;
-        }
-
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO model)
@@ -144,12 +131,12 @@ namespace WebAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var user = _mapper.Map<User>(model);
-            user.RegistrationDate = DateTime.UtcNow;
+            user.RegistrationDate = DateTimeOffset.UtcNow;
             user.UserName = model.Email;
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser is not null 
                 && !existingUser.EmailConfirmed 
-                && existingUser.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTime.UtcNow)
+                && existingUser.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTimeOffset.UtcNow)
                 await _userManager.DeleteAsync(existingUser);
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
@@ -237,7 +224,7 @@ namespace WebAPI.Controllers
             if (!user.EmailConfirmed)
             {
                 string errorMessage;
-                if (user.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTime.UtcNow)
+                if (user.RegistrationDate.AddHours(EmailConfirmationLifeTime) < DateTimeOffset.UtcNow)
                 {
                     await _userManager.DeleteAsync(user);
                     errorMessage = "Invalid request";
@@ -284,12 +271,10 @@ namespace WebAPI.Controllers
                 var errors = resetPasswordResult.Errors.Select(e => e.Description);
                 return BadRequest(errors);
             }
-            user.RefreshToken = null;
-            await _userManager.UpdateAsync(user);
+            await _refreshTokenService.DeleteUserTokensAsync(user.Id);
             return Ok();
         }
 
-        // NOT TESTED!
         [HttpPost("ExternalLogin")]
         public async Task<IActionResult> ExternalLogin([FromBody] ExternalAuthDTO externalAuth)
         {
@@ -309,7 +294,7 @@ namespace WebAPI.Controllers
                         UserName = payload.Email,
                         FirstName = payload.GivenName,
                         LastName = payload.FamilyName,
-                        RegistrationDate = DateTime.UtcNow,
+                        RegistrationDate = DateTimeOffset.UtcNow,
                         EmailConfirmed = true
                     };
                     await _userManager.CreateAsync(user);
@@ -323,9 +308,8 @@ namespace WebAPI.Controllers
                         {
                             var notMIME = _fileManager.GetImageType(type);
                             if (notMIME is not null)
-                            {
-                                await _userAvatarService.UpdateAvatarAsync(user.Id, await picture.Content.ReadAsByteArrayAsync(), type);
-                            }
+                                await _userAvatarService
+                                    .UpdateAvatarAsync(user.Id, await picture.Content.ReadAsByteArrayAsync(), notMIME);
                         }
                     }
                     await _userManager.AddLoginAsync(user, info);
@@ -349,15 +333,18 @@ namespace WebAPI.Controllers
                 return Unauthorized(new LoginResponseDTO()
                 {
                     ErrorMessage = "You are banned from this website",
-                    ErrorDetails = await MapBansAsync(bans)
+                    ErrorDetails = await _bansMapper.MapAsync(bans)
                 });
             }
 
-            user.LastSeen = DateTime.UtcNow;
+            user.LastSeen = DateTimeOffset.UtcNow;
             var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await _userManager.UpdateAsync(user);
+            await _refreshTokenService.AddAsync(new RefreshTokenModel
+            {
+                Token = refreshToken,
+                UserId = user.Id,
+                ExpiryTime = DateTimeOffset.UtcNow.AddDays(RefreshTokenLifeTime)
+            });
             var accessToken = _tokenService.GenerateAccessToken(await GetClaimsAsync(user));
             return Ok(new LoginResponseDTO {
                 Token = new TokenDTO()
@@ -387,7 +374,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> UpdateLastSeen()
         {
             var user = await _userManager.FindByEmailAsync(User.Identity!.Name);
-            user.LastSeen = DateTime.UtcNow;
+            user.LastSeen = DateTimeOffset.UtcNow;
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);

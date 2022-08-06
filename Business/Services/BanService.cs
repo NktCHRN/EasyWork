@@ -30,7 +30,7 @@ namespace Business.Services
         private IEnumerable<Ban> GetNotMappedActiveUserBans(int userId)
         {
             return _context.Bans
-                .Where(b => b.UserId == userId && b.DateTo >= DateTime.UtcNow && b.DateFrom <= DateTime.UtcNow);
+                .Where(b => b.UserId == userId && b.DateTo >= DateTimeOffset.UtcNow && b.DateFrom <= DateTimeOffset.UtcNow);
         }
         private async Task DeleteNotMappedAsync(Ban model)
         {
@@ -45,7 +45,7 @@ namespace Business.Services
         /// <exception cref="ArgumentException">Thrown if model was not valid</exception>
         public async Task AddAsync(BanModel model)
         {
-            model.DateFrom = DateTime.UtcNow;
+            model.DateFrom = DateTimeOffset.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
@@ -153,15 +153,6 @@ namespace Business.Services
             return true;
         }
 
-        /// <summary>
-        /// Returns all bans by admin id
-        /// </summary>
-        /// <param name="adminId"></param>
-        /// <returns>IEnumerable of all ban models with given admin id</returns>
-        public IEnumerable<BanModel> GetAdminBans(int adminId)
-        {
-            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.Where(b => b.AdminId == adminId)).Reverse();
-        }
 
         /// <summary>
         /// Returns all bans by user id
@@ -174,10 +165,5 @@ namespace Business.Services
         }
 
         public bool IsBanned(int userId) => GetNotMappedActiveUserBans(userId).Any();
-
-        public IEnumerable<BanModel> GetLast(int quantity)
-        {
-            return _mapper.Map<IEnumerable<BanModel>>(_context.Bans.AsEnumerable().TakeLast(quantity)).Reverse();
-        }
     }
 }

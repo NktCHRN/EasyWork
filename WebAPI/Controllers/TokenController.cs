@@ -1,9 +1,9 @@
 ﻿using Business.Interfaces;
-using Data.Entities;
+using Business.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using WebAPI.DTOs.Token;
+using WebAPI.Other;
 
 namespace WebAPI.Controllers
 {
@@ -11,33 +11,35 @@ namespace WebAPI.Controllers
     [ApiController]
     public class TokenController : ControllerBase
     {
-        readonly UserManager<User> _userManager;
+        private readonly ITokenService _service;
 
-        readonly ITokenService _service;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public TokenController(UserManager<User> userManager, ITokenService tokenService)
+        public TokenController(ITokenService tokenService, IRefreshTokenService refreshTokenService)
         {
-            _userManager = userManager;
             _service = tokenService;
+            _refreshTokenService = refreshTokenService;
         }
 
         [HttpPost]
         [Route("refresh")]
-        public async Task<IActionResult> Refresh(TokenDTO tokenApiModel)
+        public async Task<IActionResult> Refresh([FromBody] TokenDTO tokenApiModel)
         {
             if (tokenApiModel is null)
                 return BadRequest("Invalid client request");
             string accessToken = tokenApiModel.AccessToken;
             string refreshToken = tokenApiModel.RefreshToken;
             var principal = _service.GetPrincipalFromExpiredToken(accessToken);
-            var username = principal.Identity!.Name;
-            var user = await _userManager.FindByEmailAsync(username);
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            var userId = principal.GetId();
+            if (userId == null)
+                return BadRequest("Invalid client request");
+            var tokenModel = await _refreshTokenService.FindAsync(tokenApiModel.RefreshToken, userId.Value);
+            if (tokenModel is null || tokenModel.Token != refreshToken || tokenModel.ExpiryTime <= DateTimeOffset.UtcNow)
                 return BadRequest("Invalid client request");
             var newAccessToken = _service.GenerateAccessToken(principal.Claims);
             var newRefreshToken = _service.GenerateRefreshToken();
-            user.RefreshToken = newRefreshToken;
-            await _userManager.UpdateAsync(user);
+            tokenModel.Token = newRefreshToken;
+            await _refreshTokenService.UpdateAsync(tokenModel);
             return new ObjectResult(new
             {
                 accessToken = newAccessToken,
@@ -47,13 +49,15 @@ namespace WebAPI.Controllers
 
         [HttpPost, Authorize]
         [Route("revoke")]
-        public async Task<IActionResult> Revoke()
+        public async Task<IActionResult> Revoke([FromBody] RevokeTokenDTO dto)
         {
-            var username = User.Identity!.Name;
-            var user = await _userManager.FindByEmailAsync(username);
-            if (user is null) return BadRequest();
-            user.RefreshToken = null;
-            await _userManager.UpdateAsync(user);
+            var userId = User.GetId();
+            if (userId == null)
+                return BadRequest("Invalid client request");
+            var tokenModel = await _refreshTokenService.FindAsync(dto.Token, userId.Value);
+            if (tokenModel is null)
+                return NotFound();
+            await _refreshTokenService.DeleteByIdAsync(tokenModel.Id);
             return NoContent();
         }
     }

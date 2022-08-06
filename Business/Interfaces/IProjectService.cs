@@ -12,5 +12,9 @@ namespace Business.Interfaces
         Task<ProjectModel?> GetProjectByActiveInviteCodeAsync(Guid inviteCode);
 
         Task<ProjectModel?> GetProjectByActiveInviteCodeAsync(string? inviteCode);
+
+        Task<ProjectLimitsModel?> GetLimitsByIdAsync(int id);
+
+        Task UpdateLimitsByIdAsync(int id, ProjectLimitsModel limits);
     }
 }

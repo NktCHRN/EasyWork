@@ -14,7 +14,7 @@ namespace Data.Entities
         public string? Description { get; set; }
 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateTimeOffset StartDate { get; set; }
 
         public int? MaxToDo { get; set; }
 
@@ -26,7 +26,6 @@ namespace Data.Entities
 
         public bool IsInviteCodeActive { get; set; }
 
-        public ICollection<Release> Releases { get; set; } = new List<Release>();
         public ICollection<UserOnProject> TeamMembers { get; set; } = new List<UserOnProject>();
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
     }

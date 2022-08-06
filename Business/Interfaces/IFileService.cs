@@ -13,5 +13,11 @@ namespace Business.Interfaces
         Task DeleteByIdAsync(int id);
 
         Task<IEnumerable<FileModelExtended>> GetTaskFilesAsync(int taskId);
+
+        public Task ChunkAddStartAsync(FileModel model);
+
+        public Task AddChunkAsync(int fileId, FileChunkModel chunkModel);
+
+        public Task<FileModelExtended> ChunkAddEndAsync(int fileId);
     }
 }

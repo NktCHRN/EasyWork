@@ -8,6 +8,8 @@ namespace Business.Models
         [Required]
         public UserOnProjectRoles Role { get; set; }
 
+        public DateTimeOffset AdditionDate { get; set; }
+
         [Required]
         public int ProjectId { get; set; }
 

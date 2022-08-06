@@ -1,0 +1,7 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title>An error occured</h1>
+<mat-dialog-content><span class="formatted">{{data}}</span><br><br>
+    <button mat-flat-button [mat-dialog-close]="true">Close</button>
+</mat-dialog-content>

@@ -1,0 +1,13 @@
+<form fxLayout="column" class="container" style="width:100%" novalidate method="POST" [formGroup]="form" (ngSubmit)="onSubmit()" #jform="ngForm" *ngIf="!loading" fxFlex>
+    <p>
+        <mat-form-field appearance="fill" style="width:100%">
+            <mat-label>Invite code</mat-label>
+            <input matInput formControlName="inviteCode">
+            <mat-error *ngIf="formErrors.inviteCode">{{formErrors.inviteCode}}</mat-error>
+        </mat-form-field>
+    </p>
+    <button style="width:100%" type="submit" mat-raised-button color="primary" [disabled]="form.invalid">Join</button>
+</form>
+<div *ngIf="loading">
+    <mat-spinner></mat-spinner>
+</div>

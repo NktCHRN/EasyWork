@@ -4,7 +4,10 @@ using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebAPI.DTOs;
+using Microsoft.AspNetCore.SignalR;
+using WebAPI.DTOs.Message;
+using WebAPI.DTOs.User;
+using WebAPI.Hubs;
 using WebAPI.Other;
 
 namespace WebAPI.Controllers
@@ -26,7 +29,13 @@ namespace WebAPI.Controllers
 
         private readonly IMapper _mapper;
 
-        public MessagesController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, IMessageService messageService, IMapper mapper, ITaskService taskService, IFileManager fileManager)
+        private readonly IHubContext<TasksHub> _tasksHubContext;
+
+        private readonly IHubContext<MessagesHub> _hubContext;
+
+        public MessagesController(UserManager<User> userManager, IUserOnProjectService userOnProjectService, 
+            IMessageService messageService, IMapper mapper, ITaskService taskService, IFileManager fileManager, 
+            IHubContext<TasksHub> tasksHubContext, IHubContext<MessagesHub> hubContext)
         {
             _userManager = userManager;
             _userOnProjectService = userOnProjectService;
@@ -34,6 +43,8 @@ namespace WebAPI.Controllers
             _mapper = mapper;
             _taskService = taskService;
             _fileManager = fileManager;
+            _tasksHubContext = tasksHubContext;
+            _hubContext = hubContext;
         }
 
         // GET api/<MessagesController>/5
@@ -51,7 +62,7 @@ namespace WebAPI.Controllers
                 return Forbid();
             var result = _mapper.Map<MessageDTO>(model);
             var userModel = await _userManager.FindByIdAsync(model.SenderId.ToString());
-            var sender = new UserMiniWithAvatarDTO()
+            var sender = new UserMiniWithAvatarDTO
             {
                 Id = model.SenderId
             };
@@ -96,6 +107,10 @@ namespace WebAPI.Controllers
             try
             {
                 await _messageService.UpdateAsync(model);
+
+                var connectionIds = Request.Headers["ConnectionId"];
+                await _hubContext.Clients.GroupExcept(id.ToString(), connectionIds)
+                    .SendAsync("Updated", id, dto);
             }
             catch (ArgumentException exc)
             {
@@ -119,10 +134,21 @@ namespace WebAPI.Controllers
             if (model is null)
                 return NotFound();
             if (model.SenderId != userId.Value)
-                return Forbid();
+            {
+                var task = await _taskService.GetByIdAsync(model.TaskId);
+                if (task is null)
+                    return Forbid();
+                var role = await _userOnProjectService.GetRoleOnProjectAsync(task.ProjectId, userId.Value);
+                if (role is null || role < UserOnProjectRoles.Manager)
+                    return Forbid();
+            }
             try
             {
                 await _messageService.DeleteByIdAsync(id);
+
+                var connectionIds = Request.Headers["TasksConnectionId"];
+                await _tasksHubContext.Clients.GroupExcept(model.TaskId.ToString(), connectionIds)
+                    .SendAsync("DeletedMessage", model.TaskId, id);
             }
             catch (InvalidOperationException)
             {

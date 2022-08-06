@@ -1,0 +1,19 @@
+<div class="profile container no-shadow my-10" fxLayout="column">
+    <div fxLayoutAlign="space-between center">
+        <h1 class="text-xl">Your projects: </h1>
+        <button mat-raised-button color="accent" (click)="onAddClick()">Add</button>
+    </div>
+    <div fxLayout="column" fxLayoutGap="30px" class="mb-30" *ngIf="projects">
+        <mat-card *ngFor="let project of projects" class="task-card">
+            <mat-card-title class="orange truncate-content"><a class="orange no-decor" title="to project" [routerLink]="[project.id]">{{project.name}}</a></mat-card-title>
+            <mat-card-subtitle class="formatted project-description" [innerHTML]="project.description ?? '' | linky"></mat-card-subtitle>
+        </mat-card>
+    </div>
+    <div *ngIf="errorMessage">
+        <p class="red text-md">An error occured: {{errorMessage}}<br>
+        Please, try again later</p>
+    </div>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>

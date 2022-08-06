@@ -35,7 +35,7 @@ namespace Business.Services
 
         public async Task AddAsync(ProjectModel model)
         {
-            model.StartDate = DateTime.UtcNow;
+            model.StartDate = DateTimeOffset.UtcNow;
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
@@ -58,7 +58,10 @@ namespace Business.Services
                 await _context.SaveChangesAsync();
                 try
                 {
-                    _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                    if (file.IsFull)
+                        _manager.DeleteFile(file.Id.ToString() + Path.GetExtension(file.Name), Enums.EasyWorkFileTypes.File);
+                    else
+                        _manager.DeleteChunks(file.Id.ToString());
                 }
                 catch (Exception) { }
             }
@@ -73,15 +76,15 @@ namespace Business.Services
             var model = await _context.Projects
                 .Include(m => m.TeamMembers)
                 .Include(m => m.Tasks)
-                .Include(m => m.Releases)
                 .SingleOrDefaultAsync(m => m.Id == id);
             return _mapper.Map<ProjectModel?>(model);
         }
 
         public IEnumerable<ProjectModel> GetUserProjects(int userId)
         {
-            var projectsIds =  _context.UsersOnProjects.AsEnumerable().Reverse()
+            var projectsIds =  _context.UsersOnProjects
                 .Where(uop => uop.UserId == userId)
+                .OrderByDescending(p => p.AdditionDate)
                 .Select(uop => uop.ProjectId);
             var projects = projectsIds
                 .Select(p => _context.Projects.
@@ -89,10 +92,21 @@ namespace Business.Services
             return _mapper.Map<IEnumerable<ProjectModel>>(projects);
         }
 
+        private static bool IsValid(ProjectLimitsModel limits, out string? firstErrorMessage)
+            => IModelValidator<ProjectLimitsModel>.IsValidByDefault(limits, out firstErrorMessage);
+
         public bool IsValid(ProjectModel model, out string? firstErrorMessage)
         {
-            var result = IModelValidator<ProjectModel>.IsValidByDefault(model, out firstErrorMessage);
-            return result;
+            if (!IModelValidator<ProjectModel>.IsValidByDefault(model, out firstErrorMessage))
+                return false;
+            if (!IsValid(model.Limits, out firstErrorMessage))
+                return false;
+            if (model.InviteCode == null && model.IsInviteCodeActive == true)
+            {
+                firstErrorMessage = "Invite code cannot be turned on when it is not defined. Please, generate it first";
+                return false;
+            }
+            return true;
         }
 
         public async Task UpdateAsync(ProjectModel model)
@@ -120,6 +134,24 @@ namespace Business.Services
             if (!parsed)
                 return null;
             return await GetProjectByActiveInviteCodeAsync(result);
+        }
+
+        public async Task<ProjectLimitsModel?> GetLimitsByIdAsync(int id)
+        {
+            var model = _mapper.Map<ProjectModel?>(await _context.Projects
+                .SingleOrDefaultAsync(m => m.Id == id));
+            return model?.Limits;
+        }
+
+        public async Task UpdateLimitsByIdAsync(int id, ProjectLimitsModel limits)
+        {
+            bool isValid = IsValid(limits, out string? error);
+            if (!isValid)
+                throw new ArgumentException(error, nameof(limits));
+            var existingModel = await GetNotMappedByIdAsync(id);
+            existingModel = _mapper.Map(limits, existingModel);
+            _context.Projects.Update(existingModel);
+            await _context.SaveChangesAsync();
         }
     }
 }

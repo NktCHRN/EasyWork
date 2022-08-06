@@ -34,6 +34,7 @@ namespace Business.Services
             bool isValid = IsValid(model, out string? error);
             if (!isValid)
                 throw new ArgumentException(error, nameof(model));
+            model.AdditionDate = DateTimeOffset.UtcNow;
             await _context.UsersOnProjects.AddAsync(_mapper.Map<UserOnProject>(model));
             await _context.SaveChangesAsync();
         }
@@ -58,17 +59,17 @@ namespace Business.Services
 
             var teamMembers = _context.UsersOnProjects
                 .Include(uop => uop.User)
-                .AsEnumerable()
                 .Where(uop => uop.ProjectId == projectId)
+                .AsEnumerable()
                 .Select(uop => new UserOnProjectModelExtended()
                 {
                     UserId = uop.UserId,
                     Role = uop.Role,
                     TasksDone = projectTasks
-                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && TaskService.IsDone(t.Status))
+                    .Where(t => t.Executors.Select(ex => ex.UserId).Contains(uop.UserId) && HelperMethods.IsDoneTask(t.Status))
                     .Count(),
                     TasksNotDone = projectTasks
-                    .Where(t => t.Executors.Select(ex => ex.Id).Contains(uop.UserId) && !TaskService.IsDone(t.Status))
+                    .Where(t => t.Executors.Select(ex => ex.UserId).Contains(uop.UserId) && !HelperMethods.IsDoneTask(t.Status))
                     .Count()
                 }).ToList();
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Business.Exceptions;
 using Business.Interfaces;
 using Business.Models;
 using Business.Services;
@@ -136,42 +137,17 @@ namespace Tests.BLLTests
                 new Project()       // id 2
                 {
                     Name = "Project 2"
+                },
+                new Project()       // id 3
+                {
+                    Name = "Project 3",
+                    MaxToDo = 3,
+                    MaxInProgress = 2,
+                    MaxValidate = 1
                 }
             };
-            foreach (var project in projects)
-            {
-                _context.Projects.Add(project);
-                _context.SaveChanges();
-            }
-
-            var tags = new Tag[]
-            {
-                new Tag()       // id 1
-                {
-                    Name = "Automatisation",
-                },
-                new Tag()       // id 2
-                {
-                    Name = "Testing",
-                },
-                new Tag()       // id 3
-                {
-                    Name = "Programming",
-                },
-                new Tag()       // id 4
-                {
-                    Name = "Hotfix",
-                },
-                new Tag()       // id 5
-                {
-                    Name = "Business"
-                }
-            };
-            foreach (var tag in tags)
-            {
-                _context.Tags.Add(tag);
-                _context.SaveChanges();
-            }
+            _context.Projects.AddRange(projects);
+            _context.SaveChanges();
 
             var uops = new UserOnProject[]
             {
@@ -207,17 +183,7 @@ namespace Tests.BLLTests
                 Deadline = new DateTime(2022, 2, 1),
                 Description = "This is the description of the task 1",
                 Priority = TaskPriorities.Middle,
-                ProjectId = 1,
-                Executors = new List<User>
-                {
-                    _context.Users.Find(2)!, 
-                    _context.Users.Find(3)! 
-                },
-                    Tags = new List<Tag>()
-                    {
-                        _context.Tags.Single(t => t.Id == 1),
-                        _context.Tags.Single(t => t.Id == 3)
-                    }
+                ProjectId = 1
                 },
                 new TaskEntity()            // id 2
                 {
@@ -235,13 +201,7 @@ namespace Tests.BLLTests
                 EndDate = new DateTime(2022, 2, 3),
                 Status = TaskStatuses.ToDo,
                 Priority = TaskPriorities.Low,
-                ProjectId = 1,
-                Executors = new List<User>{_context.Users.Find(5)! },
-                    Tags = new List<Tag>()
-                    {
-                        _context.Tags.Single(t => t.Id == 4),
-                        _context.Tags.Single(t => t.Id == 5),
-                    }
+                ProjectId = 1
                 },
                 new TaskEntity()            // id 4
                 {
@@ -252,11 +212,6 @@ namespace Tests.BLLTests
                 Status = TaskStatuses.Validate,
                 Priority = TaskPriorities.Low,
                 ProjectId = 2,
-                Executors = new List<User>{_context.Users.Find(5)! },
-                    Tags = new List<Tag>()
-                    {
-                        _context.Tags.Single(t => t.Id == 4)
-                    }
                 },
                 new TaskEntity()            // id 5
                 {
@@ -266,8 +221,7 @@ namespace Tests.BLLTests
                 EndDate = new DateTime(2022, 3, 19),
                 Status = TaskStatuses.Complete,
                 Priority = TaskPriorities.Low,
-                ProjectId = 1,
-                Executors = new List<User>{_context.Users.Find(5)! },
+                ProjectId = 1
                 },
                 new TaskEntity()                // id 6
                 {
@@ -283,18 +237,42 @@ namespace Tests.BLLTests
                     Name = "Task 5",
                     ProjectId = 1,
                     Status = TaskStatuses.Archived,
-                    EndDate = DateTime.MinValue.AddMonths(1),
-                    Tags = new List<Tag>()
-                    {
-                        _context.Tags.Single(t => t.Id == 3)
-                    }
+                    EndDate = DateTime.MinValue.AddMonths(1)
                 }
             };
-            foreach (var task in tasks)
+            _context.Tasks.AddRange(tasks);
+            _context.SaveChanges();
+
+            var executors = new List<TaskExecutor>
             {
-                _context.Tasks.Add(task);
-                _context.SaveChanges();
-            }
+                new TaskExecutor
+                {
+                    TaskId = 1,
+                    UserId = 2
+                },
+                new TaskExecutor
+                {
+                    TaskId = 1,
+                    UserId = 3
+                },
+                new TaskExecutor
+                {
+                    TaskId = 3,
+                    UserId = 5
+                },
+                new TaskExecutor
+                {
+                    TaskId = 4,
+                    UserId = 5
+                },
+                new TaskExecutor
+                {
+                    TaskId = 5,
+                    UserId = 5
+                }
+            };
+            _context.TaskExecutors.AddRange(executors);
+            _context.SaveChanges();
 
             var messages = new Message[]
             {
@@ -325,7 +303,8 @@ namespace Tests.BLLTests
                 new File()
                 {
                     TaskId = 1,
-                    Name = "file1.file"
+                    Name = "file1.file",
+                    IsFull = true
                 },
                 new File()
                 {
@@ -495,7 +474,6 @@ namespace Tests.BLLTests
             _context.Tasks.Update(task);
             await _context.SaveChangesAsync();
             var expectedCount = _context.Tasks.Count() - 1;
-            var expectedTagsCount = 5;          // no changes
             var expectedMessagesCount = 1;
             var expectedFilesCount = 1;
 
@@ -506,16 +484,14 @@ namespace Tests.BLLTests
             var actualCount = _context.Tasks.Count();
             var actualFilesCount = _context.Files.Count();
             var actualMessagesCount = _context.Messages.Count();
-            var actualTagsCount = _context.Tags.Count();
             Assert.AreEqual(expectedCount, actualCount, "Method does not delete element");
             Assert.IsFalse(_context.Tasks.Any(t => t.Id == id), "Method deletes wrong element");
             Assert.AreEqual(expectedFilesCount, actualFilesCount, "Method does not delete all files cascadely");
             Assert.AreEqual(expectedMessagesCount, actualMessagesCount, "Method does not delete all messages cascadely");
-            Assert.AreEqual(expectedTagsCount, actualTagsCount, "Method should not delete any tags");
             _managerMock.Verify(t => t.DeleteFile("1.file", Business.Enums.EasyWorkFileTypes.File),
                 "Method does not remove the file from file system");
-            _managerMock.Verify(t => t.DeleteFile("2.file", Business.Enums.EasyWorkFileTypes.File),
-                "Method does not remove the file from file system");
+            _managerMock.Verify(t => t.DeleteChunks("2"),
+                "Method does not remove chunks from file system");
         }
 
         [Test]
@@ -550,7 +526,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void AddAsyncTest_ExceedsToDo_ThrowsInvalidOperationException()
+        public void AddAsyncTest_ExceedsToDo_ThrowsLimitsExceededException()
         {
             // Arrange
             var tempProject = new Project()             // id 2
@@ -576,11 +552,11 @@ namespace Tests.BLLTests
             };
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
-        public void AddAsyncTest_ExceedsInProgress_ThrowsInvalidOperationException()
+        public void AddAsyncTest_ExceedsInProgress_ThrowsLimitsExceededException()
         {
             // Arrange
             var tempProject = new Project()             // id 2
@@ -606,11 +582,11 @@ namespace Tests.BLLTests
             };
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
-        public void AddAsyncTest_ExceedsValidate_ThrowsInvalidOperationException()
+        public void AddAsyncTest_ExceedsValidate_ThrowsLimitsExceededExceptionException()
         {
             // Arrange
             var tempProject = new Project()             // id 2
@@ -636,7 +612,7 @@ namespace Tests.BLLTests
             };
 
             // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddAsync(model));
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.AddAsync(model));
         }
 
         [Test]
@@ -681,36 +657,149 @@ namespace Tests.BLLTests
             SeedData();
             var model = _validForUpdateTask;
             var expectedName = model.Name;
-            var expectedTagsCount = 2;
 
             // Act
             await _service.UpdateAsync(model);
 
             // Assert
-            var actual = await _context.Tasks.Include(t => t.Tags).SingleAsync(r => r.Id == model.Id);
-            var actualTagsCount = actual.Tags.Count;
+            var actual = await _context.Tasks.SingleAsync(r => r.Id == model.Id);
             Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
-            Assert.AreEqual(expectedTagsCount, actualTagsCount, "Method changed tags");
             Assert.IsNotNull(actual.EndDate);
         }
 
         [Test]
-        public async Task UpdateAsyncTest_FromCompleteToLower_UpdatesModelAndSetNullToEndDate()
+        public async Task UpdateAsyncTest_NotChangedStatus_UpdatesEntity()
         {
             // Arrange
             SeedData();
-            var id = 5;
-            var model = _mapper.Map<TaskModel>(await _context.Tasks.SingleAsync(t => t.Id == id));
-            model.Status = TaskStatuses.ToDo;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Validate,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = task.Status,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
             var expectedName = model.Name;
-            
+            for (int i = 0; i < project.MaxValidate - 1; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = model.Status, ProjectId = project.Id }); ;
+                await _context.SaveChangesAsync();
+            }
+
             // Act
             await _service.UpdateAsync(model);
 
             // Assert
-            var actual = await _context.Tasks.Include(t => t.Tags).SingleAsync(r => r.Id == model.Id);
+            var actual = await _context.Tasks.SingleAsync(r => r.Id == task.Id);
             Assert.AreEqual(expectedName, actual.Name, "Method does not update model");
-            Assert.IsNull(actual.EndDate);
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_ExceedsToDo_ThrowsLimitsExceededException()
+        {
+            // Arrange
+            SeedData();
+            var testedStatus = TaskStatuses.ToDo;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Complete,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = testedStatus,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxToDo; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = testedStatus, ProjectId = project.Id });
+                await _context.SaveChangesAsync();
+            }
+
+            // Act & Assert
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.UpdateAsync(model));
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_ExceedsInProgress_ThrowsLimitsExceededException()
+        {
+            // Arrange
+            SeedData();
+            var testedStatus = TaskStatuses.InProgress;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Complete,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = testedStatus,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxInProgress; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = testedStatus, ProjectId = project.Id });
+                await _context.SaveChangesAsync();
+            }
+
+            // Act & Assert
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.UpdateAsync(model));
+        }
+
+        [Test]
+        public async Task UpdateAsyncTest_ExceedsValidate_ThrowsLimitsExceededException()
+        {
+            // Arrange
+            SeedData();
+            var testedStatus = TaskStatuses.Validate;
+            var project = (await _context.Projects.FindAsync(3))!;
+            var task = new TaskEntity
+            {
+                Name = "TaskToUpdate",
+                Status = TaskStatuses.Complete,
+                ProjectId = project.Id
+            };
+            await _context.Tasks.AddAsync(task);
+            await _context.SaveChangesAsync();
+            var model = new TaskModel
+            {
+                Id = task.Id,
+                Status = testedStatus,
+                Name = "New name",
+                ProjectId = task.ProjectId
+            };
+            var expectedName = model.Name;
+            for (int i = 0; i < project.MaxValidate; i++)
+            {
+                await _context.Tasks.AddAsync(new TaskEntity() { Status = testedStatus, ProjectId = project.Id });
+                await _context.SaveChangesAsync();
+            }
+
+            // Act & Assert
+            Assert.ThrowsAsync<LimitsExceededException>(async () => await _service.UpdateAsync(model));
         }
 
         [Test]
@@ -723,7 +812,7 @@ namespace Tests.BLLTests
             IEnumerable<int> expectedTasksIds = new[] { 6, 7 };
 
             // Act
-            var actualTasks = _service.GetProjectTasksByStatusAndTag(projectId, status);
+            var actualTasks = _service.GetProjectTasksByStatus(projectId, status);
 
             // Assert
             Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
@@ -751,166 +840,33 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(8)]
-        public void AddTagToTaskAsyncTest_InvalidTaskId_ThrowsInvalidOperationException(int taskId)
+        public void GetUserTasksTest_ReturnsOnlyTasksWhereUserIsOnProject()
         {
             // Arrange
             SeedData();
-            var tagId = 1;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddTagToTaskAsync(taskId, tagId),
-                "Method does not throw InvalidOperationException if the task id is invalid");
-        }
-
-        [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(6)]
-        public void AddTagToTaskAsyncTest_InvalidTagId_ThrowsInvalidOperationException(int tagId)
-        {
-            // Arrange
-            SeedData();
-            var taskId = 1;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddTagToTaskAsync(taskId, tagId),
-                "Method does not throw InvalidOperationException if the tag id is invalid");
-        }
-
-        [Test]
-        [TestCase(1)]
-        [TestCase(3)]
-        public void AddTagToTaskAsyncTest_AlreadyTaskTagId_ThrowsInvalidOperationException(int tagId)
-        {
-            // Arrange
-            SeedData();
-            var taskId = 1;         // projectId = 1
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.AddTagToTaskAsync(taskId, tagId),
-                "Method does not throw InvalidOperationException if the task already has such a tag");
-        }
-
-        [Test]
-        public async Task AddTagToTaskAsyncTest_ValidData_AddsTagToTask()
-        {
-            // Arrange
-            SeedData();
-            var taskId = 2;
-            var tagId = 2;
-            var expectedTagsCount = 1;
-            var oldTag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
-            var expectedTagName = oldTag.Name;
-            var expectedTagTasksCount = oldTag.Tasks.Count + 1;
+            var task = new TaskEntity
+            {
+                ProjectId = 3
+            };
+            _context.Tasks.Add(task);
+            _context.SaveChanges();
+            _context.TaskExecutors.Add(new TaskExecutor
+            {
+                UserId = 1,
+                TaskId = task.Id
+            });
+            _context.SaveChanges();
+            var userId = 3;
+            IEnumerable<int> expectedTasksIds = new[] { 1 };
 
             // Act
-            await _service.AddTagToTaskAsync(taskId, tagId);
+            var actualTasks = _service.GetUserTasks(userId);
 
             // Assert
-            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
-            var tag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
-            Assert.AreEqual(expectedTagsCount, task.Tags.Count, "Method does not add the tag to the task");
-            Assert.AreEqual(expectedTagTasksCount, tag.Tasks.Count, "Method does not add the tag to the task");
-            Assert.AreEqual(expectedTagName, task.Tags.Last().Name, "Method added wrong tag to the task");
-            Assert.AreEqual(taskId, tag.Tasks.Last().Id, "Method added wrong task to the tag");
-        }
-
-        [Test]
-        public async Task AddTagToTaskAsyncTest2_ValidData_AddsTagToTask()
-        {
-            // Arrange
-            SeedData();
-            var taskId = 1;
-            var tagId = 4;
-            var expectedTagsCount = 3;
-            var oldTag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
-            var expectedTagName = oldTag.Name;
-            var expectedTagTasksCount = oldTag.Tasks.Count + 1;
-
-            // Act
-            await _service.AddTagToTaskAsync(taskId, tagId);
-
-            // Assert
-            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
-            var tag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
-            Assert.AreEqual(expectedTagsCount, task.Tags.Count, "Method does not add the tag to the task");
-            Assert.AreEqual(expectedTagTasksCount, tag.Tasks.Count, "Method does not add the tag to the task");
-            Assert.AreEqual(expectedTagName, task.Tags.Last().Name, "Method added wrong tag to the task");
-            Assert.AreEqual(taskId, tag.Tasks.Last().Id, "Method added wrong task to the tag");
-        }
-
-        [Test]
-        [TestCase(-1)]
-        [TestCase(0)]
-        [TestCase(8)]
-        public void DeleteTagFromTaskAsyncTest_InvalidTaskId_ThrowsInvalidOperationException(int taskId)
-        {
-            // Arrange
-            SeedData();
-            var tagId = 1;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteTagFromTaskAsync(taskId, tagId),
-                "Method does not throw InvalidOperationException if the task id is invalid");
-        }
-
-        [Test]
-        [TestCase(-1)]          // invalid id
-        [TestCase(0)]           // invalid id
-        [TestCase(2)]           // valid, but does not belong to the task with id "1"
-        [TestCase(4)]           // valid, but does not belong to the task with id "1"
-        [TestCase(5)]           // invalid id
-        public void DeleteTagFromTaskAsyncTest_TagDoesNotBelongToTask_ThrowsInvalidOperationException(int tagId)
-        {
-            // Arrange
-            SeedData();
-            var taskId = 1;
-
-            // Act & Assert
-            Assert.ThrowsAsync<InvalidOperationException>(async () => await _service.DeleteTagFromTaskAsync(taskId, tagId),
-                "Method does not throw InvalidOperationException if the tag id is invalid");
-        }
-
-        [Test]
-        public async Task DeleteTagFromTaskAsyncTest_ValidData_DeletesTagFromTask()
-        {
-            // Arrange
-            SeedData();
-            var taskId = 1;
-            var tagId = 3;
-            var expectedTaskTagsCount = 1;
-            var expectedTagTasksCount = 1;
-
-            // Act
-            await _service.DeleteTagFromTaskAsync(taskId, tagId);
-
-            // Assert
-            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
-            var tag = await _context.Tags.Include(t => t.Tasks).SingleAsync(t => t.Id == tagId);
-            Assert.AreEqual(expectedTaskTagsCount, task.Tags.Count, "Method does not delete a tag from a task");
-            Assert.AreEqual(expectedTagTasksCount, tag.Tasks.Count, "Method does not delete a task from a tag");
-        }
-
-        [Test]
-        public async Task DeleteTagFromTaskAsyncTest_ValidData_FullyDeletesTag()
-        {
-            // Arrange
-            SeedData();
-            var taskId = 3;
-            var tagId = 5;
-            var expectedTaskTagsCount = 1;
-
-            // Act
-            await _service.DeleteTagFromTaskAsync(taskId, tagId);
-
-            // Assert
-            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
-            var tag = await _context.Tags.SingleOrDefaultAsync(t => t.Id == tagId);
-            Assert.AreEqual(expectedTaskTagsCount, task.Tags.Count, "Method does not delete a tag from a task");
-            Assert.IsNull(tag);
+            Assert.AreEqual(expectedTasksIds.Count(), actualTasks.Count(), "Method returnes wrong elements");
+            var actualTasksIds = actualTasks.Select(r => r.Id);
+            Assert.IsTrue(expectedTasksIds.SequenceEqual(actualTasksIds),
+                "Method returnes wrong elements or the order is wrong");
         }
 
         [Test]
@@ -941,7 +897,7 @@ namespace Tests.BLLTests
             var expectedIds = new int[] { 1, 3};
 
             // Act
-            var actualIds = _service.GetProjectTasksByStatusAndTag(projectId, status).Select(t => t.Id);
+            var actualIds = _service.GetProjectTasksByStatus(projectId, status).Select(t => t.Id);
 
             // Assert
             Assert.AreEqual(expectedIds.Length, actualIds.Count(), "Method returnes wrong elements");
@@ -949,22 +905,17 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public void GetProjectTasksByStatusAndTagTest_ReturnsRightTasks()
+        public void GetProjectTasksByStatusTest_ReturnsRightTasksWithMessagesAndFiles()
         {
             // Arrange
             SeedData();        
             var projectId = 1;
             var status = TaskStatuses.ToDo;
-            var tagId = 3;
             var tempTask = new TaskEntity()     // id 8
             {
                 Name = "Temp task",
                 ProjectId = projectId,
-                Status = status,
-                Tags = new List<Tag>()
-                    {
-                        _context.Tags.Single(t => t.Id == 3)
-                    }
+                Status = status
             };
             _context.Tasks.Add(tempTask);
             _context.SaveChanges();
@@ -987,10 +938,10 @@ namespace Tests.BLLTests
             };
             _context.Files.Add(file);
             _context.SaveChanges();
-            var expectedIds = new int[] { 1, 8 };
+            var expectedIds = new int[] { 1, 3, 8 };
 
             // Act
-            var actual = _service.GetProjectTasksByStatusAndTag(projectId, status, tagId);
+            var actual = _service.GetProjectTasksByStatus(projectId, status);
             var actualIds = actual.Select(t => t.Id);
 
             // Assert
@@ -1001,7 +952,7 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        public async Task GetTaskExecutorsAsyncTest_ReturnsRightUsers()
+        public void GetTaskExecutorsAsyncTest_ReturnsRightUsers()
         {
             // Arrange
             SeedData();
@@ -1009,7 +960,7 @@ namespace Tests.BLLTests
             var expected = new int[] { 2, 3 };
 
             // Act
-            var actual = (await _service.GetTaskExecutorsAsync(taskId)).Select(e => e.Id);
+            var actual = _service.GetTaskExecutors(taskId).Select(e => e.Id);
 
             // Assert
             Assert.IsTrue(expected.SequenceEqual(actual));
@@ -1062,9 +1013,9 @@ namespace Tests.BLLTests
 
             // Assert
             var task = await _context.Tasks.Include(t => t.Executors).SingleAsync(t => t.Id == taskId);
-            var tag = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
+            var user = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
             Assert.AreEqual(expectedTaskUsersCount, task.Executors.Count, "Method does not delete a user from a task");
-            Assert.AreEqual(expectedUserTasksCount, tag.Tasks.Count, "Method does not delete a task from a user");
+            Assert.AreEqual(expectedUserTasksCount, user.Tasks.Count, "Method does not delete a task from a user");
         }
 
         [Test]
@@ -1133,13 +1084,23 @@ namespace Tests.BLLTests
             var task = new TaskEntity
             {
                 Name = "Add Executor Test Task",
-                Executors = new List<User>(),
                 ProjectId = 1
             };
-            for (int i = 0; i < 10; i++)
-                task.Executors.Add(new User() { FirstName=$"User{i+1}"});
             _context.Tasks.Add(task);
             _context.SaveChanges();
+            for (int i = 0; i < 5; i++)
+            {
+                var user = new User() { FirstName = $"User{i + 1}" };
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                _context.TaskExecutors.Add(new TaskExecutor
+                {
+                    UserId = user.Id,
+                    TaskId = task.Id
+                });
+                _context.SaveChanges();
+            }
+            
             var newUserId = 2;
 
             // Act & Assert
@@ -1156,19 +1117,16 @@ namespace Tests.BLLTests
             var userId = 3;
             var expectedExecutorsCount = 2;
             var oldUser = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
-            var expectedUserEmail = oldUser.Email;
-            var expectedTagTasksCount = oldUser.Tasks.Count + 1;
 
             // Act
             await _service.AddExecutorToTaskAsync(taskId, userId);
 
             // Assert
-            var task = await _context.Tasks.Include(t => t.Tags).SingleAsync(t => t.Id == taskId);
+            var task = await _context.Tasks.Include(t => t.Executors).SingleAsync(t => t.Id == taskId);
             var user = await _context.Users.Include(t => t.Tasks).SingleAsync(t => t.Id == userId);
             Assert.AreEqual(expectedExecutorsCount, task.Executors.Count, "Method does not add the user to the task");
-            Assert.AreEqual(expectedTagTasksCount, user.Tasks.Count, "Method does not add the user to the task");
-            Assert.AreEqual(expectedUserEmail, task.Executors.Last().Email, "Method added wrong user to the task");
-            Assert.AreEqual(taskId, user.Tasks.Last().Id, "Method added wrong task to the user");
+            Assert.AreEqual(userId, task.Executors.Last().UserId, "Method added wrong user to the task");
+            Assert.AreEqual(taskId, user.Tasks.Last().TaskId, "Method added wrong task to the user");
         }
     }
 }

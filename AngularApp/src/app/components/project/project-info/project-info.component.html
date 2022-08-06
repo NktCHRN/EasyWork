@@ -1,0 +1,29 @@
+<div class="project-profile" fxLayoutAlign="center center">
+    <div *ngIf="project" fxLayout="column" fxLayoutGap="15px" class="w-100">
+        <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="space-between center">
+            <div class="w-80">    
+                <h1 class="mb-0">{{project.name}}</h1> 
+                <p class="text-muted mb-0">Created {{project.startDate | date:'d MMM y'}}</p> 
+            </div>
+                <div *ngIf="me.role == userOnProjectRoles.Owner" fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="end center">    
+                    <button mat-flat-button color="accent" (click)="onModeChange()">
+                        <mat-icon *ngIf="pageMode==pageModes.Show">edit</mat-icon>
+                        <mat-icon *ngIf="pageMode==pageModes.Edit">visibility</mat-icon>
+                    </button>
+                    <button mat-flat-button color="warn" (click)="openDeleteDialog()"><mat-icon>delete</mat-icon></button>
+                </div>
+        </div>
+        <div *ngIf="pageMode==pageModes.Show">
+            <app-project-info-show [project]="project"></app-project-info-show>
+        </div>
+        <div *ngIf="pageMode==pageModes.Edit">
+            <app-project-info-edit [project]="project" (projectNameChange)="onProjectNameChange($event)"></app-project-info-edit>
+        </div>
+        <div>
+            <app-project-invite [projectId]="projectId" [me]="me" [connectionContainer]="connectionContainer"></app-project-invite>
+        </div>
+    </div>
+    <div *ngIf="loading">
+        <mat-spinner></mat-spinner>
+    </div>
+</div>

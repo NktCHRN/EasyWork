@@ -1,0 +1,25 @@
+.table-avatar {
+    width: 35px;
+    margin-right: 10px;
+}
+
+a {
+    text-decoration: none !important;
+    color: orange !important;
+}
+
+$offset-size: 3px;
+td {
+    padding-left: $offset-size !important;
+    padding-right: $offset-size !important;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: scroll;
+}
+
+.table-actions-btn {
+    margin-top: $offset-size !important;
+    margin-bottom: $offset-size !important;
+}

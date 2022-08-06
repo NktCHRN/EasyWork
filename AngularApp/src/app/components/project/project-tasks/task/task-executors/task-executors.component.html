@@ -1,0 +1,54 @@
+<h2 class="mb-0" fxLayout="row" fxLayoutAlign="start center">
+    <mat-icon>group</mat-icon><span>&nbsp;Executors</span>
+    <button type="button" mat-icon-button (click)="toggleEditable()">
+        <mat-icon *ngIf="!editable">edit</mat-icon>
+        <mat-icon *ngIf="editable">visibility</mat-icon>
+    </button>
+</h2>
+<div *ngIf="executors && freeUsersOnProject">
+    <mat-list>
+        <mat-list-item *ngFor="let executor of executors">
+            <a mat-list-avatar title="{{executor.fullName}}'s page" [routerLink]="['/users', executor.id]" (click)="this.closeDialog.emit()">
+                <img mat-list-avatar alt="avatar" src="{{executor.avatarURL ? executor.avatarURL : '../../assets/default-avatar.png'}}">
+            </a>
+            <div mat-line>
+                <a class="orange no-decor text-md" title="{{executor.fullName}}'s page" [routerLink]="['/users', executor.id]" (click)="this.closeDialog.emit()">
+                    {{executor.fullName}}
+                </a>
+            </div>
+            <div class="spacer"></div>
+            <div *ngIf="editable"><button type="button" mat-icon-button (click)="openDeleteDialog(executor.id)"><mat-icon>person_remove</mat-icon></button></div>
+        </mat-list-item>
+    </mat-list>
+    <button mat-flat-button color="primary" class="w-100 executor-adder" type="button" (click)="turnOnShowForm()" [disabled]="executors.length >= 5"
+        matTooltip="There can be at maximum 5 executors" [matTooltipDisabled]="executors.length < 5" *ngIf="!showForm">Add</button>
+    <form novalidate method="POST" [formGroup]="form" #eform="ngForm" *ngIf="showForm" (ngSubmit)="onSubmit()" fxLayout="column" class="executor-adder">
+        <mat-form-field appearance="fill">
+            <mat-label>New executor</mat-label>
+            <mat-select formControlName="id">
+              <mat-option *ngFor="let user of freeUsersOnProject" [value]="user.id">
+                <span fxLayout="row" fxLayoutAlign="start center">
+                    <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="avatar search-avatar">{{user.fullName}}
+                </span>
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formErrors.id">{{formErrors.id}}</mat-error>
+          </mat-form-field>
+          <div fxLayout="row" fxLayoutGap="10px">
+            <button type="button" mat-flat-button (click)="turnOffShowForm()"><mat-icon>close</mat-icon></button>
+            <button 
+            type="submit" 
+            mat-flat-button 
+            color="primary" 
+            [disabled]="executors.length >= 5"
+            matTooltip="There can be at maximum 5 executors" 
+            [matTooltipDisabled]="executors.length < 5"><mat-icon>check</mat-icon></button>
+          </div>
+    </form>
+</div>
+<div *ngIf="(!executors || !freeUsersOnProject) && !errorMessage">
+    <mat-spinner></mat-spinner>
+</div>
+<div *ngIf="errorMessage">
+    <h1 class="red">{{errorMessage}}</h1>
+</div>

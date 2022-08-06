@@ -86,43 +86,66 @@ namespace Tests.BLLTests
                 {
                     Name = "Task 1",
                     ProjectId = 1,
-                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.Archived
                 },
                 new TaskEntity()
                 {
                     Name = "Task 2",
                     ProjectId = 1,
-                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.Validate
                 },
                 new TaskEntity()
                 {
                     Name = "Task 3",
                     ProjectId = 2,
-                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.Complete
                 },
                 new TaskEntity()
                 {
                     Name = "Task 4",
                     ProjectId = 1,
-                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.ToDo
                 },
                 new TaskEntity()
                 {
                     Name = "Task 5",
                     ProjectId = 2,
-                    Executors = new List<User>{_context.Users.Find(1)!},
                     Status = TaskStatuses.InProgress
                 }
             };
-            foreach (var task in tasks)
+            _context.Tasks.AddRange(tasks);
+            _context.SaveChanges();
+
+            var executors = new List<TaskExecutor>
             {
-                _context.Tasks.Add(task);
-                _context.SaveChanges();
-            }
+                new TaskExecutor
+                        {
+                            UserId = 1,
+                            TaskId = 1,
+                        },
+                new TaskExecutor
+                {
+                    UserId = 1,
+                    TaskId = 2
+                },
+                new TaskExecutor
+                {
+                    UserId = 1,
+                    TaskId = 3
+                },
+                new TaskExecutor
+                {
+                    UserId = 1,
+                    TaskId = 4
+                },
+                new TaskExecutor
+                {
+                    UserId = 1,
+                    TaskId = 5
+                }
+            };
+            _context.TaskExecutors.AddRange(executors);
+            _context.SaveChanges();
         }
 
         [Test]

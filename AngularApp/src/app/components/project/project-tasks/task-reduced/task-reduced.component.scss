@@ -1,0 +1,27 @@
+a {
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.mat-card-title {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}
+
+.task-reduced-avatar {
+    width: 36px;
+    margin-right: 10px;
+}
+
+.avatars {
+    margin-top: 10px;
+}
+
+.avatar-bordered-white {
+    border: 3px solid white
+}
+
+.mat-card-subtitle{
+    margin-bottom: 8px;
+}

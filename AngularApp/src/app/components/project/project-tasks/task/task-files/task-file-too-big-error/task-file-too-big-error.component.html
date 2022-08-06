@@ -1,0 +1,8 @@
+<button mat-icon-button class="dialog-close-button" [mat-dialog-close]="true" tabindex="-1">
+    <mat-icon class="close-icon">close</mat-icon>
+</button>
+<h1 mat-dialog-title class="deep-orange">Error</h1>
+<mat-dialog-content>
+    <p>Your files {{data.fileNames.join(", ")}} will not be uploaded, because each of them is too large</p>
+    <p>The maximum file size is {{data.sizeLimit | fileSize}}</p>
+</mat-dialog-content>

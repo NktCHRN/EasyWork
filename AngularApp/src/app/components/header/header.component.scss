@@ -1,0 +1,29 @@
+::ng-deep.mat-menu-panel {
+    max-width: none !important;
+    width: 250px !important;
+  }
+
+  ::ng-deep.mat-menu-item {
+    font-size: 14pt !important;
+  }
+
+  .avatar-wrapper {
+    display: inline-block;
+    max-height: 35px !important;
+    max-width: 35px !important;
+    margin-right: 10px;
+  }
+
+  .menu-btn {
+    font-size: 14pt !important;
+  }
+
+  .active {
+    background: #f2f2f2;
+    border-radius: 15px;
+}
+
+.header-up-btn
+{
+    width: 75px;
+}

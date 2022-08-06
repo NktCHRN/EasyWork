@@ -171,22 +171,6 @@ namespace Tests.BLLTests
         }
 
         [Test]
-        [TestCase(3, 3)]
-        [TestCase(5, 5)]
-        [TestCase(10, 6)]
-        public void GetLastTest_ReturnsTopNBans(int n, int expectedCount)
-        {
-            // Arrange
-            SeedData();
-
-            // Act
-            var actualCount = _service.GetLast(n).Count();
-
-            // Assert
-            Assert.AreEqual(expectedCount, actualCount);
-        }
-
-        [Test]
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
@@ -417,22 +401,6 @@ namespace Tests.BLLTests
             // Assert
             Assert.IsTrue(actual, "Method does not return true if model is valid");
             Assert.IsTrue(string.IsNullOrEmpty(error), "Error should be left null if model is valid");
-        }
-
-        [Test]
-        public void GetAdminBans_ReturnsAllBans()
-        {
-            // Arrange
-            SeedData();
-            var adminId = 1;
-            var expectedCount = 3;
-
-            // Act
-            var actual = _service.GetAdminBans(adminId);
-
-            // Assert
-            Assert.AreEqual(expectedCount, actual.Count(), "Method does not return right quantity");
-            Assert.IsTrue(actual.All(b => b.AdminId == adminId), "Method returns wrong bans");
         }
 
         [Test]

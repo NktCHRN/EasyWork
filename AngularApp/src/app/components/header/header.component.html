@@ -1,0 +1,76 @@
+      <mat-toolbar style="z-index: 1000;" class="fixed bg-white navbar-with-delimiter container-nav">
+        <mat-toolbar-row>
+            <a routerLink="{{(isUserAuthenticated) ? '/projects' : '/home'}}" class="brand">
+                <img fxHide fxShow.gt-sm src="../../assets/logo.png" alt="logo">
+                <img fxShow fxHide.gt-sm src="../../assets/logo-mini.png" alt="logo">
+            </a>
+            <div style="margin-left: 25px; font-size: 14pt; line-height: 16pt;" *ngIf="isUserAuthenticated" fxLayout="row" fxLayoutGap="30px"
+            fxHide fxShow.gt-sm>
+              <a fxLayoutAlign="center center" fxLayout="column" routerLink="/projects" style="text-decoration: none;" routerLinkActive="active"
+              class="header-up-btn">
+                <mat-icon aria-hidden="false" aria-label="project icon" class="icon-medium deep-orange">task</mat-icon>
+                <div class="orange">Projects</div>
+              </a>
+              <a fxLayoutAlign="center center" fxLayout="column" routerLink="/tasks" style="text-decoration: none;" routerLinkActive="active"
+              class="header-up-btn">
+                <mat-icon aria-hidden="false" aria-label="task icon" class="icon-medium deep-orange">task_alt</mat-icon>
+                <div class="orange">Tasks</div>
+              </a>
+              <a fxLayoutAlign="center center" fxLayout="column" routerLink="/admin" style="text-decoration: none;" routerLinkActive="active"
+              class="header-up-btn" *ngIf="isAdmin">
+                <mat-icon aria-hidden="false" aria-label="admin panel icon" class="icon-medium deep-orange">admin_panel_settings</mat-icon>
+                <div class="orange">Admin</div>
+              </a>
+            </div>
+          <span class="spacer"></span>
+          <div fxHide fxShow.gt-sm>
+          <div class="container" fxLayoutGap="10px" *ngIf="!(isUserAuthenticated)">
+            <button mat-button class="btn-rounded" routerLink="login">Sign in</button>
+            <button mat-stroked-button color="primary" class="btn-rounded" routerLink="registration">Sign up</button>
+          </div>
+          <div class="container" fxLayoutGap="10px" *ngIf="isUserAuthenticated" fxLayoutAlign="center center">
+            <button mat-button [matMenuTriggerFor]="menu" class="menu-btn">
+              <span *ngIf="user" fxLayoutAlign="center center">
+                <span class="avatar-wrapper">
+                  <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="img-cover-center avatar">
+                </span> {{user.fullName}}
+              <mat-icon aria-hidden="false" aria-label="expand icon" class="icon-medium">expand_more</mat-icon>
+            </span> 
+            </button>
+            <mat-menu #menu="matMenu" yPosition="below" class="profile-menu">
+              <button mat-menu-item routerLink="cabinet"><mat-icon aria-hidden="false" aria-label="profile icon">person</mat-icon> My cabinet</button>
+              <button mat-menu-item (click)="logOut()"><mat-icon aria-hidden="false" aria-label="logout icon">logout</mat-icon> Sign out</button>
+            </mat-menu>
+          </div>
+          </div>
+          <button (click)="showBtns()" fxShow fxHide.gt-sm mat-icon-button class="orange" aria-label="Icon-button with menu icon">
+            <mat-icon>menu</mat-icon>
+          </button>
+        </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="!(isUserAuthenticated) && showRows" fxHide.gt-sm>
+              <div class="container full" fxLayoutGap="10px" fxLayout="row" fxLayoutAlign="center center">
+                <button mat-button class="btn-rounded" routerLink="login">Sign in</button>
+                <button mat-stroked-button color="primary" class="btn-rounded" routerLink="registration">Sign up</button>
+              </div>
+            </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows" fxHide.gt-sm>
+              <a mat-flat-button routerLink="/projects" class="deep-orange full" fxLayoutAlign="start center">
+                <mat-icon aria-hidden="false" aria-label="project icon">task</mat-icon> Projects</a>
+            </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows" fxHide.gt-sm>
+              <a mat-flat-button routerLink="/tasks" class="deep-orange full" fxLayoutAlign="start center">
+                <mat-icon aria-hidden="false" aria-label="task icon">task_alt</mat-icon> Tasks</a>
+            </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows && isAdmin" fxHide.gt-sm>
+              <a mat-flat-button routerLink="/admin" class="deep-orange full" fxLayoutAlign="start center">
+                <mat-icon aria-hidden="false" aria-label="admin panel icon">admin_panel_settings</mat-icon> Admin</a>
+            </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows" fxHide.gt-sm>
+              <a mat-flat-button routerLink="/cabinet" class="full" fxLayoutAlign="start center">
+                <mat-icon aria-hidden="false" aria-label="profile icon">person</mat-icon> My cabinet</a>
+            </mat-toolbar-row>
+            <mat-toolbar-row *ngIf="(isUserAuthenticated) && showRows" fxHide.gt-sm>
+              <a mat-flat-button (click)="logOut()" class="full" fxLayoutAlign="start center">
+                <mat-icon aria-hidden="false" aria-label="logout icon">logout</mat-icon> Sign out</a>
+            </mat-toolbar-row>
+      </mat-toolbar>

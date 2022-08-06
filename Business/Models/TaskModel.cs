@@ -14,11 +14,11 @@ namespace Business.Models
         public string? Description { get; set; }
 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateTimeOffset StartDate { get; set; }
 
-        public DateTime? Deadline { get; set; }
+        public DateTimeOffset? Deadline { get; set; }
 
-        public DateTime? EndDate { get; set; }      // should be null on creation
+        public DateTimeOffset? EndDate { get; set; }      // should be null on creation
 
         [Required]
         public TaskStatuses Status { get; set; }
@@ -28,12 +28,9 @@ namespace Business.Models
         [Required]
         public int ProjectId { get; set; }
 
-
         public ICollection<int> MessagesIds { get; set; } = new List<int>();
 
         public ICollection<int> FilesIds { get; set; } = new List<int>();
-
-        public ICollection<int> TagsIds { get; set; } = new List<int>();
 
         public ICollection<int> ExecutorsIds { get; set; } = new List<int>();
     }

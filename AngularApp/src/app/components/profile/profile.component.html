@@ -1,0 +1,41 @@
+<div class="profile container no-shadow" fxLayoutAlign="center center" *ngIf="user">
+    <div fxLayout="column" fxFlex="100" fxLayoutGap="35px">
+        <div fxLayout="row" fxFlex="100">
+            <div fxFlex="30" fxFlex.gt-sm="20" class="full">
+                <div fxLayoutAlign="center center">
+                    <span class="avatar-img-wrapper w-75">
+                    <img alt="avatar" src="{{user.avatarURL ? user.avatarURL : '../../assets/default-avatar.png'}}" class="img-cover-center avatar full">
+                    </span>
+                </div> 
+            </div>
+            <div fxFlex="70" fxFlex.gt-sm="80" fxLayoutAlign="center center" fxLayout="column" fxLayoutGap="10px">
+                <h1 fxLayoutAlign="center center" class="truncate-content">
+                    <span class="truncate" [ngClass.gt-sm]="'text-xl'">{{usersService.getFullName(user.firstName, user.lastName)}}</span>
+                </h1>
+                <i class="text-md text-muted"><span *ngIf="user.isOnline" class="orange">online</span><span *ngIf="!user.isOnline">last seen: 
+                    <span *ngIf="user.lastSeen">{{user.lastSeen | date:'d MMM y, HH:mm'}}</span><span *ngIf="!user.lastSeen">never</span></span></i>
+            </div>
+        </div>
+        <div>
+            <div class="info">
+                <span *ngIf="user.phoneNumber">Phone number: <a href="tel:+{{user.phoneNumber}}">+{{user.phoneNumber}}</a></span><br>
+                <span>Email: <a href="mailto:{{user.email}}">{{user.email}}</a></span>
+            </div>
+            <div class="info" fxLayout="column" fxLayout.gt-sm="row">
+                <div fxFlex="50" fxLayoutAlign.gt-sm="start center">
+                    <p>
+                        <br>Tasks done: <strong class="orange">{{user.tasksDone}}</strong><br>
+                        Not yet done: <strong class="deep-orange">{{user.tasksNotDone}}</strong><br>
+                        Totally: <strong class="orange">{{user.tasksDone + user.tasksNotDone}}</strong>
+                    </p>
+                </div>
+                <div fxFlex="50" fxLayoutAlign.gt-sm="end center">
+                    <p>Participates in <strong class="orange"> {{user.projects}} </strong> projects</p>
+                </div>
+            </div>
+            <div class="info" *ngIf="userReduced && isAdmin && userBansConnectionContainer" style="margin-top: 50px">
+                <app-admin-user-bans [user]="userReduced" [connectionContainer]="userBansConnectionContainer"></app-admin-user-bans>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,24 @@
+<mat-card class="example-card">
+    <mat-card-title>Invite code</mat-card-title>
+        <mat-card-subtitle *ngIf="inviteCode && me.role >= userOnProjectRoles.Manager && !errorMessage">
+            <mat-slide-toggle [checked]="inviteCode.isInviteCodeActive" (change)="toggleStatus()">
+                Active
+            </mat-slide-toggle>
+        </mat-card-subtitle>
+        <mat-card-content class="text-md">
+            <p class="mb-0" *ngIf="inviteCode && !errorMessage" [ngClass]="{'text-muted' : !inviteCode.isInviteCodeActive}">{{inviteCode.inviteCode}}
+                <button mat-icon-button (click)="copy(inviteCode.inviteCode!)" matTooltip="Copy">
+                    <mat-icon>content_copy</mat-icon>
+                </button>
+                <button mat-icon-button (click)="copy(link)" matTooltip="Copy a link">
+                    <mat-icon>link</mat-icon>
+                </button>
+            </p>
+            <p *ngIf="successCopy" class="text-muted text-sm">Copied</p>
+            <p *ngIf="successRegeneration" class="text-sm green">Regenerated successfully</p>
+            <p *ngIf="errorMessage" class="red formatted">An error occured: {{errorMessage}}</p>
+        </mat-card-content>
+        <mat-card-actions *ngIf="!errorMessage">
+            <button mat-flat-button color="accent" *ngIf="me.role >= userOnProjectRoles.Manager"  (click)="openRegenerateDialog()">Regenerate</button>
+        </mat-card-actions>
+</mat-card>
