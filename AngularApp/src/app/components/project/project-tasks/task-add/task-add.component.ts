@@ -103,6 +103,7 @@ export class TaskAddComponent implements OnInit {
           const reducedResult: TaskReducedModel = {
             filesCount: 0,
             messagesCount: 0,
+            executors: [],
             ...result
           };
           this.form.reset();

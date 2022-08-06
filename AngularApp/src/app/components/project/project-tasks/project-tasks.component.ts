@@ -16,7 +16,6 @@ import { UserOnProjectModel } from 'src/app/shared/project/user-on-project/user-
 import { TaskStatus } from 'src/app/shared/task/status/task-status';
 import { TaskStatusChangeModel } from 'src/app/shared/task/status/task-status-change.model';
 import { TaskStatusWithDescriptionModel } from 'src/app/shared/task/status/task-status-with-description.model';
-import { TaskReducedWithStatusModel } from 'src/app/shared/task/task-reduced-with-status.model';
 import { TaskReducedModel } from 'src/app/shared/task/task-reduced.model';
 import { TaskModel } from 'src/app/shared/task/task.model';
 import { UserMiniWithAvatarModel } from 'src/app/shared/user/user-mini-with-avatar.model';
@@ -192,6 +191,7 @@ export class ProjectTasksComponent implements OnInit, OnDestroy {
         this.addTask({
           filesCount: 0,
           messagesCount: 0,
+          executors: [],
           ...model
         }, model.status);
     });

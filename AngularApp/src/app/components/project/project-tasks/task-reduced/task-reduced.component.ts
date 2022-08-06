@@ -23,7 +23,6 @@ import { UserService } from 'src/app/services/user.service';
 export class TaskReducedComponent implements OnInit, OnDestroy {
   @Input() model: TaskReducedModel = undefined!;
   @Input() status: TaskStatus = undefined!
-  executors: UserMiniWithAvatarModel[] = [];
   prioritiesWithColors: any;
   @Output() updatedStatus: EventEmitter<TaskStatusChangeModel> = new EventEmitter<TaskStatusChangeModel>();
   @Output() movedFromArchived: EventEmitter<TaskReducedWithStatusModel> = new EventEmitter<TaskReducedWithStatusModel>();
@@ -42,8 +41,9 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.prioritiesWithColors = this._taskService.getPrioritiesWithColors();
-    this._taskService.getExecutors(this.model.id)
-    .subscribe(result => this.executors = result);
+    if (!this.model.executors)
+      this._taskService.getExecutors(this.model.id)
+      .subscribe(result => this.model.executors = result);
     this.connectionContainer.connection.onreconnected(() => this.startListening());
     this.connectionContainer.connection.on("Updated", (taskId: number, model: UpdateTaskModel) => {
       if (taskId == this.model.id && !this.turnedOffConnection)
@@ -51,6 +51,7 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
     });
     this.connectionContainer.connection.on("AddedExecutor", (taskId: number, executorId: number) => {
       if (taskId == this.model.id && !this.turnedOffConnection)
+      {
         this._userService.getById(executorId)
         .subscribe({
           next: result => this.addExecutor({
@@ -60,6 +61,7 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
           }),
           error: error => console.error(error)
         });
+      }
     });
     this.connectionContainer.connection.on("DeletedExecutor", (taskId: number, executorId: number) => {
       if (taskId == this.model.id && !this.turnedOffConnection)
@@ -156,13 +158,17 @@ export class TaskReducedComponent implements OnInit, OnDestroy {
 
   private addExecutor(executor: UserMiniWithAvatarModel): void
   {
-    this.executors.push(executor);
+    if (!this.model.executors)
+      return;
+    this.model.executors.push(executor);
   }
 
   private deleteExecutor(id: number): void {
-    const index = this.executors.findIndex(e => e.id == id);
+    if (!this.model.executors)
+      return;
+    const index = this.model.executors.findIndex(e => e.id == id);
     if (index != -1)
-      this.executors.splice(index, 1);
+      this.model.executors.splice(index, 1);
   }
 
   private startListening(): void
