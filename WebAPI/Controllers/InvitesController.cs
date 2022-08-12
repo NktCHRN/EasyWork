@@ -25,7 +25,8 @@ namespace WebAPI.Controllers
 
         private readonly IHubContext<ProjectsHub> _projectsHubContext;
 
-        public InvitesController(IProjectService projectService, IUserOnProjectService userOnProjectService, IMapper mapper, IHubContext<ProjectsHub> projectsHubContext)
+        public InvitesController(IProjectService projectService, IUserOnProjectService userOnProjectService, 
+            IMapper mapper, IHubContext<ProjectsHub> projectsHubContext)
         {
             _projectService = projectService;
             _userOnProjectService = userOnProjectService;
@@ -62,7 +63,14 @@ namespace WebAPI.Controllers
             }
             catch (DbUpdateException exc)
             {
-                return BadRequest(exc.Message);
+                var message = exc.Message;
+                if (exc.InnerException != null)
+                {
+                    if (exc.InnerException.Message.ToLower().Contains("duplicate"))
+                        return Ok(_mapper.Map<UserOnProjectDTO>(uop));
+                    message += $"{Environment.NewLine}{exc.InnerException.Message}";
+                }
+                return BadRequest(message);
             }
             return Created($"{this.GetApiUrl()}Projects/{project.Id}/Users/{uop.UserId}", mapped);
         }
