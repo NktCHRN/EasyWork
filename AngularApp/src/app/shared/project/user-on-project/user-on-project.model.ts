@@ -1,5 +1,5 @@
-export interface UserOnProjectModel {
-    role: string
-    projectId: number
-    userId: number
+import { UserOnProjectMiniModel } from "./user-on-project-mini.model"
+
+export interface UserOnProjectModel extends UserOnProjectMiniModel {
+    role: string;
 }
