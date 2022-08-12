@@ -2,15 +2,9 @@
 
 namespace WebAPI.DTOs.UserOnProject
 {
-    public record UserOnProjectDTO
+    public record UserOnProjectDTO : UserOnProjectMiniDTO
     {
         [Required]
         public string Role { get; init; } = string.Empty;
-
-        [Required]
-        public int ProjectId { get; init; }
-
-        [Required]
-        public int UserId { get; init; }
     }
 }

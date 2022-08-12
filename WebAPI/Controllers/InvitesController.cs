@@ -67,7 +67,7 @@ namespace WebAPI.Controllers
                 if (exc.InnerException != null)
                 {
                     if (exc.InnerException.Message.ToLower().Contains("duplicate"))
-                        return Ok(_mapper.Map<UserOnProjectDTO>(uop));
+                        return Ok(_mapper.Map<UserOnProjectMiniDTO>(uop));
                     message += $"{Environment.NewLine}{exc.InnerException.Message}";
                 }
                 return BadRequest(message);
