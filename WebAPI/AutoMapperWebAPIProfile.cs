@@ -58,6 +58,7 @@ namespace WebAPI
                 .ForMember(u => u.AvatarURL, m => m.Ignore());
             CreateMap<UserOnProjectModel, UserOnProjectDTO>()
                 .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
+            CreateMap<UserOnProjectModel, UserOnProjectMiniDTO>();
             CreateMap<UserOnProjectModel, UserOnProjectReducedDTO>()
                 .ForMember(u => u.Role, m => m.MapFrom(usr => usr.Role.ToString()));
             CreateMap<ProjectModel, ProjectReducedDTO>();
